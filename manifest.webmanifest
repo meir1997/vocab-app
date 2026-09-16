@@ -1,0 +1,12 @@
+{
+  "name": "ארבע מילים — לימוד אוצר מילים",
+  "short_name": "ארבע מילים",
+  "description": "תרגול אוצר מילים באנגלית עם ארבע אפשרויות",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f6fb",
+  "theme_color": "#111a3a",
+  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
