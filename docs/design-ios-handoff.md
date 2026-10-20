@@ -26,4 +26,4 @@ After the other agent finishes, its owner should:
 
 ## Native validation
 
-Windows cannot run Xcode or an iPhone simulator. Source review and offline data checks are local; the macOS CI workflow performs the native build and XCTest run. A successful native CI run and a real-device review are required before release. No App Store upload, signing change, Firebase integration, or production deployment is part of this branch.
+Windows cannot run Xcode or an iPhone simulator. Source review and offline data checks are local; the macOS CI workflow performs the native build and XCTest run. The native CI run passed with all 12 XCTest tests successful; a real-device review remains required before release. No App Store upload, signing change, Firebase integration, or production deployment is part of this branch.
