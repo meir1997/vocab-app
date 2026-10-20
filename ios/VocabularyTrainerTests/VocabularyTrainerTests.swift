@@ -67,18 +67,18 @@ final class LevelBandRulesTests: XCTestCase {
         XCTAssertEqual(LevelBandRules.maximumBand(highestRank: 10000), 100)
     }
 
-    func testTwentyNinePerfectAnswersCannotAdvance() {
+    func testNinePerfectAnswersCannotAdvance() {
         var bands = WebSyncBands()
-        for _ in 0..<29 {
+        for _ in 0..<9 {
             bands = LevelBandRules.recording(correct: true, rank: 100, in: bands, maximumBand: 100)
         }
         XCTAssertEqual(bands.current, 1)
-        XCTAssertEqual(bands.recent, Array(repeating: 1, count: 29))
+        XCTAssertEqual(bands.recent, Array(repeating: 1, count: 9))
     }
 
-    func testThirtiethAnswerAboveSeventyPercentAdvancesOneBandAndClearsWindow() {
+    func testExactlySevenOfTenAdvancesOneBandAndClearsWindow() {
         var bands = WebSyncBands()
-        bands.recent = Array(repeating: 0, count: 8) + Array(repeating: 1, count: 21)
+        bands.recent = Array(repeating: 1, count: 6) + Array(repeating: 0, count: 3)
         bands.extra["future"] = .string("preserved")
         let promoted = LevelBandRules.recording(correct: true, rank: 100, in: bands, maximumBand: 100)
         XCTAssertEqual(promoted.current, 2)
@@ -86,25 +86,28 @@ final class LevelBandRulesTests: XCTestCase {
         XCTAssertEqual(promoted.extra, bands.extra)
     }
 
-    func testRollingWindowDropsOldestAndRequiresStrictlyAboveSeventyPercent() {
+    func testRollingWindowDropsOldestAndAdvancesAtSevenOfTen() {
         var bands = WebSyncBands()
-        bands.recent = Array(repeating: 0, count: 16) + Array(repeating: 1, count: 34)
+        bands.recent = Array(repeating: 0, count: 5) + Array(repeating: 1, count: 4)
         bands = LevelBandRules.recording(correct: true, rank: 1, in: bands, maximumBand: 100)
-        XCTAssertEqual(bands.current, 1) // 35/50 is exactly 70%.
-        XCTAssertEqual(bands.recent, Array(repeating: 0, count: 15) + Array(repeating: 1, count: 35))
+        XCTAssertEqual(bands.current, 1) // 5/10 stays below 7.
+        XCTAssertEqual(bands.recent, Array(repeating: 0, count: 5) + Array(repeating: 1, count: 5))
         bands = LevelBandRules.recording(correct: true, rank: 1, in: bands, maximumBand: 100)
-        XCTAssertEqual(bands.current, 2) // Only the latest 50 count: 36/50.
+        XCTAssertEqual(bands.current, 1) // 6/10 still below 7.
+        XCTAssertEqual(bands.recent, Array(repeating: 0, count: 4) + Array(repeating: 1, count: 6))
+        bands = LevelBandRules.recording(correct: true, rank: 1, in: bands, maximumBand: 100)
+        XCTAssertEqual(bands.current, 2) // Oldest 0 drops out: 7/10 advances.
         XCTAssertEqual(bands.recent, [])
     }
 
-    func testFinalBandNeverAdvancesButStillKeepsLatestFiftyAnswersInOrder() {
+    func testFinalBandNeverAdvancesButStillKeepsLatestTenAnswersInOrder() {
         var bands = WebSyncBands()
         bands.current = 100
         for answer in 0..<75 {
             bands = LevelBandRules.recording(correct: answer % 5 != 0, rank: 10000, in: bands, maximumBand: 100)
         }
         XCTAssertEqual(bands.current, 100)
-        XCTAssertEqual(bands.recent, (25..<75).map { $0 % 5 != 0 ? 1 : 0 })
+        XCTAssertEqual(bands.recent, (65..<75).map { $0 % 5 != 0 ? 1 : 0 })
     }
 
     func testOtherBandAnswersCannotChangeOrPromoteCurrentBand() {
