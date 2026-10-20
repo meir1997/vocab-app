@@ -114,7 +114,7 @@ final class GoogleAuthManager: ObservableObject {
             // A canceled Google sheet is a normal outcome; do not show a failure banner.
             let nsError = error as NSError
             let canceledByGoogle = nsError.domain == kGIDSignInErrorDomain
-                && nsError.code == GIDSignInErrorCode.canceled.rawValue
+                && nsError.code == GIDSignInError.Code.canceled.rawValue
             if error is CancellationError || !acceptsAuthenticatedState {
                 do { try auth.signOut() } catch {
                     errorMessage = "לא ניתן להשלים את ההתנתקות. נסו שוב."

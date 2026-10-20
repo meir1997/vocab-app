@@ -14,7 +14,7 @@ The app supports Google → Firebase Authentication and two-way Firestore synchr
 4. Open `ios/VocabularyTrainer.xcodeproj` in **Xcode 26.2 or later**, select the shared `VocabularyTrainer` scheme, resolve packages, and configure the intended Apple signing team for a physical device.
 5. The build generates Info.plist from the committed template and registers the downloaded `REVERSED_CLIENT_ID` automatically. The native configuration folder is copied as a resource; no project editing or duplicate manual callback-scheme entry is needed.
 
-The build/runtime validators check the project (`vocab-app-meir`), sender (`71704465708`), native `:ios:` app ID, bundle ID, API/OAuth client formatting, and registered callback scheme. Firebase SDK **12.19.2** and Google Sign-In **10.0.0** are pinned exactly: the current Firebase 13 / Google Sign-In 10 releases have incompatible App Check package requirements. No package lock or native client identifier is fabricated.
+The build/runtime validators check the project (`vocab-app-meir`), sender (`71704465708`), native `:ios:` app ID, bundle ID, API/OAuth client formatting, and registered callback scheme. Firebase SDK **12.19.2** and Google Sign-In **10.0.0** are pinned exactly: the current Firebase 13 / Google Sign-In 10 releases have incompatible App Check package requirements. The committed Package.resolved comes from actual Xcode resolution in GitHub Actions run 39384320806 and locks 16 package revisions. No native client identifier is fabricated.
 
 ## Shared Firestore contract
 
