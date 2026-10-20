@@ -84,6 +84,7 @@ function recordBandAnswer(ok) {
     if (c / bands.recent.length > BAND_ADVANCE) {
       bands.current++;
       bands.recent = [];
+      $('quizBandLabel').textContent = bandLabel();
       showToast(`🎉 כל הכבוד! סיימת את המאה — עוברים לרמה ${bands.current} (מילים ${bandLo(bands.current).toLocaleString('he-IL')}–${bandHi(bands.current).toLocaleString('he-IL')})`);
     }
   }
