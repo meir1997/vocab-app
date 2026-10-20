@@ -1,5 +1,5 @@
 .gitattributes text eol=lf
-data/source-vocabulary.csv -text
+data/source-vocabulary.csv -text -whitespace
 data/*.json text eol=lf
 scripts/*.mjs text eol=lf
 ios/VocabularyTrainer/Resources/*.json text eol=lf
