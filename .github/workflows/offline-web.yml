@@ -1,0 +1,21 @@
+name: Offline web validation
+on:
+  pull_request:
+    paths: ['app.js', 'index.html', 'sw.js', 'scripts/**', '.github/workflows/offline-web.yml']
+  push:
+    branches: [main]
+    paths: ['app.js', 'index.html', 'sw.js', 'scripts/**', '.github/workflows/offline-web.yml']
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - run: node --test scripts/vocabulary.test.mjs
+      - run: node scripts/offline-browser.test.cjs
+      - run: node scripts/reconnect-browser.test.cjs

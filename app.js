@@ -22,7 +22,9 @@ const BAND_ADVANCE = 0.7;      // at least 70% (7 of 10) advances
 let bands = Object.assign({ current: 1, recent: [] }, readJSON(K.bands, {}));
 let rankOf = new Map();        // word -> rank, built when vocab loads
 let session = { queue: [], index: 0, correct: 0, wrong: 0, active: false };
-let dirty = false;                                  // local changes not yet pushed
+let dirty = readJSON('fw.pending', true);
+let localRevision = readJSON('fw.revision', 0);
+let activeUID = readJSON('fw.activeUID', null);                                  // local changes not yet pushed
 
 /* ---------- Vocabulary ---------- */
 async function loadVocab() {
@@ -170,26 +172,57 @@ const pct = (a, b) => b ? `${Math.round(a / b * 100)}%` : '—';
 /* ---------- Persistence + sync ---------- */
 function persist() {
   save(K.progress, progress); save(K.settings, settings); save(K.stats, stats); save(K.bands, bands);
-  dirty = true; schedulePush();
+  dirty = true; localRevision++; save('fw.pending', true); save('fw.revision', localRevision); saveAccountState(); schedulePush();
 }
 /* Firebase */
 let fb = { ready: false, user: null, db: null, pushing: false, timer: null, applying: false };
+function saveAccountState() {
+  save('fw.account.' + (activeUID || 'guest'), { progress, settings, stats, bands, dirty, localRevision });
+}
+function selectSyncAccount(uid) {
+  if (activeUID === uid) return;
+  saveAccountState();
+  // First sign-in adopts guest work. Switching between known accounts never does.
+  const stored = readJSON('fw.account.' + (uid || 'guest'), null);
+  if (stored || activeUID !== null || uid === null) {
+    progress = stored?.progress || {};
+    settings = stored?.settings || { length: 20, mode: 'choice', goal: 20 };
+    stats = stored?.stats || { days: {}, attempts: 0, correct: 0 };
+    bands = stored?.bands || { current: 1, recent: [] };
+    dirty = stored?.dirty || false; localRevision = stored?.localRevision || 0;
+  }
+  activeUID = uid; save('fw.activeUID', uid);
+  save(K.progress, progress); save(K.settings, settings); save(K.stats, stats); save(K.bands, bands);
+  save('fw.pending', dirty); save('fw.revision', localRevision);
+  session.active = false;
+  $('quizCard').classList.add('hidden'); $('summary').classList.add('hidden'); $('practiceHome').classList.remove('hidden');
+  applySettingsToUI(); refreshHome(); renderLibrary();
+}
 function initFirebase() {
-  if (!window.firebase || !window.FIREBASE_CONFIG) return setSync('מצב מקומי');
+  if (fb.initialized || !window.firebase || !window.FIREBASE_CONFIG) return;
+  fb.initialized = true;
   try {
-    firebase.initializeApp(window.FIREBASE_CONFIG);
+    if (!firebase.apps.length) firebase.initializeApp(window.FIREBASE_CONFIG);
     fb.db = firebase.firestore();
+    // App queue remains durable even when IndexedDB persistence is unavailable.
+    fb.db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
     firebase.auth().onAuthStateChanged(user => {
+      fb.unsubscribe?.(); fb.generation = (fb.generation || 0) + 1;
+      selectSyncAccount(user?.uid || null);
       fb.user = user; fb.ready = !!user;
+      setAuthUI(user);
       if (user) {
-        setSync('מסנכן…'); setAuthUI(user);
-        fb.db.collection('users').doc(user.uid).onSnapshot(snap => {
-          if (snap.exists) mergeRemote(snap.data());
-        }, () => setSync('שגיאת סנכרון'));
+        setSync(navigator.onLine ? 'מסנכן…' : 'אופליין · השינויים שמורים במכשיר');
+        const uid = user.uid;
+        fb.unsubscribe = fb.db.collection('users').doc(uid).onSnapshot({ includeMetadataChanges: true }, snap => {
+          if (fb.user?.uid !== uid) return;
+          if (snap.exists && !snap.metadata.hasPendingWrites) mergeRemote(snap.data());
+          if (!snap.metadata.fromCache && dirty) schedulePush(0);
+        }, () => { setSync('השינויים שמורים · ממתינים לחיבור'); schedulePush(5000); });
         schedulePush(0);
-      } else { setSync('מצב מקומי'); setAuthUI(null); }
+      } else setSync('מצב מקומי · השינויים שמורים במכשיר');
     });
-  } catch (e) { setSync('מצב מקומי'); }
+  } catch { fb.initialized = false; setSync('מצב מקומי · ניסיון סנכרון כשיחזור החיבור'); }
 }
 function setSync(text) { $('syncStatus').textContent = text; }
 function setAuthUI(user) {
@@ -219,11 +252,12 @@ function mergeRemote(data) {
     const l = stats.days[d] || { a: 0, c: 0 }, r = rt.days[d];
     stats.days[d] = { a: Math.max(l.a, r.a || 0), c: Math.max(l.c, r.c || 0) };
   });
-  if ((data.fwUpdatedAt || 0) > (readJSON('fw.settingsTs', 0)) && rs.length !== undefined) {
+  if (!dirty && (data.fwUpdatedAt || 0) > (readJSON('fw.settingsTs', 0)) && rs.length !== undefined) {
     settings = Object.assign({ length: 20, mode: 'choice', goal: 20 }, rs);
     applySettingsToUI();
   }
-  fb.applying = false; dirty = true; schedulePush(); // push the union back
+  fb.applying = false;
+  save(K.progress, progress); save(K.settings, settings); save(K.stats, stats); save(K.bands, bands); saveAccountState();
   refreshHome(); renderLibrary();
 }
 function schedulePush(delay = 2000) {
@@ -232,20 +266,44 @@ function schedulePush(delay = 2000) {
   fb.timer = setTimeout(pushNow, delay);
 }
 async function pushNow() {
-  if (!fb.ready || fb.pushing || !dirty) return;
+  if (!fb.ready || fb.pushing || !dirty || !navigator.onLine) return;
+  const uid = fb.user.uid, generation = fb.generation;
   fb.pushing = true;
   try {
-    await fb.db.collection('users').doc(fb.user.uid).set({
-      fw: { progress, settings, stats, bands },
-      fwUpdatedAt: Date.now(),
-      email: fb.user.email || null
-    }, { merge: true });
-    dirty = false; save('fw.settingsTs', Date.now()); setSync('מסונכן ✓');
-  } catch { setSync('שגיאת סנכרון'); }
-  fb.pushing = false;
+    // Read a fresh server copy before writing the local union on reconnect.
+    const reference = fb.db.collection('users').doc(uid);
+    const remote = await reference.get({ source: 'server' });
+    if (fb.user?.uid !== uid || fb.generation !== generation) return;
+    if (remote.exists) mergeRemote(remote.data());
+    const sentRevision = localRevision;
+    const payload = JSON.parse(JSON.stringify({ fw: { progress, settings, stats, bands }, fwUpdatedAt: Date.now(), email: fb.user.email || null }));
+    await reference.set(payload, { merge: true });
+    if (fb.user?.uid !== uid || fb.generation !== generation) return;
+    if (sentRevision === localRevision) { dirty = false; save('fw.pending', false); saveAccountState(); }
+    save('fw.settingsTs', payload.fwUpdatedAt);
+    setSync(dirty ? 'השינויים שמורים · ממשיכים לסנכרן' : 'מסונכרן ✓');
+  } catch { setSync('השינויים שמורים · ממתינים לחיבור'); }
+  finally {
+    fb.pushing = false;
+    if (dirty && fb.ready) schedulePush(5000);
+  }
 }
-window.addEventListener('beforeunload', () => { if (dirty) pushNow(); });
+window.addEventListener('online', () => { initFirebase(); schedulePush(0); updateOfflineStatus(); });
+window.addEventListener('offline', () => { setSync('אופליין · השינויים שמורים במכשיר'); updateOfflineStatus(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { initFirebase(); schedulePush(0); } });
 
+async function updateOfflineStatus() {
+  const label = $('offlineStatus');
+  if (!label) return;
+  try {
+    const registration = await navigator.serviceWorker.getRegistration();
+    const cache = await caches.open('four-words-offline-v4');
+    const required = ['index.html', 'app.js', 'vocab.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
+    const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
+    if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
+    else label.textContent = 'מכינים שימוש אופליין… השאירו פתוח עם אינטרנט עד שמופיע אישור';
+  } catch { label.textContent = 'שמירה אופליין לא זמינה בדפדפן זה'; }
+}
 /* ---------- Quiz ---------- */
 function startSession() {
   if (!vocab.length) return;
@@ -555,7 +613,14 @@ document.addEventListener('keydown', e => {
   const idx = ['1', '2', '3', '4'].indexOf(e.key);
   if (idx >= 0) { const btns = document.querySelectorAll('.answer'); if (btns[idx]) btns[idx].click(); }
 });
-if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('controllerchange', updateOfflineStatus);
+if ('serviceWorker' in navigator) window.addEventListener('load', async () => {
+  try {
+    await navigator.serviceWorker.register('sw.js');
+    await navigator.serviceWorker.ready;
+    updateOfflineStatus();
+  } catch { $('offlineStatus').textContent = 'לא הושלמה הכנה לאופליין. פתחו שוב עם אינטרנט ונסו לרענן.'; }
+});
 
 applySettingsToUI();
 loadVocab();
