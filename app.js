@@ -12,13 +12,13 @@ let vocab = [];
 let settings = Object.assign({ length: 20, mode: 'choice', goal: 20 }, readJSON(K.settings, {}));
 let progress = readJSON(K.progress, {});           // word -> {r,w,s,next}
 let stats = readJSON(K.stats, { days: {}, attempts: 0, correct: 0 });
-/* Bands: practice runs inside one 100-word band by rank. Over 70% success in the
-   band's recent answers advances to the next hundred automatically; words that
+/* Bands: practice runs inside one 100-word band by rank. At least 7 correct out
+   of the band's 10 most recent answers advances to the next hundred; words that
    never appeared stay untouched (no progress record is created for them). */
 const BAND_SIZE = 100;
-const BAND_MIN_ANSWERS = 30;   // answers needed in the window before evaluating
-const BAND_WINDOW = 50;        // rolling window of recent in-band answers
-const BAND_ADVANCE = 0.7;      // strictly above 70% advances
+const BAND_MIN_ANSWERS = 10;   // answers needed in the window before evaluating
+const BAND_WINDOW = 10;        // rolling window of recent in-band answers
+const BAND_ADVANCE = 0.7;      // at least 70% (7 of 10) advances
 let bands = Object.assign({ current: 1, recent: [] }, readJSON(K.bands, {}));
 let rankOf = new Map();        // word -> rank, built when vocab loads
 let session = { queue: [], index: 0, correct: 0, wrong: 0, active: false };
@@ -81,7 +81,7 @@ function recordBandAnswer(ok) {
   if (bands.recent.length > BAND_WINDOW) bands.recent.shift();
   if (bands.current < maxBand() && bands.recent.length >= BAND_MIN_ANSWERS) {
     const c = bands.recent.reduce((s, x) => s + x, 0);
-    if (c / bands.recent.length > BAND_ADVANCE) {
+    if (c / bands.recent.length >= BAND_ADVANCE) {
       bands.current++;
       bands.recent = [];
       $('quizBandLabel').textContent = bandLabel();
@@ -91,9 +91,9 @@ function recordBandAnswer(ok) {
 }
 function bandAccuracyNote() {
   const n = bands.recent.length;
-  if (!n) return 'עונים במאה הנוכחית — מעל 70% הצלחה עוברים אוטומטית למאה הבאה';
+  if (!n) return 'עונים במאה הנוכחית — 7 נכונות מתוך 10 האחרונות עוברים אוטומטית למאה הבאה';
   const c = bands.recent.reduce((s, x) => s + x, 0);
-  return `דיוק במאה זו: ${Math.round(c / n * 100)}% (${c}/${n} אחרונות) · מעל 70% עוברים למאה הבאה`;
+  return `דיוק במאה זו: ${Math.round(c / n * 100)}% (${c}/${n} אחרונות) · 7 מתוך 10 עוברים למאה הבאה`;
 }
 function setBand(b) {
   bands.current = Math.min(Math.max(1, b), maxBand());
