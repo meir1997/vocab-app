@@ -52,3 +52,73 @@ final class VocabularyTrainerTests: XCTestCase {
         XCTAssertEqual(questions.first?.entry, entries[4])
     }
 }
+
+final class LevelBandRulesTests: XCTestCase {
+    func testMembershipUsesOriginalRanksAndPreservesGaps() {
+        for (rank, band) in [(1, 1), (100, 1), (101, 2), (200, 2), (201, 3), (9999, 100), (10000, 100)] {
+            XCTAssertTrue(LevelBandRules.contains(rank: rank, band: band))
+            XCTAssertFalse(LevelBandRules.contains(rank: rank, band: band + 1))
+        }
+        XCTAssertFalse(LevelBandRules.contains(rank: 101, band: 1))
+        XCTAssertFalse(LevelBandRules.contains(rank: 0, band: 1))
+        XCTAssertFalse(LevelBandRules.contains(rank: 1, band: 0))
+        XCTAssertEqual(LevelBandRules.maximumBand(highestRank: 100), 1)
+        XCTAssertEqual(LevelBandRules.maximumBand(highestRank: 101), 2)
+        XCTAssertEqual(LevelBandRules.maximumBand(highestRank: 10000), 100)
+    }
+
+    func testTwentyNinePerfectAnswersCannotAdvance() {
+        var bands = WebSyncBands()
+        for _ in 0..<29 {
+            bands = LevelBandRules.recording(correct: true, rank: 100, in: bands, maximumBand: 100)
+        }
+        XCTAssertEqual(bands.current, 1)
+        XCTAssertEqual(bands.recent, Array(repeating: 1, count: 29))
+    }
+
+    func testThirtiethAnswerAboveSeventyPercentAdvancesOneBandAndClearsWindow() {
+        var bands = WebSyncBands()
+        bands.recent = Array(repeating: 0, count: 8) + Array(repeating: 1, count: 21)
+        bands.extra["future"] = .string("preserved")
+        let promoted = LevelBandRules.recording(correct: true, rank: 100, in: bands, maximumBand: 100)
+        XCTAssertEqual(promoted.current, 2)
+        XCTAssertEqual(promoted.recent, [])
+        XCTAssertEqual(promoted.extra, bands.extra)
+    }
+
+    func testRollingWindowDropsOldestAndRequiresStrictlyAboveSeventyPercent() {
+        var bands = WebSyncBands()
+        bands.recent = Array(repeating: 0, count: 16) + Array(repeating: 1, count: 34)
+        bands = LevelBandRules.recording(correct: true, rank: 1, in: bands, maximumBand: 100)
+        XCTAssertEqual(bands.current, 1) // 35/50 is exactly 70%.
+        XCTAssertEqual(bands.recent, Array(repeating: 0, count: 15) + Array(repeating: 1, count: 35))
+        bands = LevelBandRules.recording(correct: true, rank: 1, in: bands, maximumBand: 100)
+        XCTAssertEqual(bands.current, 2) // Only the latest 50 count: 36/50.
+        XCTAssertEqual(bands.recent, [])
+    }
+
+    func testFinalBandNeverAdvancesButStillKeepsLatestFiftyAnswersInOrder() {
+        var bands = WebSyncBands()
+        bands.current = 100
+        for answer in 0..<75 {
+            bands = LevelBandRules.recording(correct: answer % 5 != 0, rank: 10000, in: bands, maximumBand: 100)
+        }
+        XCTAssertEqual(bands.current, 100)
+        XCTAssertEqual(bands.recent, (25..<75).map { $0 % 5 != 0 ? 1 : 0 })
+    }
+
+    func testOtherBandAnswersCannotChangeOrPromoteCurrentBand() {
+        var bands = WebSyncBands()
+        bands.current = 2
+        bands.recent = Array(repeating: 1, count: 29)
+        XCTAssertEqual(LevelBandRules.recording(correct: true, rank: 100, in: bands, maximumBand: 100), bands)
+        XCTAssertEqual(LevelBandRules.recording(correct: false, rank: 201, in: bands, maximumBand: 100), bands)
+    }
+
+    func testNonpositiveSessionLengthsAreEmpty() {
+        let entries = (1...4).map { VocabularyEntry(rank: $0, english: "word\($0)", hebrew: "translation\($0)") }
+        for count in [0, -1] {
+            XCTAssertTrue(QuizEngine.makeSession(entries: entries, progress: [:], count: count).isEmpty)
+        }
+    }
+}
