@@ -19,6 +19,9 @@
 		A1000000000000000000000B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000B /* Assets.xcassets */; };
 		A1000000000000000000000C /* VocabularyTrainerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000C /* VocabularyTrainerTests.swift */; };
 		A1000000000000000000000D /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000D /* XCTest.framework */; };
+		A10000000000000000000010 /* vocabulary.json in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000010 /* vocabulary.json */; };
+		A10000000000000000000011 /* vocabulary-manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000011 /* vocabulary-manifest.json */; };
+		A10000000000000000000012 /* VocabularyDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000012 /* VocabularyDataTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -41,6 +44,9 @@
 		B1000000000000000000000D /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = System/Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
 		B1000000000000000000000E /* VocabularyTrainer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VocabularyTrainer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B1000000000000000000000F /* VocabularyTrainerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VocabularyTrainerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B10000000000000000000010 /* vocabulary.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = vocabulary.json; sourceTree = "<group>"; };
+		B10000000000000000000011 /* vocabulary-manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "vocabulary-manifest.json"; sourceTree = "<group>"; };
+		B10000000000000000000012 /* VocabularyDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyDataTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,8 +63,8 @@
 		100000000000000000000006 /* Features */ = {isa = PBXGroup; path = Features; sourceTree = "<group>"; children = (100000000000000000000007 /* Home */, 10000000000000000000000C /* Quiz */,); };
 		100000000000000000000007 /* Home */ = {isa = PBXGroup; path = Home; sourceTree = "<group>"; children = (B10000000000000000000007 /* HomeView.swift */,); };
 		10000000000000000000000C /* Quiz */ = {isa = PBXGroup; path = Quiz; sourceTree = "<group>"; children = (B10000000000000000000008 /* QuizEngine.swift */, B10000000000000000000009 /* QuizViewModel.swift */, B1000000000000000000000A /* QuizView.swift */,); };
-		100000000000000000000008 /* Resources */ = {isa = PBXGroup; path = Resources; sourceTree = "<group>"; children = (B1000000000000000000000B /* Assets.xcassets */,); };
-		100000000000000000000009 /* VocabularyTrainerTests */ = {isa = PBXGroup; path = VocabularyTrainerTests; sourceTree = "<group>"; children = (B1000000000000000000000C /* VocabularyTrainerTests.swift */,); };
+		100000000000000000000008 /* Resources */ = {isa = PBXGroup; path = Resources; sourceTree = "<group>"; children = (B1000000000000000000000B /* Assets.xcassets */, B10000000000000000000010 /* vocabulary.json */, B10000000000000000000011 /* vocabulary-manifest.json */,); };
+		100000000000000000000009 /* VocabularyTrainerTests */ = {isa = PBXGroup; path = VocabularyTrainerTests; sourceTree = "<group>"; children = (B1000000000000000000000C /* VocabularyTrainerTests.swift */, B10000000000000000000012 /* VocabularyDataTests.swift */,); };
 		10000000000000000000000A /* Frameworks */ = {isa = PBXGroup; children = (B1000000000000000000000D /* XCTest.framework */,); name = Frameworks; sourceTree = "<group>"; };
 		10000000000000000000000B /* Products */ = {isa = PBXGroup; children = (B1000000000000000000000E /* VocabularyTrainer.app */, B1000000000000000000000F /* VocabularyTrainerTests.xctest */,); name = Products; sourceTree = "<group>"; };
 /* End PBXGroup section */
@@ -73,13 +79,13 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		400000000000000000000001 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (A1000000000000000000000B /* Assets.xcassets in Resources */,); runOnlyForDeploymentPostprocessing = 0; };
+		400000000000000000000001 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (A1000000000000000000000B /* Assets.xcassets in Resources */, A10000000000000000000010 /* vocabulary.json in Resources */, A10000000000000000000011 /* vocabulary-manifest.json in Resources */,); runOnlyForDeploymentPostprocessing = 0; };
 		400000000000000000000002 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		300000000000000000000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000001, A10000000000000000000002, A10000000000000000000003, A10000000000000000000004, A10000000000000000000005, A10000000000000000000006, A10000000000000000000007, A10000000000000000000008, A10000000000000000000009, A1000000000000000000000A,); runOnlyForDeploymentPostprocessing = 0; };
-		300000000000000000000002 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A1000000000000000000000C,); runOnlyForDeploymentPostprocessing = 0; };
+		300000000000000000000002 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A1000000000000000000000C, A10000000000000000000012,); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */

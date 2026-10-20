@@ -1,0 +1,32 @@
+# Complete vocabulary assets
+
+The source is the public CSV export of the supplied Google Sheet, tab גיליון1 (gid 0). The sheet remains read-only.
+
+Current snapshot: **10,000 source records, 9,998 unique English words, two duplicate records, zero omitted records**. Duplicates are ll (source ranks 8,486 / 8,854) and cause (412 / 9,542); translations match. The first case-insensitive English occurrence is retained, matching the existing applications. English, Hebrew, and Hebrew diacritics are preserved.
+
+## Files
+
+- source-vocabulary.csv: complete source snapshot, including header and duplicates.
+- vocabulary.json: the existing web loader-compatible array of { word, translation } objects.
+- vocabulary-source.json: source column mapping, original sheet row/rank per retained word, and explicit duplicate/omission records.
+- vocabulary-manifest.json: source URL and tab, counts, byte sizes, and SHA-256 hashes.
+- ../ios/VocabularyTrainer/Resources/vocabulary.json: equivalent offline iOS entries using the existing { rank, english, hebrew } shape.
+- ../ios/VocabularyTrainer/Resources/vocabulary-manifest.json: iOS bundle count, checksum, and source URL.
+
+The bundled iOS loader is connected to its data. Web core/service-worker integration is reserved for the parallel web-core branch; this change does not change app.js, sw.js, Firebase, progress, or entry identity.
+
+## Refresh and verify
+
+Use Node.js 20 or later from the repository root. No packages are required.
+
+    node scripts/vocabulary.mjs
+    node scripts/vocabulary.mjs --check
+    node --test scripts/vocabulary.test.mjs
+
+For a separately downloaded CSV:
+
+    node scripts/vocabulary.mjs --input path/to/source.csv
+
+The importer validates the full source before writing any generated files. It rejects malformed CSV, an unexpected column layout, rows without words/translations, fewer than 9,998 unique words, or a smaller library than the current manifest. Duplicate and omission counts are explicit. The offline check recreates every generated asset from the committed source snapshot and checks exact contents, including hashes. It never needs network access.
+
+Entry IDs and rank behavior match the current iOS parser. Source rank text is kept separately to avoid changing progress keys or serial-number behavior.

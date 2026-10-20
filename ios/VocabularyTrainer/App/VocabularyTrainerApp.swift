@@ -11,6 +11,7 @@ struct VocabularyTrainerApp: App {
                 .environmentObject(repository)
                 .environmentObject(progressStore)
                 .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.locale, Locale(identifier: "he_IL"))
                 .task {
                     await repository.load()
                 }

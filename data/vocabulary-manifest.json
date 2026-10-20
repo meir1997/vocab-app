@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "spreadsheetId": "1YuNV-TcC_tITIe-SGTzTh-dKTlx4H84-4feTzAM2k4M",
+    "sheet": "גיליון1",
+    "gid": 0,
+    "csvURL": "https://docs.google.com/spreadsheets/d/1YuNV-TcC_tITIe-SGTzTh-dKTlx4H84-4feTzAM2k4M/export?format=csv&gid=0"
+  },
+  "sourceRowCount": 10000,
+  "entryCount": 9998,
+  "duplicateRowCount": 2,
+  "omittedRowCount": 0,
+  "files": {
+    "data/source-vocabulary.csv": {
+      "sha256": "041984f85ecea35db1558e489c4aee171eeb7027858b8eca700604654ea9b90e",
+      "bytes": 782743
+    },
+    "data/vocabulary.json": {
+      "sha256": "8773c420656a9f37f956ddea0e5fceeef6a3702b301a050b8d80139e45695ded",
+      "bytes": 678444
+    },
+    "ios/VocabularyTrainer/Resources/vocabulary.json": {
+      "sha256": "6a088dcf8e63973ea52b5c8d561b8257fc5b49da9103ccbae598a63560aaba5f",
+      "bytes": 837306
+    },
+    "data/vocabulary-source.json": {
+      "sha256": "a0e99b177ef2308c3cf3e6e8ba773a508023f4ff5748c6d9fdb7417bbb15b111",
+      "bytes": 895774
+    }
+  }
+}
