@@ -1,7 +1,7 @@
 'use strict';
 /* ארבע מילים v2 — SRS, cloud sync (Firebase), library, goals. */
 const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/1YuNV-TcC_tITIe-SGTzTh-dKTlx4H84-4feTzAM2k4M/export?format=csv&gid=0';
-const K = { vocab: 'fw.vocab.v2', progress: 'fw.progress.v2', settings: 'fw.settings.v2', stats: 'fw.stats.v2' };
+const K = { vocab: 'fw.vocab.v2', progress: 'fw.progress.v2', settings: 'fw.settings.v2', stats: 'fw.stats.v2', bands: 'fw.bands.v1' };
 const INTERVALS = [1, 3, 7, 14, 30]; // days, mirrors the iOS app
 const DAY = 86400000;
 const $ = id => document.getElementById(id);
@@ -12,6 +12,15 @@ let vocab = [];
 let settings = Object.assign({ length: 20, mode: 'choice', goal: 20 }, readJSON(K.settings, {}));
 let progress = readJSON(K.progress, {});           // word -> {r,w,s,next}
 let stats = readJSON(K.stats, { days: {}, attempts: 0, correct: 0 });
+/* Bands: practice runs inside one 100-word band by rank. Over 70% success in the
+   band's recent answers advances to the next hundred automatically; words that
+   never appeared stay untouched (no progress record is created for them). */
+const BAND_SIZE = 100;
+const BAND_MIN_ANSWERS = 30;   // answers needed in the window before evaluating
+const BAND_WINDOW = 50;        // rolling window of recent in-band answers
+const BAND_ADVANCE = 0.7;      // strictly above 70% advances
+let bands = Object.assign({ current: 1, recent: [] }, readJSON(K.bands, {}));
+let rankOf = new Map();        // word -> rank, built when vocab loads
 let session = { queue: [], index: 0, correct: 0, wrong: 0, active: false };
 let dirty = false;                                  // local changes not yet pushed
 
@@ -55,8 +64,41 @@ function parseCSV(text) {
   return rows;
 }
 function onVocabReady() {
+  rankOf = new Map(vocab.map(v => [v.w, v.r]));
   $('vocabCount').textContent = vocab.length.toLocaleString('he-IL');
+  renderBandSelect();
   refreshHome(); renderLibrary();
+}
+
+/* ---------- Bands ---------- */
+const maxBand = () => Math.max(1, Math.ceil(vocab.length / BAND_SIZE));
+const bandLo = b => (b - 1) * BAND_SIZE + 1;
+const bandHi = b => (vocab.length ? Math.min(b * BAND_SIZE, vocab.length) : b * BAND_SIZE);
+const inCurrentBand = v => v.r >= bandLo(bands.current) && v.r <= bands.current * BAND_SIZE;
+const bandLabel = () => `רמה ${bands.current} · מילים ${bandLo(bands.current).toLocaleString('he-IL')}–${bandHi(bands.current).toLocaleString('he-IL')}`;
+function recordBandAnswer(ok) {
+  bands.recent.push(ok ? 1 : 0);
+  if (bands.recent.length > BAND_WINDOW) bands.recent.shift();
+  if (bands.current < maxBand() && bands.recent.length >= BAND_MIN_ANSWERS) {
+    const c = bands.recent.reduce((s, x) => s + x, 0);
+    if (c / bands.recent.length > BAND_ADVANCE) {
+      bands.current++;
+      bands.recent = [];
+      $('quizBandLabel').textContent = bandLabel();
+      showToast(`🎉 כל הכבוד! סיימת את המאה — עוברים לרמה ${bands.current} (מילים ${bandLo(bands.current).toLocaleString('he-IL')}–${bandHi(bands.current).toLocaleString('he-IL')})`);
+    }
+  }
+}
+function bandAccuracyNote() {
+  const n = bands.recent.length;
+  if (!n) return 'עונים במאה הנוכחית — מעל 70% הצלחה עוברים אוטומטית למאה הבאה';
+  const c = bands.recent.reduce((s, x) => s + x, 0);
+  return `דיוק במאה זו: ${Math.round(c / n * 100)}% (${c}/${n} אחרונות) · מעל 70% עוברים למאה הבאה`;
+}
+function setBand(b) {
+  bands.current = Math.min(Math.max(1, b), maxBand());
+  bands.recent = [];
+  persist(); refreshHome();
 }
 
 /* ---------- SRS ---------- */
@@ -66,6 +108,8 @@ function markWord(word, ok) {
   if (ok) { p.r++; p.s++; p.next = now + INTERVALS[Math.min(p.s - 1, INTERVALS.length - 1)] * DAY; }
   else { p.w++; p.s = 0; p.next = now; }
   progress[word] = p;
+  const r = rankOf.get(word);
+  if (r && r >= bandLo(bands.current) && r <= bands.current * BAND_SIZE) recordBandAnswer(ok);
 }
 function priorityOf(w) {
   const p = progress[w];
@@ -75,14 +119,17 @@ function priorityOf(w) {
 }
 function buildQueue() {
   const now = Date.now();
-  const due = vocab.filter(v => (progress[v.w] ? progress[v.w].next : 0) <= now);
+  const attempted = v => { const p = progress[v.w]; return p && (p.r + p.w) > 0; };
+  // Current band plus due reviews of words already attempted anywhere;
+  // words outside the band that were never attempted are not introduced.
+  const due = vocab.filter(v => (progress[v.w] ? progress[v.w].next : 0) <= now && (inCurrentBand(v) || attempted(v)));
   due.sort((a, b) => priorityOf(a.w) - priorityOf(b.w) ||
     ((rec(a.w).r + rec(a.w).w) - (rec(b.w).r + rec(b.w).w)) || a.r - b.r);
   const want = settings.length === 'all' ? due.length : settings.length;
   let picked = due.slice(0, Math.max(want, Math.min(10, due.length)));
   if (picked.length < want && settings.length !== 'all') {
     const ids = new Set(picked.map(v => v.w));
-    picked = picked.concat(vocab.filter(v => !ids.has(v.w)).slice(0, want - picked.length));
+    picked = picked.concat(vocab.filter(v => inCurrentBand(v) && !ids.has(v.w)).slice(0, want - picked.length));
   }
   return shuffle(picked);
 }
@@ -111,7 +158,7 @@ const pct = (a, b) => b ? `${Math.round(a / b * 100)}%` : '—';
 
 /* ---------- Persistence + sync ---------- */
 function persist() {
-  save(K.progress, progress); save(K.settings, settings); save(K.stats, stats);
+  save(K.progress, progress); save(K.settings, settings); save(K.stats, stats); save(K.bands, bands);
   dirty = true; schedulePush();
 }
 /* Firebase */
@@ -142,7 +189,11 @@ function setAuthUI(user) {
 function mergeRemote(data) {
   if (!data || !data.fw) return;
   fb.applying = true;
-  const rp = data.fw.progress || {}, rs = data.fw.settings || {}, rt = data.fw.stats || {};
+  const rp = data.fw.progress || {}, rs = data.fw.settings || {}, rt = data.fw.stats || {}, rb = data.fw.bands || {};
+  if (typeof rb.current === 'number') {
+    if (rb.current > bands.current) bands = { current: rb.current, recent: Array.isArray(rb.recent) ? rb.recent.slice(-BAND_WINDOW) : [] };
+    else if (rb.current === bands.current && Array.isArray(rb.recent) && rb.recent.length > bands.recent.length) bands.recent = rb.recent.slice(-BAND_WINDOW);
+  }
   Object.keys(rp).forEach(w => {
     const l = progress[w], r = rp[w];
     if (!l || (r.r + r.w) > (l.r + l.w) || ((r.r + r.w) === (l.r + l.w) && (r.next || 0) > (l.next || 0))) progress[w] = r;
@@ -169,7 +220,7 @@ async function pushNow() {
   fb.pushing = true;
   try {
     await fb.db.collection('users').doc(fb.user.uid).set({
-      fw: { progress, settings, stats },
+      fw: { progress, settings, stats, bands },
       fwUpdatedAt: Date.now(),
       email: fb.user.email || null
     }, { merge: true });
@@ -185,6 +236,7 @@ function startSession() {
   session = { queue: buildQueue(), index: 0, correct: 0, wrong: 0, active: true };
   $('practiceHome').classList.add('hidden'); $('summary').classList.add('hidden'); $('quizCard').classList.remove('hidden');
   $('sessionLabel').textContent = settings.length === 'all' ? 'כל הדחופות' : `${session.queue.length} מילים`;
+  $('quizBandLabel').textContent = bandLabel();
   showQuestion();
 }
 function showQuestion() {
@@ -274,6 +326,29 @@ function refreshHome() {
   $('accuracyStat').textContent = pct(stats.correct, stats.attempts);
   $('sessionBtn').textContent = settings.length === 'all' ? 'כל הדחופות' : `${settings.length} מילים`;
   $('modeBtn').textContent = { choice: 'בחירה אנגלית ← עברית', reverse: 'בחירה הפוכה', typing: 'הקלדה' }[settings.mode];
+  if (vocab.length) {
+    $('bandBtn').textContent = bandLabel();
+    $('bandNote').textContent = bandAccuracyNote();
+    if ($('bandSelect').options.length) $('bandSelect').value = String(bands.current);
+  }
+}
+function renderBandSelect() {
+  const sel = $('bandSelect'); if (!sel) return;
+  sel.replaceChildren();
+  for (let b = 1; b <= maxBand(); b++) {
+    const opt = document.createElement('option');
+    opt.value = String(b);
+    opt.textContent = `רמה ${b} — מילים ${bandLo(b).toLocaleString('he-IL')}–${bandHi(b).toLocaleString('he-IL')}`;
+    sel.append(opt);
+  }
+  sel.value = String(bands.current);
+}
+let toastTimer = null;
+function showToast(text) {
+  const el = $('toast'); if (!el) return;
+  el.textContent = text; el.classList.remove('hidden');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.add('hidden'), 4000);
 }
 
 /* ---------- Library ---------- */
@@ -363,7 +438,7 @@ function applySettingsToUI() {
   $('modeSelect').value = settings.mode;
 }
 function exportData() {
-  const blob = new Blob([JSON.stringify({ app: 'fourWords', version: 2, exportedAt: new Date().toISOString(), settings, progress, stats }, null, 2)], { type: 'application/json' });
+  const blob = new Blob([JSON.stringify({ app: 'fourWords', version: 2, exportedAt: new Date().toISOString(), settings, progress, stats, bands }, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `four-words-backup-${todayKey()}.json`;
@@ -387,6 +462,11 @@ function importData(file) {
         });
       }
       if (data.settings) { settings = Object.assign(settings, data.settings); applySettingsToUI(); }
+      if (data.bands && typeof data.bands.current === 'number') {
+        if (data.bands.current > bands.current) bands = { current: data.bands.current, recent: Array.isArray(data.bands.recent) ? data.bands.recent.slice(-BAND_WINDOW) : [] };
+        else if (data.bands.current === bands.current && Array.isArray(data.bands.recent) && data.bands.recent.length > bands.recent.length) bands.recent = data.bands.recent.slice(-BAND_WINDOW);
+        renderBandSelect();
+      }
       persist(); refreshHome(); renderLibrary(); renderStats();
       alert('הגיבוי שוחזר בהצלחה');
     } catch { alert('קובץ לא תקין'); }
@@ -427,13 +507,16 @@ $('moreBtn').addEventListener('click', () => renderLibrary(false));
 $('goalSelect').addEventListener('change', e => { settings.goal = Number(e.target.value); persist(); refreshHome(); });
 $('lengthSelect').addEventListener('change', e => { settings.length = e.target.value === 'all' ? 'all' : Number(e.target.value); persist(); refreshHome(); });
 $('modeSelect').addEventListener('change', e => { settings.mode = e.target.value; persist(); refreshHome(); });
+$('bandSelect').addEventListener('change', e => { setBand(Number(e.target.value)); showToast(`הרמה שונתה — ${bandLabel()}`); });
+$('bandBtn').addEventListener('click', () => switchTab('settings'));
 $('exportBtn').addEventListener('click', exportData);
 $('importBtn').addEventListener('click', () => $('importFile').click());
 $('importFile').addEventListener('change', e => { if (e.target.files[0]) importData(e.target.files[0]); });
 $('resetBtn').addEventListener('click', () => {
   if (confirm('לאפס את כל ההתקדמות? הפעולה בלתי הפיכה.')) {
     progress = {}; stats = { days: {}, attempts: 0, correct: 0 };
-    persist(); refreshHome(); renderLibrary(); renderStats();
+    bands = { current: 1, recent: [] };
+    persist(); renderBandSelect(); refreshHome(); renderLibrary(); renderStats();
   }
 });
 $('authBtn').addEventListener('click', async () => {
