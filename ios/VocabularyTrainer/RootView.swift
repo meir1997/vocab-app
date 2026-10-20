@@ -6,6 +6,7 @@ struct RootView: View {
     @EnvironmentObject private var progressStore: ProgressStore
 
     @State private var isPracticing = false
+    @State private var isPlacement = false
 
     var body: some View {
         NavigationStack {
@@ -14,10 +15,11 @@ struct RootView: View {
                     entries: repository.entries,
                     sessionLength: progressStore.sessionCount(in: repository.entries),
                     progressStore: progressStore,
+                    placement: isPlacement,
                     onClose: { isPracticing = false }
                 )
             } else {
-                HomeView(isPracticing: $isPracticing, sessionLength: sessionLength)
+                HomeView(isPracticing: $isPracticing, sessionLength: sessionLength, isPlacement: $isPlacement)
             }
         }
         .tint(WordTheme.forest)
