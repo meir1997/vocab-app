@@ -66,6 +66,14 @@ body {
   padding: 8px 14px; font-size: 13px; font-weight: 700; cursor: pointer;
 }
 .source-note { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 18px; }
+.band-note { text-align: center; color: var(--muted); font-size: 12.5px; margin: 10px 0 0; }
+.settings-hint { display: block; color: var(--muted); font-size: 12.5px; margin-top: 6px; line-height: 1.5; }
+.toast {
+  position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%);
+  background: var(--ink); color: #fff; border-radius: 14px; padding: 12px 18px;
+  font-size: 14px; font-weight: 700; box-shadow: var(--shadow); z-index: 50;
+  max-width: min(92vw, 480px); text-align: center; animation: fade .25s ease;
+}
 
 /* Quiz */
 .quiz-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
