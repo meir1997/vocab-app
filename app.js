@@ -76,27 +76,38 @@ const bandLo = b => (b - 1) * BAND_SIZE + 1;
 const bandHi = b => (vocab.length ? Math.min(b * BAND_SIZE, vocab.length) : b * BAND_SIZE);
 const inCurrentBand = v => v.r >= bandLo(bands.current) && v.r <= bands.current * BAND_SIZE;
 const bandLabel = () => `רמה ${bands.current} · מילים ${bandLo(bands.current).toLocaleString('he-IL')}–${bandHi(bands.current).toLocaleString('he-IL')}`;
-function recordBandAnswer(ok) {
-  bands.recent.push(ok ? 1 : 0);
-  if (bands.recent.length > BAND_WINDOW) bands.recent.shift();
-  if (bands.current < maxBand() && bands.recent.length >= BAND_MIN_ANSWERS) {
-    const c = bands.recent.reduce((s, x) => s + x, 0);
-    if (c / bands.recent.length >= BAND_ADVANCE) {
-      bands.current++;
-      bands.recent = [];
-      $('quizBandLabel').textContent = bandLabel();
-      showToast(`🎉 כל הכבוד! סיימת את המאה — עוברים לרמה ${bands.current} (מילים ${bandLo(bands.current).toLocaleString('he-IL')}–${bandHi(bands.current).toLocaleString('he-IL')})`);
-    }
+function recordBandAnswer(ok, rank) {
+  const thousand = Math.floor((bands.current - 1) / 10);
+  if (!(rank > thousand * 1000 && rank <= (thousand + 1) * 1000)) return;
+  bands.thousandRecent = [...(bands.thousandRecent || []), ok ? 1 : 0].slice(-100);
+  const nextThousand = (thousand + 1) * 10 + 1;
+  const thousandCorrect = bands.thousandRecent.reduce((s, x) => s + x, 0);
+  if (bands.thousandRecent.length === 100 && thousandCorrect >= 70 && nextThousand <= maxBand()) {
+    bands.current = nextThousand; bands.recent = []; bands.thousandRecent = [];
+    $('quizBandLabel').textContent = bandLabel();
+    showToast('🎉 70 מתוך 100! עוברים לאלף הבא');
+    return;
+  }
+  if (!(rank >= bandLo(bands.current) && rank <= bands.current * BAND_SIZE)) return;
+  bands.recent = [...bands.recent, ok ? 1 : 0].slice(-BAND_WINDOW);
+  if (bands.current < maxBand() && bands.recent.length >= BAND_MIN_ANSWERS && bands.recent.reduce((s, x) => s + x, 0) / bands.recent.length >= BAND_ADVANCE) {
+    bands.current++;
+    bands.recent = [];
+    if (Math.floor((bands.current - 1) / 10) !== thousand) bands.thousandRecent = [];
+    $('quizBandLabel').textContent = bandLabel();
+    showToast(`🎉 עוברים לרמה ${bands.current}`);
   }
 }
 function bandAccuracyNote() {
   const n = bands.recent.length;
-  if (!n) return 'עונים במאה הנוכחית — 7 נכונות מתוך 10 האחרונות עוברים אוטומטית למאה הבאה';
+  if (!n) return '7 מתוך 10 מעבירים מאה · 70 מתוך 100 תשובות רגילות באלף מעבירים לאלף הבא';
   const c = bands.recent.reduce((s, x) => s + x, 0);
-  return `דיוק במאה זו: ${Math.round(c / n * 100)}% (${c}/${n} אחרונות) · 7 מתוך 10 עוברים למאה הבאה`;
+  return `דיוק במאה זו: ${Math.round(c / n * 100)}% (${c}/${n} אחרונות) · 7 מתוך 10 עוברים מאה · באלף: ${(bands.thousandRecent || []).reduce((s, x) => s + x, 0)}/${(bands.thousandRecent || []).length} (70/100 למעבר)`;
 }
 function setBand(b) {
+  const oldThousand = Math.floor((bands.current - 1) / 10);
   bands.current = Math.min(Math.max(1, b), maxBand());
+  if (Math.floor((bands.current - 1) / 10) !== oldThousand) bands.thousandRecent = [];
   bands.recent = [];
   persist(); refreshHome();
 }
@@ -109,7 +120,7 @@ function markWord(word, ok) {
   else { p.w++; p.s = 0; p.next = now; }
   progress[word] = p;
   const r = rankOf.get(word);
-  if (r && r >= bandLo(bands.current) && r <= bands.current * BAND_SIZE) recordBandAnswer(ok);
+  if (r) recordBandAnswer(ok, r);
 }
 function priorityOf(w) {
   const p = progress[w];
@@ -191,7 +202,8 @@ function mergeRemote(data) {
   fb.applying = true;
   const rp = data.fw.progress || {}, rs = data.fw.settings || {}, rt = data.fw.stats || {}, rb = data.fw.bands || {};
   if (typeof rb.current === 'number') {
-    if (rb.current > bands.current) bands = { current: rb.current, recent: Array.isArray(rb.recent) ? rb.recent.slice(-BAND_WINDOW) : [] };
+    if (Math.floor((rb.current - 1) / 10) === Math.floor((bands.current - 1) / 10) && (rb.thousandRecent || []).length > (bands.thousandRecent || []).length) bands.thousandRecent = rb.thousandRecent.slice(-100);
+    if (rb.current > bands.current) bands = { ...rb, current: rb.current, recent: Array.isArray(rb.recent) ? rb.recent.slice(-BAND_WINDOW) : [], thousandRecent: Array.isArray(rb.thousandRecent) ? rb.thousandRecent.slice(-100) : [] };
     else if (rb.current === bands.current && Array.isArray(rb.recent) && rb.recent.length > bands.recent.length) bands.recent = rb.recent.slice(-BAND_WINDOW);
   }
   Object.keys(rp).forEach(w => {
@@ -231,31 +243,6 @@ async function pushNow() {
 window.addEventListener('beforeunload', () => { if (dirty) pushNow(); });
 
 /* ---------- Quiz ---------- */
-// Placement is separate from practice: no SRS updates or 7/10 promotions.
-function placementSample(words, band, random = Math.random) {
-  const thousand = Math.floor((band - 1) / 10);
-  const unique = [...new Map(words.filter(v => v.r > thousand * 1000 && v.r <= (thousand + 1) * 1000).map(v => [v.w, v])).values()];
-  for (let i = unique.length - 1; i > 0; i--) {
-    const j = Math.floor(random() * (i + 1));
-    [unique[i], unique[j]] = [unique[j], unique[i]];
-  }
-  return unique.length >= 100 ? unique.slice(0, 100) : [];
-}
-function placementTarget(startBand, currentBand, answered, correct, maximum) {
-  const next = (Math.floor((startBand - 1) / 10) + 1) * 10 + 1;
-  return currentBand === startBand && answered === 100 && correct >= 70 && next <= maximum ? next : null;
-}
-function startPlacement() {
-  const queue = placementSample(vocab, bands.current);
-  const next = (Math.floor((bands.current - 1) / 10) + 1) * 10 + 1;
-  if (!queue.length || next > maxBand()) return showToast('אין אלף נוסף או שאין מספיק מילים למבחן מלא');
-  if (!confirm('מבחן מיקום: 100 מילים שונות מהאלף הנוכחי. 70 נכונות מדלגות לאלף הבא. יציאה באמצע לא תשנה את הרמה.')) return;
-  session = { queue, index: 0, correct: 0, wrong: 0, active: true, placement: true, startBand: bands.current, uid: fb.user?.uid || null };
-  $('practiceHome').classList.add('hidden'); $('summary').classList.add('hidden'); $('quizCard').classList.remove('hidden');
-  $('sessionLabel').textContent = 'מבחן מיקום · 100 מילים';
-  $('quizBandLabel').textContent = `אלף ${Math.floor((bands.current - 1) / 10) + 1} · 70/100 למעבר`;
-  showQuestion();
-}
 function startSession() {
   if (!vocab.length) return;
   session = { queue: buildQueue(), index: 0, correct: 0, wrong: 0, active: true };
@@ -272,7 +259,7 @@ function showQuestion() {
   $('serial').textContent = `#${item.r.toLocaleString('he-IL')}`;
   $('hint').textContent = ''; $('hint').className = 'hint';
   $('nextBtn').classList.add('hidden'); $('dontKnowBtn').classList.remove('hidden');
-  const mode = session.placement ? 'choice' : settings.mode;
+  const mode = settings.mode;
   const answers = $('answers'); answers.replaceChildren();
   if (mode === 'reverse') {
     $('promptLabel').textContent = 'מה המילה באנגלית עבור';
@@ -307,7 +294,7 @@ let locked = false;
 function answerChoice(ok, btn, correctText) {
   if (locked) return; locked = true;
   const item = session.queue[session.index];
-  if (!session.placement) { markWord(item.w, ok); markAnswer(ok); }
+  markWord(item.w, ok); markAnswer(ok);
   document.querySelectorAll('.answer').forEach(b => {
     b.disabled = true;
     if (b.textContent === correctText) b.classList.add(ok ? 'correct' : 'reveal');
@@ -326,24 +313,16 @@ function checkTyping() {
   const lev = (a, b) => { const m = a.length, n = b.length, d = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]); for (let j = 1; j <= n; j++) d[0][j] = j; for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); return d[m][n]; };
   const ok = guess === target || (target.length >= 5 && lev(guess, target) <= 1);
   locked = true;
-  if (!session.placement) { markWord(item.w, ok); markAnswer(ok); } persist(); refreshHome();
+  markWord(item.w, ok); markAnswer(ok); persist(); refreshHome();
   if (ok) { session.correct++; $('hint').textContent = 'מעולה — נכון!'; $('hint').classList.add('good'); }
   else { session.wrong++; $('hint').textContent = `התשובה: ${item.w}`; $('hint').classList.add('bad'); }
   setTimeout(() => { locked = false; session.index++; showQuestion(); }, ok ? 900 : 1800);
 }
 function finishSession() {
-  if (session.placement) {
-    const target = placementTarget(session.startBand, bands.current, session.correct + session.wrong, session.correct, maxBand());
-    if (target !== null && session.uid === (fb.user?.uid || null)) { bands.current = target; bands.recent = []; persist(); }
-    session.placementPassed = target !== null && session.uid === (fb.user?.uid || null);
-  }
   session.active = false;
   $('quizCard').classList.add('hidden'); $('summary').classList.remove('hidden');
   const total = session.correct + session.wrong;
   $('summaryText').textContent = `ענית נכון על ${session.correct} מתוך ${total} מילים — ${pct(session.correct, total)} הצלחה.`;
-  if (session.placement) $('summaryText').textContent += session.placementPassed
-    ? ' עברתם! מדלגים לאלף הבא. מילים שלא נבחנו לא סומנו כידועות.'
-    : ' הרמה לא השתנתה. אפשר לתרגל ולנסות שוב.';
   refreshHome();
 }
 function refreshHome() {
@@ -496,7 +475,8 @@ function importData(file) {
       }
       if (data.settings) { settings = Object.assign(settings, data.settings); applySettingsToUI(); }
       if (data.bands && typeof data.bands.current === 'number') {
-        if (data.bands.current > bands.current) bands = { current: data.bands.current, recent: Array.isArray(data.bands.recent) ? data.bands.recent.slice(-BAND_WINDOW) : [] };
+        if (Math.floor((data.bands.current - 1) / 10) === Math.floor((bands.current - 1) / 10) && (data.bands.thousandRecent || []).length > (bands.thousandRecent || []).length) bands.thousandRecent = data.bands.thousandRecent.slice(-100);
+        if (data.bands.current > bands.current) bands = { ...data.bands, current: data.bands.current, recent: Array.isArray(data.bands.recent) ? data.bands.recent.slice(-BAND_WINDOW) : [], thousandRecent: Array.isArray(data.bands.thousandRecent) ? data.bands.thousandRecent.slice(-100) : [] };
         else if (data.bands.current === bands.current && Array.isArray(data.bands.recent) && data.bands.recent.length > bands.recent.length) bands.recent = data.bands.recent.slice(-BAND_WINDOW);
         renderBandSelect();
       }
@@ -515,13 +495,12 @@ document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click
   if (btn.dataset.tab === 'stats') renderStats();
   if (btn.dataset.tab === 'library') renderLibrary();
 }));
-$('placementBtn').addEventListener('click', startPlacement);
 $('startBtn').addEventListener('click', startSession);
 $('againBtn').addEventListener('click', startSession);
 $('homeBtn').addEventListener('click', () => { $('summary').classList.add('hidden'); $('practiceHome').classList.remove('hidden'); });
 $('dontKnowBtn').addEventListener('click', () => {
-  if (!session.placement && settings.mode === 'typing') { locked || checkTypingDontKnow(); }
-  else answerChoice(false, null, !session.placement && settings.mode === 'reverse' ? session.queue[session.index].w : session.queue[session.index].t);
+  if (settings.mode === 'typing') { locked || checkTypingDontKnow(); }
+  else answerChoice(false, null, settings.mode === 'reverse' ? session.queue[session.index].w : session.queue[session.index].t);
 });
 function checkTypingDontKnow() {
   locked = true;
