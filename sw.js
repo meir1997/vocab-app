@@ -1,22 +1,31 @@
-const CACHE = 'four-words-shell-v3';
-const ASSETS = ['./', 'index.html', 'styles.css', 'app.js', 'firebase-config.js', 'vocab.json', 'manifest.webmanifest', 'icon.svg'];
+const CACHE = 'four-words-offline-v4';
+const SDK = ['firebase-app-compat.js', 'firebase-auth-compat.js', 'firebase-firestore-compat.js'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/' + name);
+const ASSETS = ['./', 'index.html', 'styles.css', 'app.js', 'firebase-config.js', 'vocab.json', 'manifest.webmanifest', 'icon.svg', ...SDK];
 self.addEventListener('install', event => event.waitUntil(
   caches.open(CACHE).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting())
 ));
 self.addEventListener('activate', event => event.waitUntil(
-  caches.keys()
-    .then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key))))
-    .then(() => self.clients.claim())
+  caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim())
 ));
-// Network-first for same-origin GETs so updates roll out immediately; cache keeps the app fully offline.
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
-  if (!event.request.url.startsWith(self.location.origin)) return;
-  event.respondWith(
-    fetch(event.request).then(response => {
-      const copy = response.clone();
-      caches.open(CACHE).then(cache => cache.put(event.request, copy));
+  const url = new URL(event.request.url);
+  const local = url.origin === self.location.origin;
+  if (!local && !SDK.includes(event.request.url)) return;
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE);
+    // Fixed-version SDK assets are immutable and must be usable on cold offline opens.
+    const cached = await cache.match(event.request);
+    if (!local && cached) return cached;
+    try {
+      const response = await fetch(event.request);
+      if (response.ok) await cache.put(event.request, response.clone());
       return response;
-    }).catch(() => caches.match(event.request).then(cached => cached || caches.match('./')))
-  );
+    } catch (error) {
+      if (cached) return cached;
+      if (event.request.mode === 'navigate' && url.pathname.startsWith(self.registration.scope.replace(url.origin, ''))) return cache.match('index.html');
+      // Never return HTML in place of missing JS, JSON or CSS.
+      return Response.error();
+    }
+  })());
 });
