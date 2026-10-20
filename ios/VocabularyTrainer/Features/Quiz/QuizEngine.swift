@@ -44,7 +44,28 @@ enum LevelBandRules {
     }
 }
 
+enum ThousandPlacement {
+    static func sample(entries: [VocabularyEntry], band: Int) -> [VocabularyEntry] {
+        let thousand = (max(1, band) - 1) / 10
+        var seen = Set<String>()
+        let eligible = entries.filter {
+            $0.rank > thousand * 1000 && $0.rank <= (thousand + 1) * 1000 && seen.insert($0.id).inserted
+        }
+        return eligible.count >= 100 ? Array(eligible.shuffled().prefix(100)) : []
+    }
+
+    static func target(startBand: Int, currentBand: Int, answered: Int, correct: Int, maximumBand: Int) -> Int? {
+        let next = ((max(1, startBand) - 1) / 10 + 1) * 10 + 1
+        guard currentBand == startBand, answered == 100, correct >= 70, next <= maximumBand else { return nil }
+        return next
+    }
+}
+
 enum QuizEngine {
+    static func makePlacement(entries: [VocabularyEntry], band: Int) -> [QuizQuestion] {
+        makeQuestions(selected: ThousandPlacement.sample(entries: entries, band: band), entries: entries)
+    }
+
     static func makeSession(
         entries: [VocabularyEntry],
         progress: [String: WordProgress],
@@ -77,6 +98,10 @@ enum QuizEngine {
             selected.append(contentsOf: entries.filter { LevelBandRules.contains(rank: $0.rank, band: currentBand) && !selectedIDs.contains($0.id) }.prefix(count - selected.count))
         }
 
+        return makeQuestions(selected: selected, entries: entries)
+    }
+
+    private static func makeQuestions(selected: [VocabularyEntry], entries: [VocabularyEntry]) -> [QuizQuestion] {
         return selected.map { entry in
             var seen = Set([entry.hebrew])
             var distractors: [String] = []
