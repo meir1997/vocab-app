@@ -216,6 +216,14 @@ struct WebSyncBands: Codable, Equatable, Sendable {
     var thousandRecent: [Int] = []
     var extra: [String: SyncJSONValue] = [:]
     init() {}
+    private enum CodingKeys: String, CodingKey { case current, recent, thousandRecent, extra }
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        current = try values.decodeIfPresent(Int.self, forKey: .current) ?? 1
+        recent = try values.decodeIfPresent([Int].self, forKey: .recent) ?? []
+        thousandRecent = Array((try values.decodeIfPresent([Int].self, forKey: .thousandRecent) ?? []).suffix(100))
+        extra = try values.decodeIfPresent([String: SyncJSONValue].self, forKey: .extra) ?? [:]
+    }
     fileprivate init(json: SyncJSONValue?) throws {
         let value = try object(json)
         current = max(1, try integer(value["current"], default: 1))
