@@ -11,13 +11,16 @@ final class QuizViewModel: ObservableObject {
     @Published private(set) var streak = 0
 
     private let progressStore: ProgressStore
+    private let accountUID: String?
 
     init(entries: [VocabularyEntry], sessionLength: Int, progressStore: ProgressStore) {
         self.progressStore = progressStore
+        self.accountUID = progressStore.currentUID
         questions = QuizEngine.makeSession(
             entries: entries,
             progress: progressStore.progress,
-            count: sessionLength
+            count: sessionLength,
+            currentBand: progressStore.currentBand
         )
     }
 
@@ -36,7 +39,7 @@ final class QuizViewModel: ObservableObject {
     }
 
     func choose(_ answer: String) {
-        guard selectedAnswer == nil, let question = currentQuestion else { return }
+        guard progressStore.currentUID == accountUID, selectedAnswer == nil, let question = currentQuestion else { return }
         selectedAnswer = answer
 
         if answer == question.correctAnswer {
@@ -52,7 +55,7 @@ final class QuizViewModel: ObservableObject {
     }
 
     func markUnknown() {
-        guard selectedAnswer == nil, let question = currentQuestion else { return }
+        guard progressStore.currentUID == accountUID, selectedAnswer == nil, let question = currentQuestion else { return }
         selectedAnswer = ""
         lastResult = .unknown
         streak = 0

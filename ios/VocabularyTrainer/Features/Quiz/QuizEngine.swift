@@ -13,11 +13,16 @@ enum QuizEngine {
         entries: [VocabularyEntry],
         progress: [String: WordProgress],
         count: Int,
+        currentBand: Int = 1,
         now: Date = Date()
     ) -> [QuizQuestion] {
         guard entries.count >= 4 else { return [] }
 
-        let due = entries.filter { (progress[$0.id]?.nextReview ?? .distantPast) <= now }
+        let inBand: (VocabularyEntry) -> Bool = { $0.rank >= (currentBand - 1) * 100 + 1 && $0.rank <= currentBand * 100 }
+        let due = entries.filter {
+            (progress[$0.id]?.nextReview ?? .distantPast) <= now &&
+            (inBand($0) || (progress[$0.id]?.attempts ?? 0) > 0)
+        }
         let ordered = due.sorted { lhs, rhs in
             let lhsProgress = progress[lhs.id] ?? WordProgress()
             let rhsProgress = progress[rhs.id] ?? WordProgress()
@@ -35,17 +40,29 @@ enum QuizEngine {
         var selected = Array(ordered.prefix(count))
         if selected.count < count {
             let selectedIDs = Set(selected.map(\.id))
-            selected.append(contentsOf: entries.filter { !selectedIDs.contains($0.id) }.prefix(count - selected.count))
+            selected.append(contentsOf: entries.filter { inBand($0) && !selectedIDs.contains($0.id) }.prefix(count - selected.count))
         }
 
         return selected.map { entry in
             var seen = Set([entry.hebrew])
-            let distractors = entries.shuffled().compactMap { candidate -> String? in
-                guard candidate.id != entry.id, seen.insert(candidate.hebrew).inserted else { return nil }
-                return candidate.hebrew
+            var distractors: [String] = []
+            // Random probing avoids filtering the entire 9,998-word library
+            // for each question in an all-due session. A bounded fallback
+            // handles tiny vocabularies or repeated translations.
+            for _ in 0..<min(24, entries.count * 2) {
+                guard let candidate = entries.randomElement() else { break }
+                if candidate.id != entry.id, seen.insert(candidate.hebrew).inserted {
+                    distractors.append(candidate.hebrew)
+                    if distractors.count == 3 { break }
+                }
             }
-            .prefix(3)
-            return QuizQuestion(entry: entry, options: ([entry.hebrew] + Array(distractors)).shuffled())
+            if distractors.count < 3 {
+                for candidate in entries where candidate.id != entry.id {
+                    if seen.insert(candidate.hebrew).inserted { distractors.append(candidate.hebrew) }
+                    if distractors.count == 3 { break }
+                }
+            }
+            return QuizQuestion(entry: entry, options: ([entry.hebrew] + distractors).shuffled())
         }
     }
 

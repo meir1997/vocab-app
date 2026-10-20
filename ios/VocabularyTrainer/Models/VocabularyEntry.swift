@@ -15,6 +15,6 @@ struct WordProgress: Codable, Hashable, Sendable {
     var nextReview = Date.distantPast
 
     var isLearned: Bool {
-        consecutiveCorrect >= 3
+        consecutiveCorrect >= 2
     }
 }

@@ -1,52 +1,79 @@
 import Foundation
 
 enum CSVParser {
+    enum ParseError: Error {
+        case malformedQuotes
+    }
+
     static func rows(from text: String) -> [[String]] {
+        (try? parse(text)) ?? []
+    }
+
+    /// Reads Unicode scalars so Swift's combined CRLF Character cannot hide record breaks.
+    /// Quoted CR/LF stays inside the field; malformed quotes reject the whole download.
+    static func parse(_ text: String) throws -> [[String]] {
+        let scalars = text.unicodeScalars
         var rows: [[String]] = []
         var row: [String] = []
         var field = ""
-        var isInsideQuotes = false
-        var index = text.startIndex
+        var quoted = false
+        var closedQuote = false
+        var index = scalars.startIndex
 
-        while index < text.endIndex {
-            let character = text[index]
+        if index < scalars.endIndex, scalars[index] == "\u{FEFF}" {
+            index = scalars.index(after: index)
+        }
 
-            if character == "\"" {
-                let next = text.index(after: index)
-                if isInsideQuotes, next < text.endIndex, text[next] == "\"" {
-                    field.append("\"")
-                    index = text.index(after: next)
+        func finishField() {
+            row.append(field)
+            field = ""
+            closedQuote = false
+        }
+
+        func finishRow() {
+            finishField()
+            if row.contains(where: { !$0.isEmpty }) {
+                rows.append(row)
+            }
+            row = []
+        }
+
+        while index < scalars.endIndex {
+            let scalar = scalars[index]
+            let next = scalars.index(after: index)
+            if quoted {
+                if scalar == "\"" {
+                    if next < scalars.endIndex, scalars[next] == "\"" {
+                        field.unicodeScalars.append("\"")
+                        index = scalars.index(after: next)
+                        continue
+                    }
+                    quoted = false
+                    closedQuote = true
+                } else {
+                    field.unicodeScalars.append(scalar)
+                }
+            } else if scalar == "," {
+                finishField()
+            } else if scalar == "\r" || scalar == "\n" {
+                finishRow()
+                if scalar == "\r", next < scalars.endIndex, scalars[next] == "\n" {
+                    index = scalars.index(after: next)
                     continue
                 }
-                isInsideQuotes.toggle()
-            } else if character == ",", !isInsideQuotes {
-                row.append(field)
-                field = ""
-            } else if (character == "\n" || character == "\r"), !isInsideQuotes {
-                if character == "\r" {
-                    let next = text.index(after: index)
-                    if next < text.endIndex, text[next] == "\n" {
-                        index = next
-                    }
-                }
-                row.append(field)
-                if row.contains(where: { !$0.isEmpty }) {
-                    rows.append(row)
-                }
-                row = []
-                field = ""
+            } else if scalar == "\"", field.isEmpty, !closedQuote {
+                quoted = true
             } else {
-                field.append(character)
+                guard scalar != "\"", !closedQuote else { throw ParseError.malformedQuotes }
+                field.unicodeScalars.append(scalar)
             }
-
-            index = text.index(after: index)
+            index = next
         }
 
-        row.append(field)
-        if row.contains(where: { !$0.isEmpty }) {
-            rows.append(row)
+        guard !quoted else { throw ParseError.malformedQuotes }
+        if !field.isEmpty || !row.isEmpty || closedQuote {
+            finishRow()
         }
-
         return rows
     }
 }
