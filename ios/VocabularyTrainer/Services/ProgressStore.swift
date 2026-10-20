@@ -150,6 +150,7 @@ final class ProgressStore: ObservableObject {
     func setBand(_ band: Int) {
         let band = min(max(1, band), maxBand)
         guard snapshot.state.bands.current != band else { return }
+        if (snapshot.state.bands.current - 1) / 10 != (band - 1) / 10 { snapshot.state.bands.thousandRecent = [] }
         snapshot.state.bands.current = band
         snapshot.state.bands.recent = []
         changed()
