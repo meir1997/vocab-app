@@ -45,13 +45,16 @@
           <div class="quick-settings">
             <button class="chip" id="sessionBtn" aria-label="אורך התרגול">20 מילים</button>
             <button class="chip" id="modeBtn" aria-label="סוג התרגול">בחירה אנגלית ← עברית</button>
+            <button class="chip" id="bandBtn" aria-label="רמת תרגול נוכחית">רמה 1</button>
           </div>
+          <p class="band-note" id="bandNote" aria-live="polite"></p>
           <p class="source-note" id="sourceNote">המילים נטענות מגיליון אוצר המילים שלך</p>
         </div>
 
         <div id="quizCard" class="hidden">
           <div class="quiz-head">
             <span class="chip" id="sessionLabel">20 מילים</span>
+            <span class="chip" id="quizBandLabel">רמה 1</span>
             <span id="progressText" class="progress-text">מילה 1 מתוך 20</span>
           </div>
           <div class="progress-track"><div class="progress-fill" id="progressBar"></div></div>
@@ -134,6 +137,11 @@
           </select>
         </div>
         <div class="settings-group">
+          <label for="bandSelect">רמת תרגול — מאה מילים לפי דירוג</label>
+          <select id="bandSelect"></select>
+          <span class="settings-hint">התרגול מתמקד במאה הנוכחית. מעל 70% הצלחה במאה עוברים אוטומטית למאה הבאה, בלי לסמן מילים שלא הופיעו כידועות.</span>
+        </div>
+        <div class="settings-group">
           <span class="label">גיבוי</span>
           <div class="row">
             <button class="ghost-btn" id="exportBtn">ייצוא התקדמות</button>
@@ -155,6 +163,8 @@
       <button class="tab-btn" data-tab="settings" aria-label="הגדרות">⚙️<span>הגדרות</span></button>
     </nav>
   </div>
+
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" defer></script>
