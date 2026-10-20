@@ -7,7 +7,6 @@ struct HomeView: View {
 
     @Binding var isPracticing: Bool
     @Binding var sessionLength: Int
-    @Binding var isPlacement: Bool
 
     var body: some View {
         ScrollView {
@@ -171,7 +170,6 @@ struct HomeView: View {
             }
 
             Button {
-                isPlacement = false
                 isPracticing = true
             } label: {
                 HStack(spacing: 12) {
@@ -186,12 +184,7 @@ struct HomeView: View {
             .disabled(repository.entries.count < 4 || progressStore.sessionCount(in: repository.entries) == 0)
             .accessibilityHint(sessionLength == 0 ? "פותח תרגול של כל המילים שהגיע זמן החזרה שלהן" : "פותח תרגול של \(sessionLength) מילים")
 
-            Button("מבחן מיקום לאלף הבא · 70 מתוך 100") {
-                isPlacement = true
-                isPracticing = true
-            }
-            .disabled(((progressStore.currentBand - 1) / 10 + 1) * 10 + 1 > progressStore.maxBand || ThousandPlacement.sample(entries: repository.entries, band: progressStore.currentBand).isEmpty)
-            Text("100 מילים שונות מהאלף הנוכחי. 70 נכונות מדלגות לאלף הבא. יציאה באמצע לא משנה רמה או נתוני תרגול.")
+            Text("70 נכונות מתוך 100 התשובות הרגילות האחרונות באלף מדלגות אוטומטית לאלף הבא. אין מבחן נפרד.")
                 .font(.caption)
                 .foregroundStyle(WordTheme.muted)
                 .fixedSize(horizontal: false, vertical: true)
