@@ -173,4 +173,12 @@ final class LevelBandRulesTests: XCTestCase {
         XCTAssertTrue(store.snapshot.state.bands.thousandRecent.isEmpty)
     }
 
+    func testLegacySavedBandsDecodeWithoutLosingExistingProgress() throws {
+        let data = Data(#"{"current":5,"recent":[1,0],"extra":{}}"#.utf8)
+        let bands = try JSONDecoder().decode(WebSyncBands.self, from: data)
+        XCTAssertEqual(bands.current, 5)
+        XCTAssertEqual(bands.recent, [1, 0])
+        XCTAssertTrue(bands.thousandRecent.isEmpty)
+    }
+
 }
