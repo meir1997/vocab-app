@@ -181,14 +181,14 @@ final class ProgressSyncStoreTests: XCTestCase {
     }
 
     @MainActor
-    func testBandAdvancementRequiresStrictlyAboveSeventyPercentAndDoesNotMarkUnseen() {
+    func testBandAdvancementRequiresAtLeastSevenOfTenAndDoesNotMarkUnseen() {
         let (defaults, suite) = isolatedDefaults()
         defer { defaults.removePersistentDomain(forName: suite) }
         let store = ProgressStore(defaults: defaults)
         let other = VocabularyEntry(rank: 10000, english: "calves", hebrew: "calves")
         store.registerVocabulary([mr, other])
         for _ in 0..<9 { store.record(.incorrect, for: mr, now: timestamp) }
-        for _ in 0..<21 { store.record(.correct, for: mr, now: timestamp) }
+        for _ in 0..<6 { store.record(.correct, for: mr, now: timestamp) }
         XCTAssertEqual(store.currentBand, 1)
         store.record(.correct, for: mr, now: timestamp)
         XCTAssertEqual(store.currentBand, 2)
