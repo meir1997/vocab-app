@@ -10,13 +10,19 @@ final class QuizViewModel: ObservableObject {
     @Published private(set) var correctCount = 0
     @Published private(set) var streak = 0
 
+    let isPlacement: Bool
+    let startBand: Int
+    @Published private(set) var placementPassed = false
+
     private let progressStore: ProgressStore
     private let accountUID: String?
 
-    init(entries: [VocabularyEntry], sessionLength: Int, progressStore: ProgressStore) {
+    init(entries: [VocabularyEntry], sessionLength: Int, progressStore: ProgressStore, placement: Bool = false) {
         self.progressStore = progressStore
         self.accountUID = progressStore.currentUID
-        questions = QuizEngine.makeSession(
+        self.isPlacement = placement
+        self.startBand = progressStore.currentBand
+        questions = placement ? QuizEngine.makePlacement(entries: entries, band: progressStore.currentBand) : QuizEngine.makeSession(
             entries: entries,
             progress: progressStore.progress,
             count: sessionLength,
@@ -46,11 +52,11 @@ final class QuizViewModel: ObservableObject {
             lastResult = .correct
             correctCount += 1
             streak += 1
-            progressStore.record(.correct, for: question.entry)
+            if !isPlacement { progressStore.record(.correct, for: question.entry) }
         } else {
             lastResult = .incorrect
             streak = 0
-            progressStore.record(.incorrect, for: question.entry)
+            if !isPlacement { progressStore.record(.incorrect, for: question.entry) }
         }
     }
 
@@ -59,12 +65,19 @@ final class QuizViewModel: ObservableObject {
         selectedAnswer = ""
         lastResult = .unknown
         streak = 0
-        progressStore.record(.unknown, for: question.entry)
+        if !isPlacement { progressStore.record(.unknown, for: question.entry) }
     }
 
     func advance() {
-        guard selectedAnswer != nil else { return }
+        guard progressStore.currentUID == accountUID, selectedAnswer != nil else { return }
         currentIndex += 1
+        if isPlacement, isComplete, let target = ThousandPlacement.target(
+            startBand: startBand, currentBand: progressStore.currentBand,
+            answered: currentIndex, correct: correctCount, maximumBand: progressStore.maxBand
+        ) {
+            progressStore.setBand(target)
+            placementPassed = true
+        }
         selectedAnswer = nil
         lastResult = nil
     }
