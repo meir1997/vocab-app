@@ -6,24 +6,34 @@ struct RootView: View {
     @EnvironmentObject private var progressStore: ProgressStore
 
     @State private var isPracticing = false
-    @State private var sessionLength = 10
 
     var body: some View {
         NavigationStack {
             if isPracticing {
                 QuizView(
                     entries: repository.entries,
-                    sessionLength: sessionLength,
+                    sessionLength: progressStore.sessionCount(in: repository.entries),
                     progressStore: progressStore,
                     onClose: { isPracticing = false }
                 )
             } else {
-                HomeView(isPracticing: $isPracticing, sessionLength: $sessionLength)
+                HomeView(isPracticing: $isPracticing, sessionLength: sessionLength)
             }
         }
         .tint(WordTheme.forest)
         .toolbar(.hidden, for: .navigationBar)
         .background(WordTheme.canvas)
+        .onChange(of: progressStore.currentUID) { _, _ in isPracticing = false }
+    }
+
+    private var sessionLength: Binding<Int> {
+        Binding(
+            get: { progressStore.snapshot.state.settings.sessionLength ?? 0 },
+            set: { length in
+                if length == 0 { progressStore.setAllDueSession() }
+                else { progressStore.setSessionLength(length) }
+            }
+        )
     }
 }
 

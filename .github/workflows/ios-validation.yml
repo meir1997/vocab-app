@@ -9,7 +9,7 @@ on:
       - '.gitattributes'
       - '.github/workflows/ios-validation.yml'
   push:
-    branches: [main, chatgpt-design-ios]
+    branches: [main, chatgpt-design-ios, chatgpt-ios-firebase]
     paths:
       - 'ios/**'
       - 'data/**'
@@ -17,6 +17,10 @@ on:
       - '.gitattributes'
       - '.github/workflows/ios-validation.yml'
   workflow_dispatch:
+
+concurrency:
+  group: ios-validation-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -30,6 +34,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Test native Firebase callback configuration without Xcode
+        run: python3 -m unittest discover -s ios/Scripts -p 'test_*.py' -v
       - name: Test importer and committed assets
         run: node --test scripts/vocabulary.test.mjs
       - name: Verify source and resource hashes without network access
@@ -38,9 +44,45 @@ jobs:
   ios:
     name: Build and test iPhone app
     runs-on: macos-15
-    timeout-minutes: 25
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
+      - name: Select an installed Xcode 26.2 or newer
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import plistlib
+          import re
+
+          candidates = []
+          for app in Path('/Applications').glob('Xcode*.app'):
+              try:
+                  with (app / 'Contents/Info.plist').open('rb') as source:
+                      version_text = plistlib.load(source)['CFBundleShortVersionString']
+                  if not re.fullmatch(r'\d+(?:\.\d+)*', version_text):
+                      continue
+                  version = tuple(int(part) for part in version_text.split('.'))
+                  if version >= (26, 2):
+                      candidates.append((version, str(app / 'Contents/Developer')))
+              except (OSError, ValueError, KeyError):
+                  continue
+          if not candidates:
+              raise SystemExit('Firebase 12.19.2 requires Xcode 26.2 or newer; no supported Xcode is installed')
+          version, developer_dir = min(candidates)
+          with open(os.environ['GITHUB_ENV'], 'a') as output:
+              output.write('DEVELOPER_DIR=' + developer_dir + '\n')
+          print('Selected Xcode ' + '.'.join(map(str, version)) + ' at ' + developer_dir)
+          PY
+      - name: Verify Xcode and resolve pinned SDK packages
+        shell: bash
+        run: |
+          xcodebuild -version
+          xcodebuild -resolvePackageDependencies \
+            -project ios/VocabularyTrainer.xcodeproj \
+            -scheme VocabularyTrainer \
+            -clonedSourcePackagesDirPath "$RUNNER_TEMP/VocabularyTrainerPackages"
       - name: Select an installed iPhone simulator
         id: simulator
         shell: bash
@@ -72,6 +114,7 @@ jobs:
             -scheme VocabularyTrainer \
             -destination 'platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}' \
             -parallel-testing-enabled NO \
+            -clonedSourcePackagesDirPath "$RUNNER_TEMP/VocabularyTrainerPackages" \
             -derivedDataPath "$RUNNER_TEMP/VocabularyTrainerDerivedData" \
             -resultBundlePath "$RUNNER_TEMP/VocabularyTrainer.xcresult" \
             CODE_SIGNING_ALLOWED=NO
@@ -80,5 +123,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ios-test-results
-          path: ${{ runner.temp }}/VocabularyTrainer.xcresult
+          path: |
+            ${{ runner.temp }}/VocabularyTrainer.xcresult
+            ios/VocabularyTrainer.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
           if-no-files-found: ignore

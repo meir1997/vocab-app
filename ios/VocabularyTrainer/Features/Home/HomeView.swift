@@ -15,6 +15,7 @@ struct HomeView: View {
                 introduction
                 summary
                 practiceCard
+                AccountSyncView()
                 sourceStatus
             }
             .frame(maxWidth: 640)
@@ -107,7 +108,7 @@ struct HomeView: View {
                 )
             }
 
-            Text("מילה נחשבת נלמדת אחרי שלוש תשובות נכונות ברצף.")
+            Text("מילה נחשבת מוכרת אחרי שתי תשובות נכונות ברצף.")
                 .font(.caption)
                 .foregroundStyle(WordTheme.muted)
                 .fixedSize(horizontal: false, vertical: true)
@@ -138,6 +139,37 @@ struct HomeView: View {
             .accessibilityLabel("אורך התרגול")
 
             Button {
+                sessionLength = 0
+            } label: {
+                HStack {
+                    Text("כל המילים שהגיע זמן החזרה שלהן")
+                    Spacer(minLength: 6)
+                    if sessionLength == 0 {
+                        Image(systemName: "checkmark.circle.fill").accessibilityHidden(true)
+                    }
+                }
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(WordTheme.forest)
+                .padding(.vertical, 10)
+                .frame(minHeight: 44)
+            }
+            .buttonStyle(.plain)
+            .accessibilityAddTraits(sessionLength == 0 ? .isSelected : [])
+
+            bandPicker
+
+            Text("יעד יומי: \(progressStore.snapshot.state.settings.goal) תשובות")
+                .font(.footnote)
+                .foregroundStyle(WordTheme.muted)
+
+            if progressStore.snapshot.state.settings.mode != "choice" {
+                Text("מצב התרגול שבחרתם באתר נשמר. באפליקציה מתרגלים כעת בחירה מתוך ארבע תשובות.")
+                    .font(.caption)
+                    .foregroundStyle(WordTheme.muted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Button {
                 isPracticing = true
             } label: {
                 HStack(spacing: 12) {
@@ -149,8 +181,8 @@ struct HomeView: View {
                 }
             }
             .buttonStyle(WordPrimaryButtonStyle())
-            .disabled(repository.entries.count < 4)
-            .accessibilityHint("פותח תרגול של \(sessionLength) מילים")
+            .disabled(repository.entries.count < 4 || progressStore.sessionCount(in: repository.entries) == 0)
+            .accessibilityHint(sessionLength == 0 ? "פותח תרגול של כל המילים שהגיע זמן החזרה שלהן" : "פותח תרגול של \(sessionLength) מילים")
 
             Label("אין לחץ. אפשר לגלות את התשובה ולהמשיך בקצב שלכם.", systemImage: "leaf")
                 .font(.footnote)
@@ -162,6 +194,29 @@ struct HomeView: View {
         .overlay {
             RoundedRectangle(cornerRadius: 28, style: .continuous)
                 .stroke(WordTheme.line.opacity(0.7), lineWidth: 1)
+        }
+    }
+
+    private var bandPicker: some View {
+        let highestSerial = repository.entries.last?.rank ?? 10_000
+        return VStack(alignment: .leading, spacing: 6) {
+            Picker("מאה לתרגול", selection: Binding(
+                get: { progressStore.currentBand },
+                set: { progressStore.setBand($0) }
+            )) {
+                ForEach(1...max(1, progressStore.maxBand), id: \.self) { band in
+                    let lower = (band - 1) * 100 + 1
+                    let upper = min(band * 100, highestSerial)
+                    Text("\(lower.formatted())–\(upper.formatted())").tag(band)
+                }
+            }
+            .tint(WordTheme.forest)
+            .frame(minHeight: 44)
+            .accessibilityHint("מספרי המילים תואמים לאתר. מילים שכבר תרגלתם יכולות לחזור גם ממאות קודמות.")
+            Text("דיוק של יותר מ־70% בחלון התשובות מקדם למאה הבאה, כמו באתר.")
+                .font(.caption)
+                .foregroundStyle(WordTheme.muted)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 

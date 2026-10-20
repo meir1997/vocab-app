@@ -1,0 +1,7 @@
+# Native Firebase client configuration is supplied by the project owner.
+VocabularyTrainer/Resources/Firebase/GoogleService-Info.plist
+# Local Xcode build products and user state.
+DerivedData/
+*.xcuserstate
+xcuserdata/
+Scripts/__pycache__/
