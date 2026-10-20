@@ -43,7 +43,7 @@ final class FirestoreSyncClient: CloudSyncClient {
         let reference = database.collection("users").document(userID)
         // Capture values only. Firestore can retry the block, on a background
         // queue, so the block must not mutate the app or the local progress store.
-        let writeTime = Date().timeIntervalSince1970 * 1_000
+        let writeTime = floor(Date().timeIntervalSince1970 * 1_000)
         let result = try await database.runTransaction { @Sendable transaction, errorPointer in
             do {
                 guard Auth.auth().currentUser?.uid == userID else { throw SyncError.accountChanged }

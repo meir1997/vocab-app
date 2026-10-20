@@ -147,6 +147,24 @@ final class ProgressSyncStoreTests: XCTestCase {
     }
 
     @MainActor
+    func testNativeDateClocksUseIntegralEpochMillisecondsLikeDateNow() {
+        let (defaults, suite) = isolatedDefaults()
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let store = ProgressStore(defaults: defaults)
+        let fractionalDate = Date(timeIntervalSince1970: 1_791_234_567.123456)
+        let milliseconds = (fractionalDate.timeIntervalSince1970 * 1_000).rounded(.down)
+        store.record(.correct, for: mr, now: fractionalDate)
+        XCTAssertEqual(store.snapshot.state.progress["Mr"]?.next, milliseconds + 86_400_000)
+        store.record(.unknown, for: mr, now: fractionalDate)
+        XCTAssertEqual(store.snapshot.state.progress["Mr"]?.next, milliseconds)
+        store.setSessionLength(30, now: fractionalDate)
+        XCTAssertEqual(store.snapshot.updatedAt, milliseconds)
+        var legacy = WordProgress()
+        legacy.nextReview = fractionalDate
+        XCTAssertEqual(WebWordProgress(local: legacy).next, milliseconds)
+    }
+
+    @MainActor
     func testReviewIntervalIsExactlyTwentyFourHoursAndUnknownResetsStreak() {
         let (defaults, suite) = isolatedDefaults()
         defer { defaults.removePersistentDomain(forName: suite) }

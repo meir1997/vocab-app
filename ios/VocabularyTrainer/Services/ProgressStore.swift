@@ -100,13 +100,14 @@ final class ProgressStore: ObservableObject {
         let key = canonicalWords[entry.id] ?? entry.english
         var value = snapshot.state.progress[key] ?? WebWordProgress()
         let correct = result == .correct
+        let milliseconds = max(0, (now.timeIntervalSince1970 * 1_000).rounded(.down))
         if correct {
             value.r += 1; value.s += 1
             let intervals = [1, 3, 7, 14, 30]
-            value.next = now.timeIntervalSince1970 * 1_000 + Double(intervals[min(value.s - 1, 4)]) * 86_400_000
+            value.next = milliseconds + Double(intervals[min(value.s - 1, 4)]) * 86_400_000
         } else {
             value.w += 1; value.s = 0
-            value.next = now.timeIntervalSince1970 * 1_000
+            value.next = milliseconds
         }
         snapshot.state.progress[key] = value
         snapshot.state.stats.attempts += 1
@@ -183,7 +184,7 @@ final class ProgressStore: ObservableObject {
         var merged = WebSyncDocument.merging(local: snapshot, remote: document)
         if let laterSettings, laterSettings != document.state.settings {
             merged.state.settings = laterSettings
-            merged.updatedAt = max(merged.updatedAt, document.updatedAt + 1)
+            merged.updatedAt = max(merged.updatedAt.rounded(.up), (document.updatedAt + 1).rounded(.up))
         }
         snapshot = merged
         hasPendingChanges = !unchanged && Self.hasUnwrittenContent(merged, comparedTo: document)
@@ -199,7 +200,7 @@ final class ProgressStore: ObservableObject {
     }
 
     private func settingsChanged(now: Date) {
-        snapshot.updatedAt = max(snapshot.updatedAt + 1, now.timeIntervalSince1970 * 1_000)
+        snapshot.updatedAt = max((snapshot.updatedAt + 1).rounded(.up), (now.timeIntervalSince1970 * 1_000).rounded(.down))
         snapshot.settingsPresent = true
         lastSettingsRevision = revision + 1
         changed()

@@ -1,4 +1,5 @@
 import XCTest
+import CoreFoundation
 @testable import VocabularyTrainer
 
 final class WebSyncStateTests: XCTestCase {
@@ -31,6 +32,58 @@ final class WebSyncStateTests: XCTestCase {
         XCTAssertNotNil(progress["c."])
         XCTAssertNil(progress["c"])
         XCTAssertEqual(try WebSyncDocument(dictionary: value.dictionary), value)
+    }
+
+    func testIntegralFirestoreFieldsSerializeAsIntegersLikeTheWeb() throws {
+        var value = WebSyncDocument(updatedAt: 1_791_234_567_890)
+        value.state.progress["Mr"] = WebWordProgress(r: 3, w: 1, s: 2, next: 1_791_300_000_000)
+        value.state.bands.current = 8
+        value.state.bands.recent = [1, 0]
+        value.state.stats.attempts = 4
+        value.state.stats.correct = 3
+        let dictionary = value.dictionary
+        let fw = try XCTUnwrap(dictionary["fw"] as? [String: Any])
+        let progress = try XCTUnwrap(fw["progress"] as? [String: Any])
+        let word = try XCTUnwrap(progress["Mr"] as? [String: Any])
+        let settings = try XCTUnwrap(fw["settings"] as? [String: Any])
+        let stats = try XCTUnwrap(fw["stats"] as? [String: Any])
+        let bands = try XCTUnwrap(fw["bands"] as? [String: Any])
+        let recent = try XCTUnwrap(bands["recent"] as? [Any])
+        let fields: [Any?] = [word["r"], word["w"], word["s"], word["next"], settings["goal"],
+                    stats["attempts"], stats["correct"], bands["current"], dictionary["fwUpdatedAt"]] + recent.map { Optional<Any>.some($0) }
+        for raw in fields {
+            let number = try XCTUnwrap(raw as? NSNumber)
+            XCTAssertTrue(["q", "i", "s", "l", "I", "S", "L", "Q"].contains(String(cString: number.objCType)))
+            XCTAssertNotEqual(CFGetTypeID(number), CFBooleanGetTypeID())
+        }
+    }
+
+    func testSafeIntegerBoundariesKeepFractionsAndUnsafeValuesAsDoubles() throws {
+        for value in [9_007_199_254_740_991.0, -9_007_199_254_740_991.0, 0.0, 1.0] {
+            let raw = SyncJSONValue.number(value).any
+            XCTAssertTrue(type(of: raw) == Int64.self)
+            XCTAssertEqual(try SyncJSONValue(any: raw), .number(value))
+        }
+        for value in [1_791_234_567_890.25, 9_007_199_254_740_992.0, -9_007_199_254_740_992.0] {
+            let raw = SyncJSONValue.number(value).any
+            XCTAssertTrue(type(of: raw) == Double.self)
+            let number = try XCTUnwrap(raw as? NSNumber)
+            XCTAssertEqual(String(cString: number.objCType), "d")
+            XCTAssertEqual(try SyncJSONValue(any: raw), .number(value))
+        }
+        let negativeZero = try XCTUnwrap(SyncJSONValue.number(-0.0).any as? Double)
+        XCTAssertEqual(negativeZero.sign, .minus)
+    }
+
+    func testBooleanSerializationStaysDistinctFromIntegerZeroAndOne() throws {
+        for value in [false, true] {
+            let raw = SyncJSONValue.bool(value).any
+            let number = try XCTUnwrap(raw as? NSNumber)
+            XCTAssertEqual(CFGetTypeID(number), CFBooleanGetTypeID())
+            XCTAssertEqual(try SyncJSONValue(any: raw), .bool(value))
+        }
+        XCTAssertEqual(try SyncJSONValue(any: SyncJSONValue.number(1).any), .number(1))
+        XCTAssertEqual(try SyncJSONValue(any: SyncJSONValue.number(0).any), .number(0))
     }
 
     func testMoreAttemptsWinsEvenWithEarlierNextReviewAndNeverAddsCounters() throws {

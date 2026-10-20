@@ -31,6 +31,8 @@ Source: `app.js` on main `9d34630398`. The only document read or written is `use
 
 A word is known when `s >= 2`, matching the web. There is no separate cloud `knownWords`, serial, schema-version, or tombstone field. Word keys retain source spelling (`Mr`, `c.`, etc.); iOS's lowercase identity is a local projection. Dotted word names remain literal nested dictionary keys. Original source ranks supply the displayed serial and 100-word band; gaps from duplicates are retained and the last serial is **10000**.
 
+Integral values serialize as native 64-bit integers, matching the web serializer; fractional values retain double precision. Newly generated native times use integral milliseconds.
+
 The merge selects the entire word record with more total attempts, breaking ties with the later `next`. It does not add counters from replicas. The higher band wins; equal bands adopt the longer recent window. Settings follow the web document timestamp when the remote settings include `length`. Statistics retain the larger-total winner and merge the union of day keys with per-day maxima. The day-key union preserves local days that the current web's replacement step can otherwise discard. Unknown JSON fields and words round-trip.
 
 Native choice practice also honors synchronized length (including `all`) and bands. It preserves web `typing`/`reverse` mode values instead of overwriting them; the native quiz currently remains multiple-choice and displays that distinction. A new word outside the current band is not silently introduced or marked learned.
@@ -48,9 +50,9 @@ The existing web contract has no deletion/reset tombstones or per-answer event I
 
 ## Validation and remaining checks
 
-Local Windows checks: six portable Python tests for native Info.plist/callback generation, four existing Node import tests, complete source/rank comparison for all 9,998 words, project references, and protected-web diff checks. No local Swift compiler, Xcode or physical iPhone is available.
+Local Windows checks: seven portable Python tests for native Info.plist/callback generation and full web/native vocabulary parity, four existing Node import tests, complete source/rank comparison for all 9,998 words, project references, and protected-web diff checks. No local Swift compiler, Xcode or physical iPhone is available.
 
-There are **52 XCTest methods** (12 prior + 40 new). New cases cover model encoding/merge, raw casing, dotted keys, numeric milliseconds, unknown-field preservation, known status, rank/band boundaries, legacy migration, separate UID stores, stale listeners, same-UID reconnect, late acknowledgements, later settings/answer edits, offline retry, native configuration validation, and unavailable-auth behavior. Tests use isolated UserDefaults and fake cloud transport; they do not authenticate or write to production Firebase. The macOS CI workflow resolves the real SDK packages, builds the app and runs this suite.
+There are **56 XCTest methods** (12 prior + 44 new). New cases cover model encoding/merge, raw casing, dotted keys, numeric milliseconds, unknown-field preservation, known status, rank/band boundaries, legacy migration, separate UID stores, stale listeners, same-UID reconnect, late acknowledgements, later settings/answer edits, offline retry, native configuration validation, and unavailable-auth behavior. Tests use isolated UserDefaults and fake cloud transport; they do not authenticate or write to production Firebase. The macOS CI workflow resolves the real SDK packages, builds the app and runs this suite.
 
 Still requires the actual native configuration and a real device/account: Google OAuth presentation/callback, persisted sign-in and logout, matching the web Firebase UID, deployed Firestore rules allowing only the signed-in owner's document, real network transitions, background/foreground delivery, and an end-to-end web ↔ iOS round trip. Example owner-rule condition to verify in the existing deployment is `request.auth != null && request.auth.uid == userId`; this branch does not deploy rules or loosen access.
 

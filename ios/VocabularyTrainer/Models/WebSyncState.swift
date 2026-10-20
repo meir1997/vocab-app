@@ -23,7 +23,16 @@ indirect enum SyncJSONValue: Codable, Equatable, Sendable {
         case .object(let value): return value.mapValues(\.any)
         case .array(let value): return value.map(\.any)
         case .string(let value): return value
-        case .number(let value): return value
+        case .number(let value):
+            // Match the web SDK's isSafeInteger dispatch. Firestore's native
+            // serializer distinguishes NSNumber integer and double encodings;
+            // counters must not silently become doubles on a native write.
+            let isNegativeZero = value == 0 && value.sign == .minus
+            if value.isFinite, !isNegativeZero, value.rounded(.towardZero) == value,
+               abs(value) <= 9_007_199_254_740_991 {
+                return Int64(value)
+            }
+            return value
         case .bool(let value): return value
         case .null: return NSNull()
         }
@@ -105,7 +114,7 @@ struct WebWordProgress: Codable, Equatable, Sendable {
         r = max(0, local.successes)
         w = max(0, local.attempts - r)
         s = max(0, local.consecutiveCorrect)
-        next = max(0, local.nextReview.timeIntervalSince1970 * 1_000)
+        next = max(0, (local.nextReview.timeIntervalSince1970 * 1_000).rounded(.down))
     }
 
     var local: WordProgress {
