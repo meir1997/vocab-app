@@ -8,6 +8,42 @@ struct QuizQuestion: Identifiable, Equatable {
     var correctAnswer: String { entry.hebrew }
 }
 
+/// Shared with ProgressStore so queue selection and promotion use app.js rules.
+/// Bands use source ranks, including gaps left by duplicate vocabulary rows.
+enum LevelBandRules {
+    static let wordsPerBand = 100
+    static let windowSize = 50
+    static let minimumAnswers = 30
+
+    static func contains(rank: Int, band: Int) -> Bool {
+        guard rank > 0, band > 0 else { return false }
+        return (rank - 1) / wordsPerBand == band - 1
+    }
+
+    static func maximumBand(highestRank: Int) -> Int {
+        guard highestRank > 0 else { return 1 }
+        return (highestRank - 1) / wordsPerBand + 1
+    }
+
+    static func recording(
+        correct: Bool, rank: Int, in bands: WebSyncBands, maximumBand: Int
+    ) -> WebSyncBands {
+        // Due reviews from other bands still update word progress, but cannot
+        // contribute to the current band's accuracy or promote it.
+        guard contains(rank: rank, band: bands.current) else { return bands }
+        var result = bands
+        result.recent = Array((bands.recent + [correct ? 1 : 0]).suffix(windowSize))
+        let correctAnswers = result.recent.reduce(0, +)
+        // Integer arithmetic makes exactly 70% stay in the current band.
+        if result.current < maximumBand, result.recent.count >= minimumAnswers,
+           correctAnswers * 10 > result.recent.count * 7 {
+            result.current += 1
+            result.recent = []
+        }
+        return result
+    }
+}
+
 enum QuizEngine {
     static func makeSession(
         entries: [VocabularyEntry],
@@ -16,12 +52,10 @@ enum QuizEngine {
         currentBand: Int = 1,
         now: Date = Date()
     ) -> [QuizQuestion] {
-        guard entries.count >= 4 else { return [] }
+        guard entries.count >= 4, count > 0 else { return [] }
 
-        let inBand: (VocabularyEntry) -> Bool = { $0.rank >= (currentBand - 1) * 100 + 1 && $0.rank <= currentBand * 100 }
         let due = entries.filter {
-            (progress[$0.id]?.nextReview ?? .distantPast) <= now &&
-            (inBand($0) || (progress[$0.id]?.attempts ?? 0) > 0)
+            isDue($0, progress: progress[$0.id], currentBand: currentBand, now: now)
         }
         let ordered = due.sorted { lhs, rhs in
             let lhsProgress = progress[lhs.id] ?? WordProgress()
@@ -40,7 +74,7 @@ enum QuizEngine {
         var selected = Array(ordered.prefix(count))
         if selected.count < count {
             let selectedIDs = Set(selected.map(\.id))
-            selected.append(contentsOf: entries.filter { inBand($0) && !selectedIDs.contains($0.id) }.prefix(count - selected.count))
+            selected.append(contentsOf: entries.filter { LevelBandRules.contains(rank: $0.rank, band: currentBand) && !selectedIDs.contains($0.id) }.prefix(count - selected.count))
         }
 
         return selected.map { entry in
@@ -64,6 +98,22 @@ enum QuizEngine {
             }
             return QuizQuestion(entry: entry, options: ([entry.hebrew] + distractors).shuffled())
         }
+    }
+
+    static func isDue(
+        _ entry: VocabularyEntry, progress: WordProgress?, currentBand: Int, now: Date
+    ) -> Bool {
+        (progress?.nextReview ?? .distantPast) <= now &&
+        isEligible(entry, progress: progress, currentBand: currentBand, now: now)
+    }
+
+    /// Fixed-length sessions may fill with any current-band word. Outside the
+    /// band, only previously answered words whose review is due are eligible.
+    static func isEligible(
+        _ entry: VocabularyEntry, progress: WordProgress?, currentBand: Int, now: Date
+    ) -> Bool {
+        LevelBandRules.contains(rank: entry.rank, band: currentBand) ||
+        ((progress?.attempts ?? 0) > 0 && (progress?.nextReview ?? .distantPast) <= now)
     }
 
     private static func priority(of progress: WordProgress) -> Int {

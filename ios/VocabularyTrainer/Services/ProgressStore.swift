@@ -29,13 +29,11 @@ final class ProgressStore: ObservableObject {
     }
 
     var currentBand: Int { snapshot.state.bands.current }
-    var maxBand: Int { max(1, (highestRank + 99) / 100) }
+    var maxBand: Int { LevelBandRules.maximumBand(highestRank: highestRank) }
 
     func dueCount(in entries: [VocabularyEntry], now: Date = Date()) -> Int {
-        entries.filter { entry in
-            let value = progress[entry.id]
-            let inBand = entry.rank >= (currentBand - 1) * 100 + 1 && entry.rank <= currentBand * 100
-            return (value?.nextReview ?? .distantPast) <= now && (inBand || (value?.attempts ?? 0) > 0)
+        entries.filter {
+            QuizEngine.isDue($0, progress: progress[$0.id], currentBand: currentBand, now: now)
         }.count
     }
 
@@ -45,9 +43,8 @@ final class ProgressStore: ObservableObject {
         guard let requested = snapshot.state.settings.sessionLength else { return due }
         // The numeric web session can fill from the current band, but it must
         // never introduce a new word outside the selected hundred.
-        let eligible = entries.filter { entry in
-            let inBand = entry.rank >= (currentBand - 1) * 100 + 1 && entry.rank <= currentBand * 100
-            return inBand || ((progress[entry.id]?.attempts ?? 0) > 0 && (progress[entry.id]?.nextReview ?? .distantPast) <= now)
+        let eligible = entries.filter {
+            QuizEngine.isEligible($0, progress: progress[$0.id], currentBand: currentBand, now: now)
         }.count
         return min(max(0, requested), eligible)
     }
@@ -118,17 +115,11 @@ final class ProgressStore: ObservableObject {
         if correct { day.c += 1 }
         snapshot.state.stats.days[dayKey] = day
 
-        let band = snapshot.state.bands.current
-        if entry.rank >= (band - 1) * 100 + 1 && entry.rank <= band * 100 {
-            snapshot.state.bands.recent.append(correct ? 1 : 0)
-            snapshot.state.bands.recent = Array(snapshot.state.bands.recent.suffix(50))
-            let answers = snapshot.state.bands.recent
-            if band < maxBand, answers.count >= 30,
-               Double(answers.reduce(0, +)) / Double(answers.count) > 0.7 {
-                snapshot.state.bands.current += 1
-                snapshot.state.bands.recent = []
-            }
-        }
+        // Keep the web-compatible fw.bands value in the same durable snapshot
+        // as word progress; changed() queues it for the existing cloud sync.
+        snapshot.state.bands = LevelBandRules.recording(
+            correct: correct, rank: entry.rank, in: snapshot.state.bands, maximumBand: maxBand
+        )
         changed()
     }
 

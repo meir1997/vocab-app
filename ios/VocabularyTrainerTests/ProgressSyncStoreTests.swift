@@ -200,4 +200,102 @@ final class ProgressSyncStoreTests: XCTestCase {
         XCTAssertEqual(store.value(for: other).attempts, 1)
         XCTAssertEqual(store.snapshot.state.bands.recent, [1])
     }
+
+    @MainActor
+    func testOutOfBandReviewsUpdateProgressAndStatsWithoutChangingBandWindow() {
+        let (defaults, suite) = isolatedDefaults()
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let store = ProgressStore(defaults: defaults)
+        store.registerVocabulary([mr, dotted])
+        store.setBand(2)
+        store.record(.correct, for: mr, now: timestamp)
+        store.record(.unknown, for: mr, now: timestamp)
+        XCTAssertEqual(store.value(for: mr).attempts, 2)
+        XCTAssertEqual(store.value(for: mr).consecutiveCorrect, 0)
+        XCTAssertEqual(store.snapshot.state.stats.attempts, 2)
+        XCTAssertEqual(store.snapshot.state.stats.correct, 1)
+        XCTAssertEqual(store.currentBand, 2)
+        XCTAssertEqual(store.snapshot.state.bands.recent, [])
+        XCTAssertNil(store.snapshot.state.progress[dotted.english])
+    }
+
+    @MainActor
+    func testRemoteBandWindowContinuesLocallyPersistsAndUsesExactFirestoreShape() throws {
+        let (defaults, suite) = isolatedDefaults()
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let entry = VocabularyEntry(rank: 101, english: "boundary", hebrew: "boundary")
+        let store = ProgressStore(defaults: defaults)
+        store.activateAccount(uid: "bands-account")
+        store.registerVocabulary([mr, entry, dotted])
+        let remote = try WebSyncDocument(dictionary: ["fw": ["bands": ["current": 2, "recent": [1, 0, 1]]]])
+        store.applyRemote(remote)
+        XCTAssertFalse(store.hasPendingChanges)
+        store.record(.unknown, for: entry, now: timestamp)
+        XCTAssertTrue(store.hasPendingChanges)
+        XCTAssertEqual(store.currentBand, 2)
+        XCTAssertEqual(store.snapshot.state.bands.recent, [1, 0, 1, 0])
+        let fw = try XCTUnwrap(store.snapshot.dictionary["fw"] as? [String: Any])
+        let bands = try XCTUnwrap(fw["bands"] as? [String: Any])
+        XCTAssertEqual(Set(bands.keys), Set(["current", "recent"]))
+        XCTAssertEqual((bands["current"] as? NSNumber)?.intValue, 2)
+        XCTAssertEqual((bands["recent"] as? [NSNumber])?.map(\.intValue), [1, 0, 1, 0])
+        XCTAssertEqual(try WebSyncDocument(dictionary: store.snapshot.dictionary).state.bands, store.snapshot.state.bands)
+        let reopened = ProgressStore(defaults: defaults)
+        reopened.activateAccount(uid: "bands-account")
+        XCTAssertEqual(reopened.snapshot.state.bands, store.snapshot.state.bands)
+        XCTAssertTrue(reopened.hasPendingChanges)
+        XCTAssertNil(reopened.snapshot.state.progress[mr.english])
+    }
+
+    @MainActor
+    func testRemoteWindowCanPromoteLocallyWithoutMarkingAnyUnseenWordsKnown() throws {
+        let (defaults, suite) = isolatedDefaults()
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let store = ProgressStore(defaults: defaults)
+        let entries = [100, 101, 199, 200, 201, 10000].map {
+            VocabularyEntry(rank: $0, english: "word\($0)", hebrew: "translation\($0)")
+        }
+        store.registerVocabulary(entries)
+        var remote = WebSyncDocument()
+        remote.state.bands.current = 2
+        remote.state.bands.recent = Array(repeating: 0, count: 8) + Array(repeating: 1, count: 21)
+        store.applyRemote(remote)
+        let answered = entries[1]
+        store.record(.correct, for: answered, now: timestamp)
+        XCTAssertEqual(store.currentBand, 3)
+        XCTAssertEqual(store.snapshot.state.bands.recent, [])
+        XCTAssertEqual(store.learnedCount, 0)
+        XCTAssertEqual(Set(store.snapshot.state.progress.keys), Set([answered.english]))
+        let reopened = ProgressStore(defaults: defaults)
+        XCTAssertEqual(reopened.currentBand, 3)
+        XCTAssertEqual(reopened.snapshot.state.bands.recent, [])
+        XCTAssertEqual(reopened.progress.count, 1)
+    }
+
+    @MainActor
+    func testSessionCountsAndQueueShareOriginalRankEligibility() {
+        let (defaults, suite) = isolatedDefaults()
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let store = ProgressStore(defaults: defaults)
+        let entries = [1, 100, 101, 200, 201, 202, 10000].map {
+            VocabularyEntry(rank: $0, english: "word\($0)", hebrew: "translation\($0)")
+        }
+        store.registerVocabulary(entries)
+        store.record(.incorrect, for: entries[4], now: timestamp) // Due old review outside band 1.
+        store.record(.correct, for: entries[5], now: timestamp) // Future outside-band review.
+        store.record(.correct, for: entries[1], now: timestamp) // Future current-band filler.
+        XCTAssertEqual(store.dueCount(in: entries, now: timestamp), 2)
+        store.setAllDueSession(now: timestamp)
+        XCTAssertEqual(store.sessionCount(in: entries, now: timestamp), 2)
+        let due = QuizEngine.makeSession(entries: entries, progress: store.progress,
+                                        count: store.sessionCount(in: entries, now: timestamp), now: timestamp)
+        XCTAssertEqual(Set(due.map { $0.entry.rank }), Set([1, 201]))
+        store.setSessionLength(20, now: timestamp)
+        XCTAssertEqual(store.sessionCount(in: entries, now: timestamp), 3)
+        let filled = QuizEngine.makeSession(entries: entries, progress: store.progress,
+                                           count: store.sessionCount(in: entries, now: timestamp), now: timestamp)
+        XCTAssertEqual(Set(filled.map { $0.entry.rank }), Set([1, 100, 201]))
+        // The sparse array must not pull rank 101 into the first hundred.
+        XCTAssertFalse(filled.contains { $0.entry.rank == 101 })
+    }
 }
