@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-  <meta name="theme-color" content="#111a3a">
+  <meta name="theme-color" content="#0f1730">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="ארבע מילים">
-  <meta name="description" content="לימוד אוצר מילים באנגלית עם ארבע אפשרויות וחזרה חכמה">
+  <meta name="description" content="לימוד אוצר מילים באנגלית עם חזרות מרווחות, סנכרון בין מכשירים וספריית מילים מלאה">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon.svg">
@@ -18,65 +18,148 @@
   <div class="shell">
     <header class="topbar">
       <div class="brand"><span class="brand-mark">4</span><span>ארבע מילים</span></div>
-      <button class="icon-btn" id="helpBtn" aria-label="הוספה למסך הבית">↗</button>
+      <div class="top-actions">
+        <span id="syncStatus" class="sync-status" role="status">מצב מקומי</span>
+        <button class="auth-btn" id="authBtn">כניסה עם Google</button>
+      </div>
     </header>
 
-    <main>
-      <section class="stats" aria-label="נתוני התקדמות">
-        <div><strong id="learnedStat">0</strong><span>מילים שנלמדו</span></div>
-        <div><strong id="accuracyStat">—</strong><span>דיוק</span></div>
-        <div><strong id="streakStat">0</strong><span>רצף נכון</span></div>
-      </section>
-
-      <section class="quiz-card" id="quizCard" aria-live="polite">
-        <div class="progress-row">
-          <span id="progressText">טוען את אוצר המילים…</span>
-          <button class="small-btn" id="sessionBtn" aria-label="שינוי אורך התרגול">20 מילים</button>
+    <main id="main">
+      <!-- ===== Practice tab ===== -->
+      <section id="tab-practice" class="tab-panel" aria-label="תרגול">
+        <div id="practiceHome">
+          <div class="goal-card">
+            <div class="goal-ring" id="goalRing" role="img" aria-label="התקדמות יומית"><span id="goalRingText">0%</span></div>
+            <div class="goal-info">
+              <strong id="todayCount">0</strong><span>מתוך <b id="goalTarget">20</b> מילים היום</span>
+              <span class="streak-line">🔥 <b id="dayStreak">0</b> ימים ברצף</span>
+            </div>
+          </div>
+          <div class="mini-stats">
+            <div><strong id="dueCount">0</strong><span>דחופות לחזרה</span></div>
+            <div><strong id="learnedStat">0</strong><span>נלמדו</span></div>
+            <div><strong id="accuracyStat">—</strong><span>דיוק</span></div>
+            <div><strong id="vocabCount">0</strong><span>במאגר</span></div>
+          </div>
+          <button class="primary-btn" id="startBtn">מתחילים תרגול</button>
+          <div class="quick-settings">
+            <button class="chip" id="sessionBtn" aria-label="אורך התרגול">20 מילים</button>
+            <button class="chip" id="modeBtn" aria-label="סוג התרגול">בחירה אנגלית ← עברית</button>
+          </div>
+          <p class="source-note" id="sourceNote">המילים נטענות מגיליון אוצר המילים שלך</p>
         </div>
-        <div class="progress-track"><span id="progressBar"></span></div>
 
-        <p class="eyebrow">מה התרגום של</p>
-        <h1 id="word" dir="ltr">Loading…</h1>
-        <p class="hint" id="hint">בחרו את התשובה הנכונה</p>
+        <div id="quizCard" class="hidden">
+          <div class="quiz-head">
+            <span class="chip" id="sessionLabel">20 מילים</span>
+            <span id="progressText" class="progress-text">מילה 1 מתוך 20</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" id="progressBar"></div></div>
+          <p class="prompt-label" id="promptLabel">מה התרגום של</p>
+          <div class="word-row">
+            <h2 class="word" id="word" lang="en">…</h2>
+            <span class="serial" id="serial" aria-label="מספר סידורי"></span>
+            <button class="speak-btn" id="speakBtn" aria-label="השמעת המילה">🔊</button>
+          </div>
+          <p class="hint" id="hint" aria-live="polite">בחרו את התשובה הנכונה</p>
+          <div class="answers" id="answers"></div>
+          <div id="typingBox" class="typing-box hidden">
+            <input id="typingInput" type="text" lang="en" dir="ltr" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="כתבו את המילה באנגלית" aria-label="כתבו את המילה באנגלית">
+            <button class="primary-btn" id="typingCheck">בדיקה</button>
+          </div>
+          <button class="ghost-btn" id="dontKnowBtn">לא יודע</button>
+          <button class="primary-btn hidden" id="nextBtn">המשך</button>
+        </div>
 
-        <div class="answers" id="answers"></div>
-        <button class="dont-know" id="dontKnowBtn">לא יודע</button>
+        <div id="summary" class="hidden">
+          <h2>כל הכבוד!</h2>
+          <p id="summaryText"></p>
+          <button class="primary-btn" id="againBtn">עוד סבב</button>
+          <button class="ghost-btn" id="homeBtn">חזרה למסך הראשי</button>
+        </div>
       </section>
 
-      <section class="summary hidden" id="summary">
-        <div class="summary-icon">✓</div>
-        <p class="eyebrow">תרגול הושלם</p>
-        <h2>כל הכבוד!</h2>
-        <p id="summaryText"></p>
-        <button class="primary" id="againBtn">תרגול נוסף</button>
+      <!-- ===== Library tab ===== -->
+      <section id="tab-library" class="tab-panel hidden" aria-label="ספריית מילים">
+        <div class="search-row">
+          <input id="searchInput" type="search" placeholder="חיפוש מילה באנגלית או בעברית…" aria-label="חיפוש מילה">
+        </div>
+        <p class="library-count" id="libraryCount"></p>
+        <div id="libraryList" class="library-list"></div>
+        <button class="ghost-btn hidden" id="moreBtn">הצג עוד</button>
       </section>
 
-      <p class="source-note" id="sourceNote">המילים נטענות מגיליון אוצר המילים שלך</p>
+      <!-- ===== Stats tab ===== -->
+      <section id="tab-stats" class="tab-panel hidden" aria-label="סטטיסטיקה">
+        <h2>השבוע שלך</h2>
+        <div class="week-bars" id="weekBars"></div>
+        <div class="mini-stats">
+          <div><strong id="totalAttempts">0</strong><span>תשובות סה״כ</span></div>
+          <div><strong id="totalAccuracy">—</strong><span>דיוק כללי</span></div>
+          <div><strong id="statsLearned">0</strong><span>מילים נלמדו</span></div>
+          <div><strong id="statsDue">0</strong><span>דחופות</span></div>
+        </div>
+      </section>
+
+      <!-- ===== Settings tab ===== -->
+      <section id="tab-settings" class="tab-panel hidden" aria-label="הגדרות">
+        <h2>הגדרות</h2>
+        <div class="settings-group">
+          <label for="goalSelect">יעד יומי</label>
+          <select id="goalSelect">
+            <option value="10">10 מילים ביום</option>
+            <option value="20">20 מילים ביום</option>
+            <option value="30">30 מילים ביום</option>
+            <option value="50">50 מילים ביום</option>
+            <option value="100">100 מילים ביום</option>
+          </select>
+        </div>
+        <div class="settings-group">
+          <label for="lengthSelect">אורך תרגול</label>
+          <select id="lengthSelect">
+            <option value="10">10 מילים</option>
+            <option value="20">20 מילים</option>
+            <option value="30">30 מילים</option>
+            <option value="50">50 מילים</option>
+            <option value="100">100 מילים</option>
+            <option value="all">כל הדחופות</option>
+          </select>
+        </div>
+        <div class="settings-group">
+          <label for="modeSelect">סוג תרגול</label>
+          <select id="modeSelect">
+            <option value="choice">בחירה — אנגלית ← עברית</option>
+            <option value="reverse">בחירה הפוכה — עברית ← אנגלית</option>
+            <option value="typing">הקלדה — כתיבת המילה באנגלית</option>
+          </select>
+        </div>
+        <div class="settings-group">
+          <span class="label">גיבוי</span>
+          <div class="row">
+            <button class="ghost-btn" id="exportBtn">ייצוא התקדמות</button>
+            <button class="ghost-btn" id="importBtn">שחזור מקובץ</button>
+            <input type="file" id="importFile" accept="application/json" class="hidden" aria-label="בחירת קובץ גיבוי">
+          </div>
+        </div>
+        <div class="settings-group danger">
+          <button class="ghost-btn danger" id="resetBtn">איפוס כל ההתקדמות</button>
+        </div>
+        <p class="source-note">גרסה 2.0 — סנכרון ענן, חזרות מרווחות ו־9,998 מילים</p>
+      </section>
     </main>
+
+    <nav class="tabbar" aria-label="ניווט ראשי">
+      <button class="tab-btn active" data-tab="practice" aria-label="תרגול">🏠<span>תרגול</span></button>
+      <button class="tab-btn" data-tab="library" aria-label="ספריית מילים">📖<span>ספריה</span></button>
+      <button class="tab-btn" data-tab="stats" aria-label="סטטיסטיקה">📊<span>נתונים</span></button>
+      <button class="tab-btn" data-tab="settings" aria-label="הגדרות">⚙️<span>הגדרות</span></button>
+    </nav>
   </div>
 
-  <dialog id="helpDialog">
-    <button class="dialog-close" id="closeHelp" aria-label="סגירה">×</button>
-    <div class="dialog-icon">⌂</div>
-    <h2>להוסיף למסך הבית</h2>
-    <ol>
-      <li>פתחו את הדף ב־Safari.</li>
-      <li>לחצו על כפתור השיתוף <b>□↑</b>.</li>
-      <li>בחרו „הוספה למסך הבית”.</li>
-    </ol>
-    <p>ההתקדמות נשמרת במכשיר, ואחרי הביקור הראשון אפשר ללמוד גם בלי חיבור.</p>
-  </dialog>
-
-  <dialog id="sessionDialog">
-    <button class="dialog-close" id="closeSession" aria-label="סגירה">×</button>
-    <h2>אורך התרגול</h2>
-    <div class="session-options">
-      <button data-length="10">10 מילים</button>
-      <button data-length="20">20 מילים</button>
-      <button data-length="30">30 מילים</button>
-    </div>
-  </dialog>
-
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js" defer></script>
+  <script src="firebase-config.js"></script>
   <script src="app.js" defer></script>
 </body>
 </html>
