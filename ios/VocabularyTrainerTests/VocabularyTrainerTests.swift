@@ -114,8 +114,8 @@ final class LevelBandRulesTests: XCTestCase {
         var bands = WebSyncBands()
         bands.current = 2
         bands.recent = Array(repeating: 1, count: 29)
-        XCTAssertEqual(LevelBandRules.recording(correct: true, rank: 100, in: bands, maximumBand: 100), bands)
-        XCTAssertEqual(LevelBandRules.recording(correct: false, rank: 201, in: bands, maximumBand: 100), bands)
+        XCTAssertEqual(LevelBandRules.recording(correct: true, rank: 100, in: bands, maximumBand: 100).recent, bands.recent)
+        XCTAssertEqual(LevelBandRules.recording(correct: false, rank: 201, in: bands, maximumBand: 100).current, bands.current)
     }
 
     func testNonpositiveSessionLengthsAreEmpty() {
@@ -124,52 +124,53 @@ final class LevelBandRulesTests: XCTestCase {
             XCTAssertTrue(QuizEngine.makeSession(entries: entries, progress: [:], count: count).isEmpty)
         }
     }
-    func testThousandPlacementUsesUniqueWordsAndOriginalRankRange() {
-        let entries = (1...2000).map { VocabularyEntry(rank: $0, english: "w\($0)", hebrew: "t\($0)") }
-        for band in [1, 5, 10, 11, 20] {
-            let sample = ThousandPlacement.sample(entries: entries, band: band)
-            let thousand = (band - 1) / 10
-            XCTAssertEqual(sample.count, 100)
-            XCTAssertEqual(Set(sample.map(\.id)).count, 100)
-            XCTAssertTrue(sample.allSatisfy { $0.rank > thousand * 1000 && $0.rank <= (thousand + 1) * 1000 })
-        }
-        XCTAssertTrue(ThousandPlacement.sample(entries: Array(entries.prefix(99)), band: 1).isEmpty)
-        XCTAssertTrue(ThousandPlacement.sample(entries: Array(repeating: entries[0], count: 110), band: 1).isEmpty)
+    func testAutomaticThousandPromotionAtSeventyOfOneHundred() {
+        var bands = WebSyncBands()
+        bands.current = 5
+        bands.thousandRecent = Array(repeating: 1, count: 69) + Array(repeating: 0, count: 30)
+        let promoted = LevelBandRules.recording(correct: true, rank: 100, in: bands, maximumBand: 100)
+        XCTAssertEqual(promoted.current, 11)
+        XCTAssertTrue(promoted.recent.isEmpty)
+        XCTAssertTrue(promoted.thousandRecent.isEmpty)
+        let failed = LevelBandRules.recording(correct: false, rank: 100, in: bands, maximumBand: 100)
+        XCTAssertEqual(failed.current, 5)
+        XCTAssertEqual(failed.thousandRecent.count, 100)
+        XCTAssertEqual(LevelBandRules.recording(correct: true, rank: 2000, in: bands, maximumBand: 100), bands)
     }
 
-    func testThousandPlacementRequiresCompleteTestAndSeventyCorrect() {
-        XCTAssertEqual(ThousandPlacement.target(startBand: 5, currentBand: 5, answered: 100, correct: 70, maximumBand: 100), 11)
-        XCTAssertNil(ThousandPlacement.target(startBand: 5, currentBand: 5, answered: 100, correct: 69, maximumBand: 100))
-        XCTAssertNil(ThousandPlacement.target(startBand: 5, currentBand: 5, answered: 99, correct: 99, maximumBand: 100))
-        XCTAssertNil(ThousandPlacement.target(startBand: 5, currentBand: 6, answered: 100, correct: 100, maximumBand: 100))
-        XCTAssertNil(ThousandPlacement.target(startBand: 95, currentBand: 95, answered: 100, correct: 100, maximumBand: 100))
+    func testThousandWindowSurvivesHundredPromotionButClearsOnThousandBoundary() {
+        var bands = WebSyncBands()
+        bands.current = 5
+        bands.recent = Array(repeating: 1, count: 6) + Array(repeating: 0, count: 3)
+        bands.thousandRecent = [1, 0, 1]
+        let nextHundred = LevelBandRules.recording(correct: true, rank: 450, in: bands, maximumBand: 100)
+        XCTAssertEqual(nextHundred.current, 6)
+        XCTAssertEqual(nextHundred.thousandRecent, [1, 0, 1, 1])
+        bands.current = 10
+        let nextThousand = LevelBandRules.recording(correct: true, rank: 950, in: bands, maximumBand: 100)
+        XCTAssertEqual(nextThousand.current, 11)
+        XCTAssertTrue(nextThousand.thousandRecent.isEmpty)
+        bands.current = 100
+        bands.thousandRecent = Array(repeating: 1, count: 100)
+        XCTAssertEqual(LevelBandRules.recording(correct: true, rank: 9950, in: bands, maximumBand: 100).current, 100)
     }
 
     @MainActor
-    func testPlacementViewModelPromotesOnlyAtCompletionWithoutWritingWordProgress() {
-        let suite = "placement-" + UUID().uuidString
+    func testThousandWindowPersistsAndRoundTripsThroughFirestore() throws {
+        let suite = "thousand-" + UUID().uuidString
         let defaults = UserDefaults(suiteName: suite)!
         defer { defaults.removePersistentDomain(forName: suite) }
         let store = ProgressStore(defaults: defaults)
-        let entries = (1...1100).map { VocabularyEntry(rank: $0, english: "w\($0)", hebrew: "t\($0)") }
-        store.registerVocabulary(entries)
-        let model = QuizViewModel(entries: entries, sessionLength: 10, progressStore: store, placement: true)
-        XCTAssertEqual(model.questions.count, 100)
-        for index in 0..<100 {
-            if index < 70 { model.choose(model.currentQuestion!.correctAnswer) }
-            else { model.markUnknown() }
-            XCTAssertEqual(store.currentBand, 1)
-            if index == 99 { break }
-            model.advance()
-        }
-        model.advance()
-        XCTAssertTrue(model.placementPassed)
-        XCTAssertEqual(store.currentBand, 11)
-        XCTAssertTrue(store.progress.isEmpty)
-        XCTAssertEqual(store.snapshot.state.stats.attempts, 0)
-        XCTAssertTrue(store.snapshot.state.bands.recent.isEmpty)
-        let reopened = ProgressStore(defaults: defaults)
-        XCTAssertEqual(reopened.currentBand, 11)
+        let entry = VocabularyEntry(rank: 1, english: "one", hebrew: "אחד")
+        store.record(.correct, for: entry)
+        XCTAssertEqual(store.snapshot.state.bands.thousandRecent, [1])
+        let remote = try WebSyncDocument(dictionary: store.snapshot.dictionary)
+        XCTAssertEqual(remote.state.bands.thousandRecent, [1])
+        XCTAssertEqual(ProgressStore(defaults: defaults).snapshot.state.bands.thousandRecent, [1])
+        store.setBand(2)
+        XCTAssertEqual(store.snapshot.state.bands.thousandRecent, [1])
+        store.setBand(11)
+        XCTAssertTrue(store.snapshot.state.bands.thousandRecent.isEmpty)
     }
 
 }
