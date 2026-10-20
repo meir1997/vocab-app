@@ -297,7 +297,9 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const prepared = registration?.active && await caches.has('four-words-offline-v4');
+    const cache = await caches.open('four-words-offline-v4');
+    const required = ['index.html', 'app.js', 'vocab.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
+    const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
     else label.textContent = 'מכינים שימוש אופליין… השאירו פתוח עם אינטרנט עד שמופיע אישור';
   } catch { label.textContent = 'שמירה אופליין לא זמינה בדפדפן זה'; }
@@ -611,6 +613,7 @@ document.addEventListener('keydown', e => {
   const idx = ['1', '2', '3', '4'].indexOf(e.key);
   if (idx >= 0) { const btns = document.querySelectorAll('.answer'); if (btns[idx]) btns[idx].click(); }
 });
+if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('controllerchange', updateOfflineStatus);
 if ('serviceWorker' in navigator) window.addEventListener('load', async () => {
   try {
     await navigator.serviceWorker.register('sw.js');
