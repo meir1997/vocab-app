@@ -12,8 +12,8 @@ struct QuizQuestion: Identifiable, Equatable {
 /// Bands use source ranks, including gaps left by duplicate vocabulary rows.
 enum LevelBandRules {
     static let wordsPerBand = 100
-    static let windowSize = 50
-    static let minimumAnswers = 30
+    static let windowSize = 10
+    static let minimumAnswers = 10
 
     static func contains(rank: Int, band: Int) -> Bool {
         guard rank > 0, band > 0 else { return false }
@@ -34,9 +34,9 @@ enum LevelBandRules {
         var result = bands
         result.recent = Array((bands.recent + [correct ? 1 : 0]).suffix(windowSize))
         let correctAnswers = result.recent.reduce(0, +)
-        // Integer arithmetic makes exactly 70% stay in the current band.
+        // Integer arithmetic: exactly 70% (7 of 10) also advances.
         if result.current < maximumBand, result.recent.count >= minimumAnswers,
-           correctAnswers * 10 > result.recent.count * 7 {
+           correctAnswers * 10 >= result.recent.count * 7 {
             result.current += 1
             result.recent = []
         }
