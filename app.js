@@ -203,7 +203,11 @@ function mergeRemote(data) {
   const rp = data.fw.progress || {}, rs = data.fw.settings || {}, rt = data.fw.stats || {}, rb = data.fw.bands || {};
   if (typeof rb.current === 'number') {
     if (Math.floor((rb.current - 1) / 10) === Math.floor((bands.current - 1) / 10) && (rb.thousandRecent || []).length > (bands.thousandRecent || []).length) bands.thousandRecent = rb.thousandRecent.slice(-100);
-    if (rb.current > bands.current) bands = { ...rb, current: rb.current, recent: Array.isArray(rb.recent) ? rb.recent.slice(-BAND_WINDOW) : [], thousandRecent: Array.isArray(rb.thousandRecent) ? rb.thousandRecent.slice(-100) : [] };
+    if (rb.current > bands.current) {
+      const retainedThousand = Math.floor((rb.current - 1) / 10) === Math.floor((bands.current - 1) / 10) ? (bands.thousandRecent || []) : [];
+      bands = { ...rb, current: rb.current, recent: Array.isArray(rb.recent) ? rb.recent.slice(-BAND_WINDOW) : [], thousandRecent: Array.isArray(rb.thousandRecent) ? rb.thousandRecent.slice(-100) : [] };
+      if (retainedThousand.length > bands.thousandRecent.length) bands.thousandRecent = retainedThousand;
+    }
     else if (rb.current === bands.current && Array.isArray(rb.recent) && rb.recent.length > bands.recent.length) bands.recent = rb.recent.slice(-BAND_WINDOW);
   }
   Object.keys(rp).forEach(w => {
@@ -476,7 +480,11 @@ function importData(file) {
       if (data.settings) { settings = Object.assign(settings, data.settings); applySettingsToUI(); }
       if (data.bands && typeof data.bands.current === 'number') {
         if (Math.floor((data.bands.current - 1) / 10) === Math.floor((bands.current - 1) / 10) && (data.bands.thousandRecent || []).length > (bands.thousandRecent || []).length) bands.thousandRecent = data.bands.thousandRecent.slice(-100);
-        if (data.bands.current > bands.current) bands = { ...data.bands, current: data.bands.current, recent: Array.isArray(data.bands.recent) ? data.bands.recent.slice(-BAND_WINDOW) : [], thousandRecent: Array.isArray(data.bands.thousandRecent) ? data.bands.thousandRecent.slice(-100) : [] };
+        if (data.bands.current > bands.current) {
+          const retainedThousand = Math.floor((data.bands.current - 1) / 10) === Math.floor((bands.current - 1) / 10) ? (bands.thousandRecent || []) : [];
+          bands = { ...data.bands, current: data.bands.current, recent: Array.isArray(data.bands.recent) ? data.bands.recent.slice(-BAND_WINDOW) : [], thousandRecent: Array.isArray(data.bands.thousandRecent) ? data.bands.thousandRecent.slice(-100) : [] };
+          if (retainedThousand.length > bands.thousandRecent.length) bands.thousandRecent = retainedThousand;
+        }
         else if (data.bands.current === bands.current && Array.isArray(data.bands.recent) && data.bands.recent.length > bands.recent.length) bands.recent = data.bands.recent.slice(-BAND_WINDOW);
         renderBandSelect();
       }
