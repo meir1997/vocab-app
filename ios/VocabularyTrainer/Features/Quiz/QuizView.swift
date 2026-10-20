@@ -14,11 +14,11 @@ struct QuizView: View {
         case word, feedback, completion
     }
 
-    init(entries: [VocabularyEntry], sessionLength: Int, progressStore: ProgressStore, placement: Bool = false, onClose: @escaping () -> Void) {
+    init(entries: [VocabularyEntry], sessionLength: Int, progressStore: ProgressStore, onClose: @escaping () -> Void) {
         _viewModel = StateObject(wrappedValue: QuizViewModel(
             entries: entries,
             sessionLength: sessionLength,
-            progressStore: progressStore, placement: placement
+            progressStore: progressStore
         ))
         self.onClose = onClose
     }
@@ -26,7 +26,6 @@ struct QuizView: View {
     var body: some View {
         VStack(spacing: 0) {
             topBar
-            if viewModel.isPlacement { Text("מבחן מיקום · אלף \( (viewModel.startBand - 1) / 10 + 1) · 70/100 למעבר").font(.caption).padding(8) }
             if viewModel.questions.isEmpty {
                 emptyState
             } else if viewModel.isComplete {
@@ -286,11 +285,11 @@ struct QuizView: View {
                     .accessibilityHidden(true)
 
                 VStack(alignment: .leading, spacing: 12) {
-                    Text(viewModel.isPlacement ? (viewModel.placementPassed ? "עברתם לאלף הבא!" : "הרמה לא השתנתה") : "עוד צעד קדימה.")
+                    Text("עוד צעד קדימה.")
                         .font(.system(.largeTitle, design: .rounded, weight: .bold))
                         .accessibilityAddTraits(.isHeader)
                         .accessibilityFocused($accessibilityFocus, equals: .completion)
-                    Text(viewModel.isPlacement ? "מבחן מיקום: \(viewModel.correctCount) מתוך 100. נדרשות 70 נכונות. נתוני התרגול לא השתנו." : "תרגלתם \(viewModel.questions.count) מילים. כל מפגש כזה הופך את האנגלית לקצת יותר מוכרת.")
+                    Text("תרגלתם \(viewModel.questions.count) מילים. כל מפגש כזה הופך את האנגלית לקצת יותר מוכרת.")
                         .font(.body)
                         .foregroundStyle(WordTheme.muted)
                         .lineSpacing(4)
