@@ -213,8 +213,17 @@ struct WebSyncStats: Codable, Equatable, Sendable {
 struct WebSyncBands: Codable, Equatable, Sendable {
     var current = 1
     var recent: [Int] = []
+    var thousandRecent: [Int] = []
     var extra: [String: SyncJSONValue] = [:]
     init() {}
+    private enum CodingKeys: String, CodingKey { case current, recent, thousandRecent, extra }
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        current = try values.decodeIfPresent(Int.self, forKey: .current) ?? 1
+        recent = try values.decodeIfPresent([Int].self, forKey: .recent) ?? []
+        thousandRecent = Array((try values.decodeIfPresent([Int].self, forKey: .thousandRecent) ?? []).suffix(100))
+        extra = try values.decodeIfPresent([String: SyncJSONValue].self, forKey: .extra) ?? [:]
+    }
     fileprivate init(json: SyncJSONValue?) throws {
         let value = try object(json)
         current = max(1, try integer(value["current"], default: 1))
@@ -226,10 +235,20 @@ struct WebSyncBands: Codable, Equatable, Sendable {
                 return n
             }.suffix(50).map { $0 }
         }
-        extra = extras(value, excluding: ["current", "recent"])
+        if let raw = value["thousandRecent"] {
+            guard case .array(let values) = raw else { throw WebSyncError.invalidDocument }
+            thousandRecent = try values.map { raw in
+                let n = try integer(raw)
+                guard n == 0 || n == 1 else { throw WebSyncError.invalidDocument }
+                return n
+            }.suffix(100).map { $0 }
+        }
+        extra = extras(value, excluding: ["current", "recent", "thousandRecent"])
     }
     fileprivate var json: SyncJSONValue {
-        .object(extra.merging(["current": .number(Double(current)), "recent": .array(recent.map { .number(Double($0)) })]) { _, value in value })
+        var value = extra.merging(["current": SyncJSONValue.number(Double(current)), "recent": .array(recent.map { .number(Double($0)) })]) { _, value in value }
+        if !thousandRecent.isEmpty { value["thousandRecent"] = .array(thousandRecent.map { .number(Double($0)) }) }
+        return .object(value)
     }
 }
 
@@ -320,6 +339,9 @@ struct WebSyncDocument: Codable, Equatable, Sendable {
         if remoteBand.current > localBand.current ||
             (remoteBand.current == localBand.current && remoteBand.recent.count > localBand.recent.count) {
             merged.state.bands = remoteBand
+        }
+        if (localBand.current - 1) / 10 == (remoteBand.current - 1) / 10 {
+            merged.state.bands.thousandRecent = localBand.thousandRecent.count >= remoteBand.thousandRecent.count ? localBand.thousandRecent : remoteBand.thousandRecent
         }
         merged.state.bands.recent = Array(merged.state.bands.recent.suffix(50))
         merged.state.bands.extra = union(localBand.extra, remoteBand.extra)

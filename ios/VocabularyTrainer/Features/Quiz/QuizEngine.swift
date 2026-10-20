@@ -28,17 +28,25 @@ enum LevelBandRules {
     static func recording(
         correct: Bool, rank: Int, in bands: WebSyncBands, maximumBand: Int
     ) -> WebSyncBands {
-        // Due reviews from other bands still update word progress, but cannot
-        // contribute to the current band's accuracy or promote it.
-        guard contains(rank: rank, band: bands.current) else { return bands }
+        let thousand = (bands.current - 1) / 10
+        guard rank > thousand * 1000, rank <= (thousand + 1) * 1000 else { return bands }
         var result = bands
+        result.thousandRecent = Array((bands.thousandRecent + [correct ? 1 : 0]).suffix(100))
+        let nextThousand = (thousand + 1) * 10 + 1
+        if result.thousandRecent.count == 100, result.thousandRecent.reduce(0, +) >= 70, nextThousand <= maximumBand {
+            result.current = nextThousand
+            result.recent = []
+            result.thousandRecent = []
+            return result
+        }
+        guard contains(rank: rank, band: bands.current) else { return result }
         result.recent = Array((bands.recent + [correct ? 1 : 0]).suffix(windowSize))
         let correctAnswers = result.recent.reduce(0, +)
-        // Integer arithmetic: exactly 70% (7 of 10) also advances.
         if result.current < maximumBand, result.recent.count >= minimumAnswers,
            correctAnswers * 10 >= result.recent.count * 7 {
             result.current += 1
             result.recent = []
+            if (result.current - 1) / 10 != thousand { result.thousandRecent = [] }
         }
         return result
     }

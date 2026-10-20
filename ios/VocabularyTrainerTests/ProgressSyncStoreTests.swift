@@ -236,7 +236,7 @@ final class ProgressSyncStoreTests: XCTestCase {
         XCTAssertEqual(store.snapshot.state.bands.recent, [1, 0, 1, 0])
         let fw = try XCTUnwrap(store.snapshot.dictionary["fw"] as? [String: Any])
         let bands = try XCTUnwrap(fw["bands"] as? [String: Any])
-        XCTAssertEqual(Set(bands.keys), Set(["current", "recent"]))
+        XCTAssertEqual(Set(bands.keys), Set(["current", "recent", "thousandRecent"]))
         XCTAssertEqual((bands["current"] as? NSNumber)?.intValue, 2)
         XCTAssertEqual((bands["recent"] as? [NSNumber])?.map(\.intValue), [1, 0, 1, 0])
         XCTAssertEqual(try WebSyncDocument(dictionary: store.snapshot.dictionary).state.bands, store.snapshot.state.bands)

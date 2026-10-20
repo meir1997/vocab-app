@@ -184,6 +184,11 @@ struct HomeView: View {
             .disabled(repository.entries.count < 4 || progressStore.sessionCount(in: repository.entries) == 0)
             .accessibilityHint(sessionLength == 0 ? "פותח תרגול של כל המילים שהגיע זמן החזרה שלהן" : "פותח תרגול של \(sessionLength) מילים")
 
+            Text("70 נכונות מתוך 100 התשובות הרגילות האחרונות באלף מדלגות אוטומטית לאלף הבא. אין מבחן נפרד.")
+                .font(.caption)
+                .foregroundStyle(WordTheme.muted)
+                .fixedSize(horizontal: false, vertical: true)
+
             Label("אין לחץ. אפשר לגלות את התשובה ולהמשיך בקצב שלכם.", systemImage: "leaf")
                 .font(.footnote)
                 .foregroundStyle(WordTheme.muted)

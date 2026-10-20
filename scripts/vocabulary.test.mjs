@@ -43,3 +43,22 @@ test('complete committed snapshot matches every generated asset and contains all
   assert.deepEqual(metadata.duplicates.map(item => item.word), ['ll', 'cause']);
   assert.deepEqual(metadata.omissions, []);
 });
+
+test('regular quiz automatically advances a thousand at 70/100 and retains the hundred rule', async () => {
+  const source = await readFile(new URL('../app.js', import.meta.url), 'utf8');
+  const code = source.slice(source.indexOf('function recordBandAnswer('), source.indexOf('function bandAccuracyNote('));
+  const run = Function('bands', 'answers', `const BAND_SIZE=100,BAND_WINDOW=10,BAND_MIN_ANSWERS=10,BAND_ADVANCE=.7;
+    const maxBand=()=>100,bandLo=b=>(b-1)*100+1,bandLabel=()=>'', $=()=>({}),showToast=()=>{};
+    ${code}; for(const [ok,rank] of answers)recordBandAnswer(ok,rank);return bands;`);
+  let bands={current:5,recent:[],thousandRecent:[...Array(69).fill(1),...Array(30).fill(0)]};
+  assert.equal(run(structuredClone(bands),[[true,100]]).current,11);
+  assert.equal(run(structuredClone(bands),[[false,100]]).current,5);
+  assert.deepEqual(run(structuredClone(bands),[[true,2000]]),bands);
+  bands={current:5,recent:[1,1,1,1,1,1,0,0,0],thousandRecent:[1,0]};
+  const hundred=run(structuredClone(bands),[[true,450]]);
+  assert.equal(hundred.current,6);assert.deepEqual(hundred.thousandRecent,[1,0,1]);
+  bands.current=10;
+  assert.deepEqual(run(bands,[[true,950]]).thousandRecent,[]);
+  const incomplete=run({current:5,recent:[],thousandRecent:Array(98).fill(1)},[[true,100]]);
+  assert.equal(incomplete.current,5);
+});

@@ -114,8 +114,8 @@ final class LevelBandRulesTests: XCTestCase {
         var bands = WebSyncBands()
         bands.current = 2
         bands.recent = Array(repeating: 1, count: 29)
-        XCTAssertEqual(LevelBandRules.recording(correct: true, rank: 100, in: bands, maximumBand: 100), bands)
-        XCTAssertEqual(LevelBandRules.recording(correct: false, rank: 201, in: bands, maximumBand: 100), bands)
+        XCTAssertEqual(LevelBandRules.recording(correct: true, rank: 100, in: bands, maximumBand: 100).recent, bands.recent)
+        XCTAssertEqual(LevelBandRules.recording(correct: false, rank: 201, in: bands, maximumBand: 100).current, bands.current)
     }
 
     func testNonpositiveSessionLengthsAreEmpty() {
@@ -124,4 +124,61 @@ final class LevelBandRulesTests: XCTestCase {
             XCTAssertTrue(QuizEngine.makeSession(entries: entries, progress: [:], count: count).isEmpty)
         }
     }
+    func testAutomaticThousandPromotionAtSeventyOfOneHundred() {
+        var bands = WebSyncBands()
+        bands.current = 5
+        bands.thousandRecent = Array(repeating: 1, count: 69) + Array(repeating: 0, count: 30)
+        let promoted = LevelBandRules.recording(correct: true, rank: 100, in: bands, maximumBand: 100)
+        XCTAssertEqual(promoted.current, 11)
+        XCTAssertTrue(promoted.recent.isEmpty)
+        XCTAssertTrue(promoted.thousandRecent.isEmpty)
+        let failed = LevelBandRules.recording(correct: false, rank: 100, in: bands, maximumBand: 100)
+        XCTAssertEqual(failed.current, 5)
+        XCTAssertEqual(failed.thousandRecent.count, 100)
+        XCTAssertEqual(LevelBandRules.recording(correct: true, rank: 2000, in: bands, maximumBand: 100), bands)
+    }
+
+    func testThousandWindowSurvivesHundredPromotionButClearsOnThousandBoundary() {
+        var bands = WebSyncBands()
+        bands.current = 5
+        bands.recent = Array(repeating: 1, count: 6) + Array(repeating: 0, count: 3)
+        bands.thousandRecent = [1, 0, 1]
+        let nextHundred = LevelBandRules.recording(correct: true, rank: 450, in: bands, maximumBand: 100)
+        XCTAssertEqual(nextHundred.current, 6)
+        XCTAssertEqual(nextHundred.thousandRecent, [1, 0, 1, 1])
+        bands.current = 10
+        let nextThousand = LevelBandRules.recording(correct: true, rank: 950, in: bands, maximumBand: 100)
+        XCTAssertEqual(nextThousand.current, 11)
+        XCTAssertTrue(nextThousand.thousandRecent.isEmpty)
+        bands.current = 100
+        bands.thousandRecent = Array(repeating: 1, count: 100)
+        XCTAssertEqual(LevelBandRules.recording(correct: true, rank: 9950, in: bands, maximumBand: 100).current, 100)
+    }
+
+    @MainActor
+    func testThousandWindowPersistsAndRoundTripsThroughFirestore() throws {
+        let suite = "thousand-" + UUID().uuidString
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let store = ProgressStore(defaults: defaults)
+        let entry = VocabularyEntry(rank: 1, english: "one", hebrew: "אחד")
+        store.record(.correct, for: entry)
+        XCTAssertEqual(store.snapshot.state.bands.thousandRecent, [1])
+        let remote = try WebSyncDocument(dictionary: store.snapshot.dictionary)
+        XCTAssertEqual(remote.state.bands.thousandRecent, [1])
+        XCTAssertEqual(ProgressStore(defaults: defaults).snapshot.state.bands.thousandRecent, [1])
+        store.setBand(2)
+        XCTAssertEqual(store.snapshot.state.bands.thousandRecent, [1])
+        store.setBand(11)
+        XCTAssertTrue(store.snapshot.state.bands.thousandRecent.isEmpty)
+    }
+
+    func testLegacySavedBandsDecodeWithoutLosingExistingProgress() throws {
+        let data = Data(#"{"current":5,"recent":[1,0],"extra":{}}"#.utf8)
+        let bands = try JSONDecoder().decode(WebSyncBands.self, from: data)
+        XCTAssertEqual(bands.current, 5)
+        XCTAssertEqual(bands.recent, [1, 0])
+        XCTAssertTrue(bands.thousandRecent.isEmpty)
+    }
+
 }
