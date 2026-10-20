@@ -43,3 +43,26 @@ test('complete committed snapshot matches every generated asset and contains all
   assert.deepEqual(metadata.duplicates.map(item => item.word), ['ll', 'cause']);
   assert.deepEqual(metadata.omissions, []);
 });
+
+// Exercise the actual browser implementation, with no DOM or duplicated policy.
+test('placement samples 100 distinct words from the entire current thousand', async () => {
+  const source = await readFile(new URL('../app.js', import.meta.url), 'utf8');
+  const functions = source.slice(source.indexOf('function placementSample('), source.indexOf('function startPlacement('));
+  const { sample, target } = Function(functions + '; return {sample:placementSample,target:placementTarget};')();
+  const words = Array.from({length: 2000}, (_, i) => ({r:i+1,w:'word'+i,t:'t'+i}));
+  for (const band of [1, 5, 10, 11, 20]) {
+    const selected = sample(words, band);
+    const thousand = Math.floor((band-1)/10);
+    assert.equal(selected.length, 100);
+    assert.equal(new Set(selected.map(w=>w.w)).size, 100);
+    assert.ok(selected.every(w=>w.r>thousand*1000 && w.r<=(thousand+1)*1000));
+  }
+  assert.equal(sample(words.slice(0,99),1).length,0);
+  assert.equal(sample(Array(110).fill(words[0]),1).length,0);
+  assert.equal(target(5,5,100,70,100),11);
+  assert.equal(target(5,5,100,69,100),null);
+  assert.equal(target(5,5,99,99,100),null);
+  assert.equal(target(5,6,100,100,100),null);
+  assert.equal(target(15,15,100,70,100),21);
+  assert.equal(target(95,95,100,100,100),null);
+});
