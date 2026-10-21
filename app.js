@@ -297,8 +297,8 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v4');
-    const required = ['index.html', 'app.js', 'vocab.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
+    const cache = await caches.open('four-words-offline-v5');
+    const required = ['index.html', 'app.js', 'vocab.json', 'details.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
     else label.textContent = 'מכינים שימוש אופליין… השאירו פתוח עם אינטרנט עד שמופיע אישור';
@@ -364,7 +364,7 @@ function answerChoice(ok, btn, correctText) {
   if (ok) { session.correct++; btn.classList.add('correct'); $('hint').textContent = 'מעולה — תשובה נכונה!'; $('hint').classList.add('good'); }
   else { session.wrong++; if (btn) btn.classList.add('wrong'); $('hint').textContent = `התשובה: ${correctText}`; $('hint').classList.add('bad'); }
   persist(); refreshHome();
-  setTimeout(() => { locked = false; session.index++; showQuestion(); }, ok ? 900 : 1600);
+  advanceWhenReady(() => { locked = false; session.index++; showQuestion(); }, ok ? 900 : 1600);
 }
 function checkTyping() {
   if (locked) return;
@@ -378,7 +378,7 @@ function checkTyping() {
   markWord(item.w, ok); markAnswer(ok); persist(); refreshHome();
   if (ok) { session.correct++; $('hint').textContent = 'מעולה — נכון!'; $('hint').classList.add('good'); }
   else { session.wrong++; $('hint').textContent = `התשובה: ${item.w}`; $('hint').classList.add('bad'); }
-  setTimeout(() => { locked = false; session.index++; showQuestion(); }, ok ? 900 : 1800);
+  advanceWhenReady(() => { locked = false; session.index++; showQuestion(); }, ok ? 900 : 1800);
 }
 function finishSession() {
   session.active = false;
@@ -449,30 +449,64 @@ function renderLibrary(reset = true) {
     row.querySelector('.w').textContent = v.w;
     row.querySelector('.t').textContent = v.t;
     row.querySelector('.speak').addEventListener('click', () => speak(v.w));
-    row.querySelector('.w').addEventListener('click', () => toggleExample(row, v.w));
+    row.querySelector('.w').addEventListener('click', () => openDetails(v));
+    row.querySelector('.t').addEventListener('click', () => openDetails(v));
     list.append(row);
   });
   $('moreBtn').classList.toggle('hidden', libShown >= items.length);
 }
-async function toggleExample(row, word) {
-  const existing = row.querySelector('.example');
-  if (existing) { existing.remove(); return; }
-  const el = document.createElement('span');
-  el.className = 'example'; el.textContent = 'טוען דוגמה…';
-  row.append(el);
-  try {
-    const cache = readJSON('fw.examples.v1', {});
-    let entry = cache[word.toLowerCase()];
-    if (!entry) {
-      const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word.toLowerCase())}`);
-      if (!res.ok) throw new Error();
-      const data = await res.json();
-      const meaning = data[0] && data[0].meanings && data[0].meanings[0];
-      entry = { def: meaning && meaning.definitions && meaning.definitions[0] && meaning.definitions[0].definition, ex: meaning && meaning.definitions && (meaning.definitions.find(d => d.example) || {}).example };
-      cache[word.toLowerCase()] = entry; save('fw.examples.v1', cache);
-    }
-    el.textContent = [entry.def, entry.ex ? `דוגמה: ${entry.ex}` : ''].filter(Boolean).join(' — ') || 'אין דוגמה זמינה';
-  } catch { el.textContent = 'אין דוגמה זמינה'; }
+/* ---------- Word details card (synonyms, meanings, example) ---------- */
+let detailsPromise = null, sheetOpen = false, pendingAdvance = null;
+const POS_HE = { n: 'שם עצם', v: 'פועל', a: 'תואר', r: 'תואר הפועל' };
+function loadDetails() {
+  if (!detailsPromise) detailsPromise = fetch('details.json').then(r => { if (!r.ok) throw new Error('details'); return r.json(); }).catch(err => { detailsPromise = null; throw err; });
+  return detailsPromise;
+}
+function addDetailSection(parent, title, nodes) {
+  const sec = document.createElement('section'); sec.className = 'detail-section';
+  const h = document.createElement('h3'); h.textContent = title; sec.append(h, ...nodes); parent.append(sec);
+}
+async function openDetails(item) {
+  const body = $('detailBody');
+  $('detailWord').textContent = item.w; $('detailSerial').textContent = `#${item.r.toLocaleString('he-IL')}`;
+  $('detailTranslation').textContent = item.t;
+  $('detailSpeak').onclick = () => speak(item.w);
+  body.replaceChildren(); const loading = document.createElement('p'); loading.className = 'detail-empty'; loading.textContent = 'טוען…'; body.append(loading);
+  $('detailSheet').classList.remove('hidden'); sheetOpen = true;
+  let data;
+  try { data = (await loadDetails())[item.r] || null; }
+  catch { body.replaceChildren(); const p = document.createElement('p'); p.className = 'detail-empty'; p.textContent = 'הפרטים עדיין לא נטענו — פתחו פעם אחת עם אינטרנט.'; body.append(p); return; }
+  if (!sheetOpen || $('detailWord').textContent !== item.w) return;
+  body.replaceChildren();
+  if (!data) { const p = document.createElement('p'); p.className = 'detail-empty'; p.textContent = 'אין פרטים נוספים למילה הזו.'; body.append(p); return; }
+  if (data.s && data.s.length) {
+    const wrap = document.createElement('div'); wrap.className = 'chips-row'; wrap.dir = 'ltr';
+    data.s.forEach(s => { const c = document.createElement('span'); c.className = 'syn-chip'; c.textContent = s; wrap.append(c); });
+    addDetailSection(body, 'מילים נרדפות', [wrap]);
+  }
+  if (data.d && data.d.length) {
+    const list = document.createElement('ol'); list.className = 'meaning-list'; list.dir = 'ltr';
+    data.d.forEach(entry => {
+      const cut = entry.indexOf('|'); const pos = entry.slice(0, cut), text = entry.slice(cut + 1);
+      const li = document.createElement('li');
+      const tag = document.createElement('span'); tag.className = 'pos-tag'; tag.textContent = POS_HE[pos] || pos; tag.dir = 'rtl';
+      li.append(tag, document.createTextNode(text)); list.append(li);
+    });
+    addDetailSection(body, 'משמעויות', [list]);
+  }
+  if (data.e) {
+    const row = document.createElement('div'); row.className = 'example-row';
+    const q = document.createElement('p'); q.className = 'example-text'; q.dir = 'ltr'; q.textContent = data.e;
+    const b = document.createElement('button'); b.className = 'speak'; b.setAttribute('aria-label', 'השמעת המשפט'); b.textContent = '🔊'; b.addEventListener('click', () => speak(data.e));
+    row.append(q, b); addDetailSection(body, 'משפט לדוגמה', [row]);
+  }
+}
+function closeDetails() {
+  $('detailSheet').classList.add('hidden'); sheetOpen = false;
+  if (pendingAdvance) { const fn = pendingAdvance; pendingAdvance = null; fn(); }
+}
+function advanceWhenReady(fn, delay) {
+  setTimeout(() => { if (sheetOpen) pendingAdvance = fn; else fn(); }, delay);
 }
 function speak(text) {
   try {
@@ -573,10 +607,14 @@ function checkTypingDontKnow() {
   const item = session.queue[session.index];
   markWord(item.w, false); markAnswer(false); session.wrong++; persist(); refreshHome();
   $('hint').textContent = `התשובה: ${item.w}`; $('hint').classList.add('bad');
-  setTimeout(() => { locked = false; session.index++; showQuestion(); }, 1800);
+  advanceWhenReady(() => { locked = false; session.index++; showQuestion(); }, 1800);
 }
 $('typingCheck').addEventListener('click', checkTyping);
 $('typingInput').addEventListener('keydown', e => { if (e.key === 'Enter') checkTyping(); });
+$('detailBtn').addEventListener('click', () => { const item = session.queue[session.index]; if (item) openDetails(item); });
+$('detailClose').addEventListener('click', closeDetails);
+$('detailSheet').addEventListener('click', e => { if (e.target === $('detailSheet')) closeDetails(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && sheetOpen) closeDetails(); });
 $('speakBtn').addEventListener('click', () => { const item = session.queue[session.index]; if (item) speak(item.w); });
 $('sessionBtn').addEventListener('click', () => switchTab('settings'));
 $('modeBtn').addEventListener('click', () => switchTab('settings'));

@@ -64,6 +64,7 @@
             <h2 class="word" id="word" lang="en">…</h2>
             <span class="serial" id="serial" aria-label="מספר סידורי"></span>
             <button class="speak-btn" id="speakBtn" aria-label="השמעת המילה">🔊</button>
+            <button class="speak-btn" id="detailBtn" aria-label="פרטים על המילה">ⓘ</button>
           </div>
           <p class="hint" id="hint" aria-live="polite">בחרו את התשובה הנכונה</p>
           <div class="answers" id="answers"></div>
@@ -167,6 +168,18 @@
 
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
+  <div id="detailSheet" class="sheet-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="detailWord">
+    <div class="sheet">
+      <div class="sheet-head">
+        <div><h2 id="detailWord" lang="en" dir="ltr"></h2><span class="serial" id="detailSerial"></span></div>
+        <button class="speak" id="detailSpeak" aria-label="השמעת המילה">🔊</button>
+        <button class="sheet-close" id="detailClose" aria-label="סגירה">✕</button>
+      </div>
+      <p class="detail-translation" id="detailTranslation"></p>
+      <div id="detailBody"></div>
+      <p class="detail-credit">נתונים אוטומטיים מ־Princeton WordNet ו־Tatoeba (CC BY 2.0 FR). ייתכנו אי־דיוקים בהתאמת המשמעות.</p>
+    </div>
+  </div>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js" defer></script>

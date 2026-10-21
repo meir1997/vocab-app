@@ -1,0 +1,29 @@
+name: Build word details data
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [word-details-card]
+    paths: ['scripts/build-details.py', '.github/workflows/build-details.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install nltk
+      - run: python -c "import nltk; nltk.download('wordnet'); nltk.download('omw-1.4'); nltk.download('stopwords')"
+      - run: |
+          curl -sL -o /tmp/sentences.tar.bz2 https://downloads.tatoeba.org/exports/sentences.tar.bz2
+          tar xjf /tmp/sentences.tar.bz2 -C /tmp
+      - run: python scripts/build-details.py
+      - name: Commit details.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add details.json
+          git diff --cached --quiet || git commit -m "Add generated word details data"
+          git push
