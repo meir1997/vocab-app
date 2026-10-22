@@ -14,20 +14,47 @@ def forms(w):
         m=wn.morphy(w,p)
         if m:s.add(m)
     return s
-# Tatoeba
+# Tatoeba: keep the single best (most modern, natural, easy) sentence per word
 tok=re.compile(r"[a-z'-]+")
-best=collections.defaultdict(list)
+rank={v['w'].lower():v['r'] for v in vocab}
+ARCH_IDS=set()
+try:
+    for r_ in csv.reader(open('/tmp/tags.csv',encoding='utf8'),delimiter='\t',quoting=csv.QUOTE_NONE):
+        if len(r_)>=2 and r_[1].lower() in ('archaic','old english','middle english','shakespearean','poetic'):ARCH_IDS.add(r_[0])
+except FileNotFoundError: pass
+ARCHAIC=re.compile(r"\b(thou|thee|thy|thine|thyself|ye|hast|hath|doth|dost|wilt|shalt|art|whither|hither|thither|ere|o'er|e'er|ne'er|'tis|'twas|nay|verily|forsooth|prithee|wherefore|hence|thence|whence|whilst|yonder|(?:knowest|comest|goest|seest|hearest|sayest|makest|wast|wert|didst|canst|couldst|wouldst|shouldst|hadst|hast|speaketh|saith|cometh|goeth))\b",re.I)
+best={};bestarch={}
 BAD=re.compile(r'\b(sex|sexual|fuck\w*|shit|rape\w*|kill\w*|suicide|murder\w*|porn\w*|bitch|dick|penis|naked|nazi|terroris\w*|bomb\w*|drunk|whore|slut|damn|hell|ass|cock|tits|boobs|hitler|jerk|idiot|stupid)\b',re.I)
-good=re.compile(r"^[A-Z][^\"“”()\[\]0-9@/]*[.?!]$")
+good=re.compile(r"^[A-Z][^\"“”()\[\]0-9@/;:]*[.?!]$")
+def score(s,w):
+    ws=s.split();n=len(ws)
+    toks=[t for t in tok.findall(s.lower()) if t!=w]
+    if not toks: return None
+    common=sum(1 for t in toks if rank.get(t,99999)<=3000)/len(toks)
+    rare=sum(1 for t in toks if rank.get(t,99999)>8000)
+    sc=3*common-0.6*abs(n-8)-1.5*rare
+    if s.count(',')>1: sc-=1
+    if s.endswith('?'): sc-=0.3
+    return sc
 for row in csv.reader(open('/tmp/sentences.csv',encoding='utf8'),delimiter='\t',quoting=csv.QUOTE_NONE):
     if len(row)<3 or row[1]!='eng':continue
     s=row[2]
     n=len(s.split())
-    if n<6 or n>13 or not good.match(s) or BAD.search(s):continue
+    if n<5 or n>12 or not good.match(s) or BAD.search(s):continue
     toks=set(tok.findall(s.lower()))
-    for t in toks:
-        if t in wset and len(best[t])<40: best[t].append(s)
-        
+    am={m.group(0).lower() for m in ARCHAIC.finditer(s)}
+    for t in toks&wset:
+        a=row[0] in ARCH_IDS or bool(am-{t})
+        sc=score(s,t)
+        if sc is None:continue
+        d=bestarch if a else best
+        if t not in d or sc>d[t][0]: d[t]=(sc,s)
+best_final={}
+for t in wset:
+    if t in best: best_final[t]=[best[t][1]]
+    elif t in bestarch: best_final[t]=[bestarch[t][1]]
+best=best_final
+
 # map inflected tokens to lemma words too
 out={};stats=collections.Counter()
 for v in vocab:
@@ -62,7 +89,6 @@ for v in vocab:
     defs=defs[:3]; syn=syn[:4]
     cands=best.get(w,[])
     if cands:
-        cands=sorted(cands,key=lambda s:abs(len(s.split())-9))
         sent=cands[0]
     else: sent=None
     if ex and (not sent): sent=ex
