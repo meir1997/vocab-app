@@ -184,6 +184,13 @@ struct HomeView: View {
             .disabled(repository.entries.count < 4 || progressStore.sessionCount(in: repository.entries) == 0)
             .accessibilityHint(sessionLength == 0 ? "פותח תרגול של כל המילים שהגיע זמן החזרה שלהן" : "פותח תרגול של \(sessionLength) מילים")
 
+            Text(progressStore.learningIsFull
+                 ? "בלמידה: \(progressStore.learningCount)/\(progressStore.learningLimit) · המכסה מלאה, מילים חדשות ייכנסו רק אחרי שמילים ייצאו מהלמידה"
+                 : "בלמידה: \(progressStore.learningCount)/\(progressStore.learningLimit) מילים")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(progressStore.learningIsFull ? WordTheme.coral : WordTheme.muted)
+                .fixedSize(horizontal: false, vertical: true)
+
             Text("70 נכונות מתוך 100 התשובות הרגילות האחרונות באלף מדלגות אוטומטית לאלף הבא. אין מבחן נפרד.")
                 .font(.caption)
                 .foregroundStyle(WordTheme.muted)
