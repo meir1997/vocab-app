@@ -18,6 +18,7 @@ let stats = readJSON(K.stats, { days: {}, attempts: 0, correct: 0 });
 const BAND_SIZE = 100;
 const BAND_MIN_ANSWERS = 10;   // answers needed in the window before evaluating
 const BAND_WINDOW = 10;        // rolling window of recent in-band answers
+const LEARNING_LIMIT = 200;    // max words in the learning state at once
 const BAND_ADVANCE = 0.7;      // at least 70% (7 of 10) advances
 let bands = Object.assign({ current: 1, recent: [] }, readJSON(K.bands, {}));
 let rankOf = new Map();        // word -> rank, built when vocab loads
@@ -130,19 +131,28 @@ function priorityOf(w) {
   if (!p || (p.r + p.w) === 0) return 1;           // new
   return 2;
 }
+// "In learning" = attempted at least once and not yet learned (streak < 2).
+const isLearning = p => !!p && (p.r + p.w) > 0 && p.s < 2;
+const learningCount = () => Object.values(progress).filter(isLearning).length;
 function buildQueue() {
   const now = Date.now();
   const attempted = v => { const p = progress[v.w]; return p && (p.r + p.w) > 0; };
+  // Never-attempted words may enter learning only while fewer than
+  // LEARNING_LIMIT words are in learning. Existing words are never removed.
+  let slots = Math.max(0, LEARNING_LIMIT - learningCount());
+  const admit = v => { if (attempted(v)) return true; if (slots <= 0) return false; slots--; return true; };
   // Current band plus due reviews of words already attempted anywhere;
   // words outside the band that were never attempted are not introduced.
   const due = vocab.filter(v => (progress[v.w] ? progress[v.w].next : 0) <= now && (inCurrentBand(v) || attempted(v)));
   due.sort((a, b) => priorityOf(a.w) - priorityOf(b.w) ||
     ((rec(a.w).r + rec(a.w).w) - (rec(b.w).r + rec(b.w).w)) || a.r - b.r);
   const want = settings.length === 'all' ? due.length : settings.length;
-  let picked = due.slice(0, Math.max(want, Math.min(10, due.length)));
+  const floor = Math.max(want, Math.min(10, due.length));
+  let picked = [];
+  for (const v of due) { if (picked.length >= floor) break; if (admit(v)) picked.push(v); }
   if (picked.length < want && settings.length !== 'all') {
     const ids = new Set(picked.map(v => v.w));
-    picked = picked.concat(vocab.filter(v => inCurrentBand(v) && !ids.has(v.w)).slice(0, want - picked.length));
+    for (const v of vocab) { if (picked.length >= want) break; if (!ids.has(v.w) && inCurrentBand(v) && admit(v)) { ids.add(v.w); picked.push(v); } }
   }
   return shuffle(picked);
 }
@@ -313,6 +323,15 @@ function startSession() {
   $('quizBandLabel').textContent = bandLabel();
   showQuestion();
 }
+// Shrink the prompt word until it fits on one line; wrapping is the fallback.
+function fitWord() {
+  const el = $('word'); if (!el) return;
+  el.style.fontSize = '';
+  let size = parseFloat(getComputedStyle(el).fontSize) || 42;
+  el.style.whiteSpace = 'nowrap';
+  while (size > 20 && el.scrollWidth > el.clientWidth + 1) { size -= 2; el.style.fontSize = size + 'px'; }
+  el.style.whiteSpace = '';
+}
 function showQuestion() {
   const item = session.queue[session.index];
   if (!item) return finishSession();
@@ -351,6 +370,7 @@ function showQuestion() {
       answers.append(b);
     });
   }
+  fitWord();
 }
 let locked = false;
 function answerChoice(ok, btn, correctText) {
@@ -396,6 +416,7 @@ function refreshHome() {
   $('goalRing').style.background = `conic-gradient(var(--accent) ${p}%, var(--accent-soft) ${p}%)`;
   $('dayStreak').textContent = dayStreak();
   $('dueCount').textContent = dueCount().toLocaleString('he-IL');
+  renderLearningNote();
   $('learnedStat').textContent = learnedCount().toLocaleString('he-IL');
   $('accuracyStat').textContent = pct(stats.correct, stats.attempts);
   $('sessionBtn').textContent = settings.length === 'all' ? 'כל הדחופות' : `${settings.length} מילים`;
@@ -405,6 +426,15 @@ function refreshHome() {
     $('bandNote').textContent = bandAccuracyNote();
     if ($('bandSelect').options.length) $('bandSelect').value = String(bands.current);
   }
+}
+function renderLearningNote() {
+  const el = $('learningNote'); if (!el) return;
+  const n = learningCount();
+  const full = n >= LEARNING_LIMIT;
+  el.textContent = full
+    ? `בלמידה: ${n}/${LEARNING_LIMIT} · המכסה מלאה, מילים חדשות ייכנסו רק אחרי שמילים ייצאו מהלמידה`
+    : `בלמידה: ${n}/${LEARNING_LIMIT} מילים`;
+  el.classList.toggle('full', full);
 }
 function renderBandSelect() {
   const sel = $('bandSelect'); if (!sel) return;
