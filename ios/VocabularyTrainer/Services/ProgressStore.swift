@@ -31,10 +31,16 @@ final class ProgressStore: ObservableObject {
     var currentBand: Int { snapshot.state.bands.current }
     var maxBand: Int { LevelBandRules.maximumBand(highestRank: highestRank) }
 
+    var learningCount: Int { LearningLimit.count(in: progress) }
+    var learningLimit: Int { LearningLimit.maximum }
+    var learningIsFull: Bool { learningCount >= LearningLimit.maximum }
+
     func dueCount(in entries: [VocabularyEntry], now: Date = Date()) -> Int {
-        entries.filter {
+        let due = entries.filter {
             QuizEngine.isDue($0, progress: progress[$0.id], currentBand: currentBand, now: now)
-        }.count
+        }
+        let known = due.filter { (progress[$0.id]?.attempts ?? 0) > 0 }.count
+        return known + min(due.count - known, LearningLimit.freeSlots(in: progress))
     }
 
     func sessionCount(in entries: [VocabularyEntry], now: Date = Date()) -> Int {
@@ -42,10 +48,16 @@ final class ProgressStore: ObservableObject {
         let due = dueCount(in: entries, now: now)
         guard let requested = snapshot.state.settings.sessionLength else { return due }
         // The numeric web session can fill from the current band, but it must
-        // never introduce a new word outside the selected hundred.
-        let eligible = entries.filter {
+        // never introduce a new word outside the selected hundred, and new
+        // words are capped by the free learning slots.
+        let known = entries.filter {
+            (progress[$0.id]?.attempts ?? 0) > 0 &&
             QuizEngine.isEligible($0, progress: progress[$0.id], currentBand: currentBand, now: now)
         }.count
+        let fresh = entries.filter {
+            (progress[$0.id]?.attempts ?? 0) == 0 && LevelBandRules.contains(rank: $0.rank, band: currentBand)
+        }.count
+        let eligible = known + min(fresh, LearningLimit.freeSlots(in: progress))
         return min(max(0, requested), eligible)
     }
 
