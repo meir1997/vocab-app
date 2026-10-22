@@ -52,6 +52,25 @@ enum LevelBandRules {
     }
 }
 
+/// At most `maximum` words may be in learning (attempted, streak below 2).
+/// Existing words are never removed; only new entries are blocked when full.
+enum LearningLimit {
+    static let maximum = 200
+
+    static func isLearning(_ progress: WordProgress?) -> Bool {
+        guard let progress else { return false }
+        return progress.attempts > 0 && !progress.isLearned
+    }
+
+    static func count(in progress: [String: WordProgress]) -> Int {
+        progress.values.filter { isLearning($0) }.count
+    }
+
+    static func freeSlots(in progress: [String: WordProgress]) -> Int {
+        max(0, maximum - count(in: progress))
+    }
+}
+
 enum QuizEngine {
     static func makeSession(
         entries: [VocabularyEntry],
@@ -79,10 +98,28 @@ enum QuizEngine {
             return lhs.rank < rhs.rank
         }
 
-        var selected = Array(ordered.prefix(count))
+        var slots = LearningLimit.freeSlots(in: progress)
+        func admit(_ entry: VocabularyEntry) -> Bool {
+            if (progress[entry.id]?.attempts ?? 0) > 0 { return true }
+            guard slots > 0 else { return false }
+            slots -= 1
+            return true
+        }
+
+        var selected: [VocabularyEntry] = []
+        for entry in ordered {
+            if selected.count >= count { break }
+            if admit(entry) { selected.append(entry) }
+        }
         if selected.count < count {
-            let selectedIDs = Set(selected.map(\.id))
-            selected.append(contentsOf: entries.filter { LevelBandRules.contains(rank: $0.rank, band: currentBand) && !selectedIDs.contains($0.id) }.prefix(count - selected.count))
+            var selectedIDs = Set(selected.map(\.id))
+            for entry in entries where LevelBandRules.contains(rank: entry.rank, band: currentBand) && !selectedIDs.contains(entry.id) {
+                if selected.count >= count { break }
+                if admit(entry) {
+                    selected.append(entry)
+                    selectedIDs.insert(entry.id)
+                }
+            }
         }
 
         return selected.map { entry in

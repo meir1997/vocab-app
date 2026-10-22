@@ -110,6 +110,8 @@ struct QuizView: View {
                         Text(englishWord(question.entry.english))
                             .font(.system(size: wordFontSize, weight: .semibold, design: .serif))
                             .multilineTextAlignment(.center)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.3)
                             .fixedSize(horizontal: false, vertical: true)
                             .environment(\.layoutDirection, .leftToRight)
                             .accessibilityFocused($accessibilityFocus, equals: .word)
