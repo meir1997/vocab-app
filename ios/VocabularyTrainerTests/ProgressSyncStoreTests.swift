@@ -298,4 +298,25 @@ final class ProgressSyncStoreTests: XCTestCase {
         // The sparse array must not pull rank 101 into the first hundred.
         XCTAssertFalse(filled.contains { $0.entry.rank == 101 })
     }
+
+    func testLearningLimitBlocksNewWordsButKeepsExisting() {
+        let entries = (1...300).map {
+            VocabularyEntry(rank: $0, english: "lim\($0)", hebrew: "tr\($0)")
+        }
+        var progress: [String: WordProgress] = [:]
+        for entry in entries.prefix(200) {
+            progress[entry.id] = WordProgress(attempts: 1, successes: 0, consecutiveCorrect: 0, nextReview: .distantPast)
+        }
+        XCTAssertEqual(LearningLimit.count(in: progress), 200)
+        XCTAssertEqual(LearningLimit.freeSlots(in: progress), 0)
+        let full = QuizEngine.makeSession(entries: entries, progress: progress, count: 20, currentBand: 1)
+        XCTAssertEqual(full.count, 20)
+        XCTAssertTrue(full.allSatisfy { (progress[$0.entry.id]?.attempts ?? 0) > 0 })
+
+        progress[entries[0].id] = WordProgress(attempts: 3, successes: 3, consecutiveCorrect: 3, nextReview: .distantFuture)
+        progress[entries[1].id] = WordProgress(attempts: 3, successes: 3, consecutiveCorrect: 3, nextReview: .distantFuture)
+        XCTAssertEqual(LearningLimit.freeSlots(in: progress), 2)
+        let open = QuizEngine.makeSession(entries: entries, progress: progress, count: 300, currentBand: 3)
+        XCTAssertEqual(open.filter { (progress[$0.entry.id]?.attempts ?? 0) == 0 }.count, 2)
+    }
 }
