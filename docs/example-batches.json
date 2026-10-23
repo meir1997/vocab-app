@@ -28,6 +28,34 @@
       "added": 666,
       "exceptions": 33,
       "previouslyReviewed": 1
+    },
+    {
+      "start": 3101,
+      "end": 3800,
+      "added": 666,
+      "exceptions": 34,
+      "previouslyReviewed": 0
+    },
+    {
+      "start": 3801,
+      "end": 4500,
+      "added": 676,
+      "exceptions": 24,
+      "previouslyReviewed": 0
+    },
+    {
+      "start": 4501,
+      "end": 5200,
+      "added": 671,
+      "exceptions": 29,
+      "previouslyReviewed": 0
+    },
+    {
+      "start": 5201,
+      "end": 5900,
+      "added": 663,
+      "exceptions": 37,
+      "previouslyReviewed": 0
     }
   ]
 }
