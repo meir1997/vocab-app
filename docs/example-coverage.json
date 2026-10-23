@@ -6,9 +6,9 @@
       "words": 9998,
       "withExample": 9816,
       "withoutExample": 182,
-      "reviewed": 60,
-      "withPromptContext": 60,
-      "withExampleWithoutDetails": 60
+      "reviewed": 59,
+      "withPromptContext": 59,
+      "withExampleWithoutDetails": 59
     },
     "top300": {
       "words": 300,
@@ -22,56 +22,41 @@
   "after": {
     "all": {
       "words": 9998,
-      "withExample": 9665,
-      "withoutExample": 333,
-      "reviewed": 9665,
-      "withPromptContext": 9665,
-      "withExampleWithoutDetails": 9665
+      "withExample": 9885,
+      "withoutExample": 113,
+      "reviewed": 9885,
+      "withPromptContext": 9885,
+      "withExampleWithoutDetails": 9885
     },
     "top300": {
       "words": 300,
-      "withExample": 286,
-      "withoutExample": 14,
-      "reviewed": 286,
-      "withPromptContext": 286,
-      "withExampleWithoutDetails": 286
+      "withExample": 297,
+      "withoutExample": 3,
+      "reviewed": 297,
+      "withPromptContext": 297,
+      "withExampleWithoutDetails": 297
     }
   },
   "frequencyBatches": [
     {
       "start": 301,
       "end": 1000,
-      "added": 648,
-      "exceptions": 22,
+      "added": 661,
+      "exceptions": 9,
       "previouslyReviewed": 30,
       "coverage": {
         "words": 700,
-        "withExample": 678,
-        "withoutExample": 22,
-        "reviewed": 678,
-        "withPromptContext": 678,
-        "withExampleWithoutDetails": 678
+        "withExample": 691,
+        "withoutExample": 9,
+        "reviewed": 691,
+        "withPromptContext": 691,
+        "withExampleWithoutDetails": 691
       },
       "withoutExample": [
-        {
-          "r": 327,
-          "w": "least",
-          "t": "פָּחוּת"
-        },
         {
           "r": 367,
           "w": "er",
           "t": "אה"
-        },
-        {
-          "r": 370,
-          "w": "reason",
-          "t": "לְנַמֵק"
-        },
-        {
-          "r": 387,
-          "w": "I'll",
-          "t": "חוֹלֶה"
         },
         {
           "r": 423,
@@ -79,34 +64,9 @@
           "t": "sn"
         },
         {
-          "r": 434,
-          "w": "turn",
-          "t": "פִּנָה"
-        },
-        {
-          "r": 439,
-          "w": "followed",
-          "t": "בעקבותיו"
-        },
-        {
-          "r": 451,
-          "w": "ye",
-          "t": "אתה"
-        },
-        {
-          "r": 462,
-          "w": "can't",
-          "t": "צְבִיעוּת"
-        },
-        {
           "r": 484,
           "w": "ety",
           "t": "ety"
-        },
-        {
-          "r": 527,
-          "w": "real",
-          "t": "רִיאָל"
         },
         {
           "r": 572,
@@ -114,19 +74,9 @@
           "t": "א'"
         },
         {
-          "r": 637,
-          "w": "wrong",
-          "t": "טָעוּת"
-        },
-        {
           "r": 672,
           "w": "u",
           "t": "u"
-        },
-        {
-          "r": 673,
-          "w": "won't",
-          "t": "רָגִיל"
         },
         {
           "r": 801,
@@ -139,24 +89,9 @@
           "t": "ג"
         },
         {
-          "r": 854,
-          "w": "marriage",
-          "t": "חֲתוּנָה"
-        },
-        {
-          "r": 923,
-          "w": "corner",
-          "t": "קֶרֶן"
-        },
-        {
           "r": 952,
           "w": "o'",
           "t": "או'"
-        },
-        {
-          "r": 969,
-          "w": "I'd",
-          "t": "תְעוּדַת זֶהוּת"
         },
         {
           "r": 975,
@@ -168,16 +103,16 @@
     {
       "start": 1001,
       "end": 1700,
-      "added": 680,
-      "exceptions": 14,
+      "added": 687,
+      "exceptions": 7,
       "previouslyReviewed": 6,
       "coverage": {
         "words": 700,
-        "withExample": 686,
-        "withoutExample": 14,
-        "reviewed": 686,
-        "withPromptContext": 686,
-        "withExampleWithoutDetails": 686
+        "withExample": 693,
+        "withoutExample": 7,
+        "reviewed": 693,
+        "withPromptContext": 693,
+        "withExampleWithoutDetails": 693
       },
       "withoutExample": [
         {
@@ -186,39 +121,14 @@
           "t": "et"
         },
         {
-          "r": 1018,
-          "w": "class",
-          "t": "מַחלָקָה"
-        },
-        {
-          "r": 1043,
-          "w": "hart",
-          "t": "הארט"
-        },
-        {
-          "r": 1052,
-          "w": "pride",
-          "t": "גֵאָה"
-        },
-        {
           "r": 1147,
           "w": "em",
           "t": "em"
         },
         {
-          "r": 1175,
-          "w": "possessed",
-          "t": "דיבוק"
-        },
-        {
           "r": 1232,
           "w": "q",
           "t": "ש"
-        },
-        {
-          "r": 1347,
-          "w": "companion",
-          "t": "לוויה"
         },
         {
           "r": 1421,
@@ -239,44 +149,24 @@
           "r": 1566,
           "w": "mother+'s",
           "t": "של אמא+"
-        },
-        {
-          "r": 1591,
-          "w": "phrase",
-          "t": "מִשׁפָּט"
-        },
-        {
-          "r": 1676,
-          "w": "don",
-          "t": "דוֹן"
         }
       ]
     },
     {
       "start": 1701,
       "end": 2400,
-      "added": 682,
-      "exceptions": 15,
+      "added": 692,
+      "exceptions": 5,
       "previouslyReviewed": 3,
       "coverage": {
         "words": 700,
-        "withExample": 685,
-        "withoutExample": 15,
-        "reviewed": 685,
-        "withPromptContext": 685,
-        "withExampleWithoutDetails": 685
+        "withExample": 695,
+        "withoutExample": 5,
+        "reviewed": 695,
+        "withPromptContext": 695,
+        "withExampleWithoutDetails": 695
       },
       "withoutExample": [
-        {
-          "r": 1858,
-          "w": "yards",
-          "t": "מטרים"
-        },
-        {
-          "r": 1879,
-          "w": "becoming",
-          "t": "הִתהַוּוּת"
-        },
         {
           "r": 1907,
           "w": "obs",
@@ -288,39 +178,9 @@
           "t": "fn"
         },
         {
-          "r": 1960,
-          "w": "kissed",
-          "t": "התנשקה"
-        },
-        {
-          "r": 1968,
-          "w": "companions",
-          "t": "לוויה"
-        },
-        {
           "r": 2007,
           "w": "en",
           "t": "he"
-        },
-        {
-          "r": 2025,
-          "w": "sell",
-          "t": "מְכִירָה"
-        },
-        {
-          "r": 2082,
-          "w": "shalt",
-          "t": "shalt"
-        },
-        {
-          "r": 2164,
-          "w": "compliance",
-          "t": "הַתאָמָה"
-        },
-        {
-          "r": 2214,
-          "w": "we'll",
-          "t": "טוֹב"
         },
         {
           "r": 2260,
@@ -328,47 +188,27 @@
           "t": "w"
         },
         {
-          "r": 2268,
-          "w": "render",
-          "t": "לְדַקלֵם"
-        },
-        {
           "r": 2307,
           "w": "y",
           "t": "y"
-        },
-        {
-          "r": 2354,
-          "w": "email",
-          "t": "אֶלֶקטרוֹנִי"
         }
       ]
     },
     {
       "start": 2401,
       "end": 3100,
-      "added": 684,
-      "exceptions": 15,
+      "added": 693,
+      "exceptions": 6,
       "previouslyReviewed": 1,
       "coverage": {
         "words": 700,
-        "withExample": 685,
-        "withoutExample": 15,
-        "reviewed": 685,
-        "withPromptContext": 685,
-        "withExampleWithoutDetails": 685
+        "withExample": 694,
+        "withoutExample": 6,
+        "reviewed": 694,
+        "withPromptContext": 694,
+        "withExampleWithoutDetails": 694
       },
       "withoutExample": [
-        {
-          "r": 2414,
-          "w": "recent",
-          "t": "לאחרונה"
-        },
-        {
-          "r": 2475,
-          "w": "bade",
-          "t": "הציע"
-        },
         {
           "r": 2552,
           "w": "th'",
@@ -380,24 +220,9 @@
           "t": "les"
         },
         {
-          "r": 2606,
-          "w": "sorts",
-          "t": "מיון"
-        },
-        {
           "r": 2650,
           "w": "rest.",
           "t": "לָנוּחַ."
-        },
-        {
-          "r": 2668,
-          "w": "o'er",
-          "t": "או''ר"
-        },
-        {
-          "r": 2694,
-          "w": "referred",
-          "t": "הפניה"
         },
         {
           "r": 2772,
@@ -413,49 +238,24 @@
           "r": 2805,
           "w": "n",
           "t": "נ"
-        },
-        {
-          "r": 3022,
-          "w": "contrast",
-          "t": "לְהַשְׁווֹת"
-        },
-        {
-          "r": 3023,
-          "w": "relieved",
-          "t": "הקלה"
-        },
-        {
-          "r": 3055,
-          "w": "owns",
-          "t": "הבעלים"
-        },
-        {
-          "r": 3058,
-          "w": "stirred",
-          "t": "בוחשים"
         }
       ]
     },
     {
       "start": 3101,
       "end": 3800,
-      "added": 679,
-      "exceptions": 21,
+      "added": 695,
+      "exceptions": 5,
       "previouslyReviewed": 0,
       "coverage": {
         "words": 700,
-        "withExample": 679,
-        "withoutExample": 21,
-        "reviewed": 679,
-        "withPromptContext": 679,
-        "withExampleWithoutDetails": 679
+        "withExample": 695,
+        "withoutExample": 5,
+        "reviewed": 695,
+        "withPromptContext": 695,
+        "withExampleWithoutDetails": 695
       },
       "withoutExample": [
-        {
-          "r": 3111,
-          "w": "testimony",
-          "t": "עֵד"
-        },
         {
           "r": 3139,
           "w": "Shak",
@@ -467,89 +267,14 @@
           "t": "ד"
         },
         {
-          "r": 3168,
-          "w": "forming",
-          "t": "טְבִיעָה"
-        },
-        {
-          "r": 3193,
-          "w": "resources",
-          "t": "אֶמְצָעִי"
-        },
-        {
-          "r": 3218,
-          "w": "preparing",
-          "t": "עֲרִיכָה"
-        },
-        {
-          "r": 3233,
-          "w": "missed",
-          "t": "החמצה"
-        },
-        {
-          "r": 3238,
-          "w": "agony",
-          "t": "יָגוֹן"
-        },
-        {
-          "r": 3239,
-          "w": "respects",
-          "t": "מכבדים"
-        },
-        {
           "r": 3266,
           "w": "non",
           "t": "לֹא"
         },
         {
-          "r": 3297,
-          "w": "sore",
-          "t": "דַלֶקֶת"
-        },
-        {
-          "r": 3308,
-          "w": "fancied",
-          "t": "דִמיוֹנִי"
-        },
-        {
-          "r": 3343,
-          "w": "he'll",
-          "t": "גֵיהִנוֹם"
-        },
-        {
-          "r": 3451,
-          "w": "attained",
-          "t": "מוּשָׂג"
-        },
-        {
-          "r": 3480,
-          "w": "swung",
-          "t": "התנופה"
-        },
-        {
-          "r": 3530,
-          "w": "occasional",
-          "t": "מִקרִי"
-        },
-        {
-          "r": 3577,
-          "w": "roused",
-          "t": "מתעורר"
-        },
-        {
-          "r": 3590,
-          "w": "abode",
-          "t": "מָקוֹם"
-        },
-        {
           "r": 3611,
           "w": "yer",
           "t": "כן"
-        },
-        {
-          "r": 3638,
-          "w": "afforded",
-          "t": "הניתן"
         },
         {
           "r": 3687,
@@ -561,57 +286,22 @@
     {
       "start": 3801,
       "end": 4500,
-      "added": 682,
-      "exceptions": 18,
+      "added": 695,
+      "exceptions": 5,
       "previouslyReviewed": 0,
       "coverage": {
         "words": 700,
-        "withExample": 682,
-        "withoutExample": 18,
-        "reviewed": 682,
-        "withPromptContext": 682,
-        "withExampleWithoutDetails": 682
+        "withExample": 695,
+        "withoutExample": 5,
+        "reviewed": 695,
+        "withPromptContext": 695,
+        "withExampleWithoutDetails": 695
       },
       "withoutExample": [
-        {
-          "r": 3810,
-          "w": "faced",
-          "t": "מתמודד"
-        },
-        {
-          "r": 3833,
-          "w": "fro",
-          "t": "קדימה"
-        },
-        {
-          "r": 3952,
-          "w": "commanding",
-          "t": "פיקוד"
-        },
         {
           "r": 3983,
           "w": "adv",
           "t": "עו\"ד"
-        },
-        {
-          "r": 4002,
-          "w": "learnt",
-          "t": "מְלוּמָד"
-        },
-        {
-          "r": 4034,
-          "w": "wishing",
-          "t": "משאלה"
-        },
-        {
-          "r": 4045,
-          "w": "stopping",
-          "t": "סְתִימָה"
-        },
-        {
-          "r": 4058,
-          "w": "dost",
-          "t": "דוסט"
         },
         {
           "r": 4077,
@@ -619,24 +309,9 @@
           "t": "לא"
         },
         {
-          "r": 4118,
-          "w": "hereafter",
-          "t": "הַבָּא"
-        },
-        {
-          "r": 4206,
-          "w": "desirous",
-          "t": "צָמֵא"
-        },
-        {
           "r": 4259,
           "w": "del",
           "t": "del"
-        },
-        {
-          "r": 4275,
-          "w": "acres",
-          "t": "דונם"
         },
         {
           "r": 4300,
@@ -644,61 +319,31 @@
           "t": "UT"
         },
         {
-          "r": 4336,
-          "w": "quoth",
-          "t": "ציטוט"
-        },
-        {
-          "r": 4365,
-          "w": "neat",
-          "t": "בְּהֵמָה"
-        },
-        {
           "r": 4383,
           "w": "imp.",
           "t": "שֵׁד."
-        },
-        {
-          "r": 4457,
-          "w": "fain",
-          "t": "חלש"
         }
       ]
     },
     {
       "start": 4501,
       "end": 5200,
-      "added": 682,
-      "exceptions": 18,
+      "added": 692,
+      "exceptions": 8,
       "previouslyReviewed": 0,
       "coverage": {
         "words": 700,
-        "withExample": 682,
-        "withoutExample": 18,
-        "reviewed": 682,
-        "withPromptContext": 682,
-        "withExampleWithoutDetails": 682
+        "withExample": 692,
+        "withoutExample": 8,
+        "reviewed": 692,
+        "withPromptContext": 692,
+        "withExampleWithoutDetails": 692
       },
       "withoutExample": [
-        {
-          "r": 4524,
-          "w": "blowing",
-          "t": "מַשָׁב"
-        },
-        {
-          "r": 4529,
-          "w": "pitch",
-          "t": "פְּסִיעָה"
-        },
         {
           "r": 4552,
           "w": "m",
           "t": "מ"
-        },
-        {
-          "r": 4643,
-          "w": "pan",
-          "t": "פָּאן"
         },
         {
           "r": 4682,
@@ -711,24 +356,9 @@
           "t": "פסוד"
         },
         {
-          "r": 4696,
-          "w": "glittering",
-          "t": "הַברָקָה"
-        },
-        {
-          "r": 4716,
-          "w": "eagle",
-          "t": "נֶשֶׁר"
-        },
-        {
           "r": 4769,
           "w": "el",
           "t": "אל"
-        },
-        {
-          "r": 4789,
-          "w": "glancing",
-          "t": "מבט"
         },
         {
           "r": 4844,
@@ -746,61 +376,31 @@
           "t": "br"
         },
         {
-          "r": 4934,
-          "w": "fundamental",
-          "t": "יְסוֹד"
-        },
-        {
-          "r": 5018,
-          "w": "pool",
-          "t": "פּוּל"
-        },
-        {
-          "r": 5025,
-          "w": "didst",
-          "t": "didst"
-        },
-        {
           "r": 5150,
           "w": "ein",
           "t": "ein"
-        },
-        {
-          "r": 5174,
-          "w": "reckoned",
-          "t": "התחשבנו"
         }
       ]
     },
     {
       "start": 5201,
       "end": 5900,
-      "added": 675,
-      "exceptions": 25,
+      "added": 691,
+      "exceptions": 9,
       "previouslyReviewed": 0,
       "coverage": {
         "words": 700,
-        "withExample": 675,
-        "withoutExample": 25,
-        "reviewed": 675,
-        "withPromptContext": 675,
-        "withExampleWithoutDetails": 675
+        "withExample": 691,
+        "withoutExample": 9,
+        "reviewed": 691,
+        "withPromptContext": 691,
+        "withExampleWithoutDetails": 691
       },
       "withoutExample": [
-        {
-          "r": 5209,
-          "w": "rubbed",
-          "t": "מְשׁוּפשָׁף"
-        },
         {
           "r": 5234,
           "w": "x",
           "t": "x"
-        },
-        {
-          "r": 5268,
-          "w": "morals",
-          "t": "מוֹרָל"
         },
         {
           "r": 5271,
@@ -808,24 +408,9 @@
           "t": "2ד"
         },
         {
-          "r": 5322,
-          "w": "welcomed",
-          "t": "בברכה"
-        },
-        {
           "r": 5345,
           "w": "NM",
           "t": "NM"
-        },
-        {
-          "r": 5392,
-          "w": "indies",
-          "t": "אינדי"
-        },
-        {
-          "r": 5414,
-          "w": "slew",
-          "t": "בְּרֵכָה"
         },
         {
           "r": 5468,
@@ -838,69 +423,14 @@
           "t": "פָּאבּ."
         },
         {
-          "r": 5574,
-          "w": "cherished",
-          "t": "מְטוּפָּח"
-        },
-        {
           "r": 5592,
           "w": "g",
           "t": "ז"
         },
         {
-          "r": 5659,
-          "w": "flashing",
-          "t": "הַברָקָה"
-        },
-        {
-          "r": 5677,
-          "w": "encoding",
-          "t": "הַצפָּנָה"
-        },
-        {
-          "r": 5686,
-          "w": "honoured",
-          "t": "כבוד"
-        },
-        {
-          "r": 5703,
-          "w": "draught",
-          "t": "טְיוּטָה"
-        },
-        {
-          "r": 5749,
-          "w": "she'd",
-          "t": "לִשְׁפּוֹך"
-        },
-        {
-          "r": 5763,
-          "w": "quest",
-          "t": "לַחקוֹר"
-        },
-        {
-          "r": 5790,
-          "w": "dainty",
-          "t": "מְעַדֵן"
-        },
-        {
-          "r": 5793,
-          "w": "singularly",
-          "t": "באופן יחידני"
-        },
-        {
           "r": 5838,
           "w": "t'",
           "t": "לא'"
-        },
-        {
-          "r": 5848,
-          "w": "grieved",
-          "t": "צער"
-        },
-        {
-          "r": 5850,
-          "w": "bursting",
-          "t": "בִּצבּוּץ"
         },
         {
           "r": 5881,
@@ -917,32 +447,22 @@
     {
       "start": 5901,
       "end": 6600,
-      "added": 680,
-      "exceptions": 20,
+      "added": 695,
+      "exceptions": 5,
       "previouslyReviewed": 0,
       "coverage": {
         "words": 700,
-        "withExample": 680,
-        "withoutExample": 20,
-        "reviewed": 680,
-        "withPromptContext": 680,
-        "withExampleWithoutDetails": 680
+        "withExample": 695,
+        "withoutExample": 5,
+        "reviewed": 695,
+        "withPromptContext": 695,
+        "withExampleWithoutDetails": 695
       },
       "withoutExample": [
-        {
-          "r": 5934,
-          "w": "accounted",
-          "t": "התחשב"
-        },
         {
           "r": 5959,
           "w": "8vo",
           "t": "8vo"
-        },
-        {
-          "r": 5979,
-          "w": "pitched",
-          "t": "זָפוּף"
         },
         {
           "r": 6014,
@@ -950,34 +470,9 @@
           "t": "oe."
         },
         {
-          "r": 6036,
-          "w": "resulted",
-          "t": "התוצאה"
-        },
-        {
-          "r": 6063,
-          "w": "springing",
-          "t": "קפיצה"
-        },
-        {
-          "r": 6068,
-          "w": "she'll",
-          "t": "פָּגָז"
-        },
-        {
           "r": 6167,
           "w": "as.",
           "t": "כְּמוֹ."
-        },
-        {
-          "r": 6180,
-          "w": "eighteenth",
-          "t": "שמונה עשרה"
-        },
-        {
-          "r": 6287,
-          "w": "we'd",
-          "t": "לְהִתְחַתֵן"
         },
         {
           "r": 6300,
@@ -985,65 +480,25 @@
           "t": "ness"
         },
         {
-          "r": 6360,
-          "w": "margin",
-          "t": "מֶתַח"
-        },
-        {
-          "r": 6399,
-          "w": "Prussian",
-          "t": "פרוסיה"
-        },
-        {
-          "r": 6478,
-          "w": "honored",
-          "t": "כבוד"
-        },
-        {
-          "r": 6494,
-          "w": "fishes",
-          "t": "מַזַל דָגִים"
-        },
-        {
-          "r": 6508,
-          "w": "ropes",
-          "t": "חִבֵּל"
-        },
-        {
-          "r": 6530,
-          "w": "dazzling",
-          "t": "הִסתַנוְרוּת"
-        },
-        {
-          "r": 6534,
-          "w": "novelty",
-          "t": "טְרִיוּת"
-        },
-        {
           "r": 6540,
           "w": "li",
           "t": "לי"
-        },
-        {
-          "r": 6576,
-          "w": "ingenuity",
-          "t": "שְׁנִינוּת"
         }
       ]
     },
     {
       "start": 6601,
       "end": 7300,
-      "added": 669,
-      "exceptions": 31,
+      "added": 693,
+      "exceptions": 7,
       "previouslyReviewed": 0,
       "coverage": {
         "words": 700,
-        "withExample": 669,
-        "withoutExample": 31,
-        "reviewed": 669,
-        "withPromptContext": 669,
-        "withExampleWithoutDetails": 669
+        "withExample": 693,
+        "withoutExample": 7,
+        "reviewed": 693,
+        "withPromptContext": 693,
+        "withExampleWithoutDetails": 693
       },
       "withoutExample": [
         {
@@ -1052,39 +507,9 @@
           "t": "אמונות טפלות"
         },
         {
-          "r": 6655,
-          "w": "compilation",
-          "t": "הַהדָרָה"
-        },
-        {
-          "r": 6677,
-          "w": "nineteenth",
-          "t": "תֵשַׁע עֶשׂרֵה"
-        },
-        {
-          "r": 6684,
-          "w": "captivity",
-          "t": "גָלוּת"
-        },
-        {
           "r": 6728,
           "w": "wid",
           "t": "wid"
-        },
-        {
-          "r": 6733,
-          "w": "writ",
-          "t": "כתב"
-        },
-        {
-          "r": 6781,
-          "w": "anon",
-          "t": "אנון"
-        },
-        {
-          "r": 6798,
-          "w": "turf",
-          "t": "טוֹרף"
         },
         {
           "r": 6810,
@@ -1097,74 +522,9 @@
           "t": "מהרינגס"
         },
         {
-          "r": 6862,
-          "w": "yon",
-          "t": "יון"
-        },
-        {
-          "r": 6863,
-          "w": "waistcoat",
-          "t": "חֲזִיָה"
-        },
-        {
           "r": 6883,
           "w": "med",
           "t": "med"
-        },
-        {
-          "r": 6962,
-          "w": "sixteenth",
-          "t": "שש עשרה"
-        },
-        {
-          "r": 6966,
-          "w": "odds",
-          "t": "קְטָטָה"
-        },
-        {
-          "r": 6979,
-          "w": "irritation",
-          "t": "הַקפָּדָה"
-        },
-        {
-          "r": 6997,
-          "w": "devised",
-          "t": "המהווה"
-        },
-        {
-          "r": 7045,
-          "w": "satin",
-          "t": "מֶשִׁי"
-        },
-        {
-          "r": 7065,
-          "w": "starving",
-          "t": "הַרעָבָה"
-        },
-        {
-          "r": 7070,
-          "w": "excused",
-          "t": "מתרץ"
-        },
-        {
-          "r": 7084,
-          "w": "ay",
-          "t": "אה"
-        },
-        {
-          "r": 7090,
-          "w": "transported",
-          "t": "הובלה"
-        },
-        {
-          "r": 7101,
-          "w": "eighth",
-          "t": "ח"
-        },
-        {
-          "r": 7105,
-          "w": "mentions",
-          "t": "מזכירים"
         },
         {
           "r": 7121,
@@ -1172,61 +532,31 @@
           "t": "te"
         },
         {
-          "r": 7130,
-          "w": "wan",
-          "t": "wan"
-        },
-        {
-          "r": 7202,
-          "w": "insensible",
-          "t": "חסר היגיון"
-        },
-        {
-          "r": 7237,
-          "w": "desiring",
-          "t": "הִתאַוּוּת"
-        },
-        {
-          "r": 7238,
-          "w": "rushes",
-          "t": "ממהרים"
-        },
-        {
           "r": 7272,
           "w": "gen.",
           "t": "gen."
-        },
-        {
-          "r": 7294,
-          "w": "sob",
-          "t": "בֶּן כַּלבָּה"
         }
       ]
     },
     {
       "start": 7301,
       "end": 8000,
-      "added": 664,
-      "exceptions": 36,
+      "added": 686,
+      "exceptions": 14,
       "previouslyReviewed": 0,
       "coverage": {
         "words": 700,
-        "withExample": 664,
-        "withoutExample": 36,
-        "reviewed": 664,
-        "withPromptContext": 664,
-        "withExampleWithoutDetails": 664
+        "withExample": 686,
+        "withoutExample": 14,
+        "reviewed": 686,
+        "withPromptContext": 686,
+        "withExampleWithoutDetails": 686
       },
       "withoutExample": [
         {
           "r": 7301,
           "w": "v",
           "t": "v"
-        },
-        {
-          "r": 7314,
-          "w": "disclaim",
-          "t": "התנערות"
         },
         {
           "r": 7320,
@@ -1239,11 +569,6 @@
           "t": "ta"
         },
         {
-          "r": 7364,
-          "w": "impose",
-          "t": "לֶאֱכוֹף"
-        },
-        {
           "r": 7366,
           "w": "pa",
           "t": "pa"
@@ -1254,34 +579,14 @@
           "t": "אב"
         },
         {
-          "r": 7397,
-          "w": "anticipation",
-          "t": "הֶקדֵם"
-        },
-        {
           "r": 7432,
           "w": "col.",
           "t": "קול."
         },
         {
-          "r": 7457,
-          "w": "temporal",
-          "t": "זְמַנִי"
-        },
-        {
           "r": 7458,
           "w": "con",
           "t": "con"
-        },
-        {
-          "r": 7460,
-          "w": "lapse",
-          "t": "לִשְׁגוֹת"
-        },
-        {
-          "r": 7465,
-          "w": "eyed",
-          "t": "עיניים"
         },
         {
           "r": 7470,
@@ -1299,59 +604,9 @@
           "t": "quod"
         },
         {
-          "r": 7519,
-          "w": "befallen",
-          "t": "נפל"
-        },
-        {
-          "r": 7536,
-          "w": "wheeled",
-          "t": "גלגלים"
-        },
-        {
-          "r": 7545,
-          "w": "fifteenth",
-          "t": "חֲמִישָׁה עָשָׂר"
-        },
-        {
-          "r": 7554,
-          "w": "imaginative",
-          "t": "דִמיוֹנִי"
-        },
-        {
-          "r": 7567,
-          "w": "vowed",
-          "t": "מוּקדָשׁ"
-        },
-        {
-          "r": 7583,
-          "w": "regained",
-          "t": "חזר"
-        },
-        {
-          "r": 7603,
-          "w": "overboard",
-          "t": "הַחוּצָה"
-        },
-        {
-          "r": 7618,
-          "w": "plucked",
-          "t": "מרפה"
-        },
-        {
           "r": 7712,
           "w": "ch.",
           "t": "ch."
-        },
-        {
-          "r": 7721,
-          "w": "e-mail",
-          "t": "אֶלֶקטרוֹנִי"
-        },
-        {
-          "r": 7757,
-          "w": "trod",
-          "t": "דרוך"
         },
         {
           "r": 7766,
@@ -1367,68 +622,28 @@
           "r": 7841,
           "w": "AK",
           "t": "AK"
-        },
-        {
-          "r": 7845,
-          "w": "paced",
-          "t": "בקצב"
-        },
-        {
-          "r": 7853,
-          "w": "asunder",
-          "t": "להתנתק"
-        },
-        {
-          "r": 7893,
-          "w": "denounced",
-          "t": "הוקעה"
-        },
-        {
-          "r": 7924,
-          "w": "blest",
-          "t": "מברך"
-        },
-        {
-          "r": 7947,
-          "w": "heroine",
-          "t": "אֲלִילָה"
-        },
-        {
-          "r": 7958,
-          "w": "gal",
-          "t": "גל"
         }
       ]
     },
     {
       "start": 8001,
       "end": 8700,
-      "added": 673,
-      "exceptions": 27,
+      "added": 692,
+      "exceptions": 8,
       "previouslyReviewed": 0,
       "coverage": {
         "words": 700,
-        "withExample": 673,
-        "withoutExample": 27,
-        "reviewed": 673,
-        "withPromptContext": 673,
-        "withExampleWithoutDetails": 673
+        "withExample": 692,
+        "withoutExample": 8,
+        "reviewed": 692,
+        "withPromptContext": 692,
+        "withExampleWithoutDetails": 692
       },
       "withoutExample": [
-        {
-          "r": 8012,
-          "w": "laborious",
-          "t": "חָרוּץ"
-        },
         {
           "r": 8017,
           "w": "AC",
           "t": "AC"
-        },
-        {
-          "r": 8020,
-          "w": "ninth",
-          "t": "ט"
         },
         {
           "r": 8030,
@@ -1436,24 +651,9 @@
           "t": "ft."
         },
         {
-          "r": 8073,
-          "w": "rides",
-          "t": "רוכבים"
-        },
-        {
           "r": 8091,
           "w": "ni",
           "t": "ni"
-        },
-        {
-          "r": 8132,
-          "w": "Otto",
-          "t": "אוטוטו"
-        },
-        {
-          "r": 8134,
-          "w": "apparition",
-          "t": "הוֹפָעָה"
         },
         {
           "r": 8157,
@@ -1461,59 +661,14 @@
           "t": "ti"
         },
         {
-          "r": 8160,
-          "w": "twelfth",
-          "t": "שְׁנֵים עָשָׂר"
-        },
-        {
-          "r": 8284,
-          "w": "incline",
-          "t": "שְׁפִיָה"
-        },
-        {
-          "r": 8314,
-          "w": "burroughs",
-          "t": "מבורות"
-        },
-        {
           "r": 8324,
           "w": "dis",
           "t": "דיס"
         },
         {
-          "r": 8375,
-          "w": "knave",
-          "t": "אומללה"
-        },
-        {
-          "r": 8419,
-          "w": "adieu",
-          "t": "adieu"
-        },
-        {
-          "r": 8435,
-          "w": "screw",
-          "t": "לִדפּוֹק"
-        },
-        {
-          "r": 8462,
-          "w": "daresay",
-          "t": "להעיז"
-        },
-        {
           "r": 8486,
           "w": "ll",
           "t": "ll"
-        },
-        {
-          "r": 8534,
-          "w": "constantine",
-          "t": "קבועה"
-        },
-        {
-          "r": 8564,
-          "w": "quart",
-          "t": "רְבִיעִית"
         },
         {
           "r": 8570,
@@ -1524,64 +679,24 @@
           "r": 8601,
           "w": "l",
           "t": "ל"
-        },
-        {
-          "r": 8621,
-          "w": "durst",
-          "t": "סבל"
-        },
-        {
-          "r": 8625,
-          "w": "wert",
-          "t": "wert"
-        },
-        {
-          "r": 8627,
-          "w": "disinterested",
-          "t": "חֲסַר עִניָן"
-        },
-        {
-          "r": 8644,
-          "w": "fringe",
-          "t": "עַיִט"
-        },
-        {
-          "r": 8650,
-          "w": "thirteenth",
-          "t": "שְׁלוֹשׁ עֶשׂרֵה"
         }
       ]
     },
     {
       "start": 8701,
       "end": 9400,
-      "added": 667,
-      "exceptions": 32,
+      "added": 688,
+      "exceptions": 11,
       "previouslyReviewed": 0,
       "coverage": {
         "words": 699,
-        "withExample": 667,
-        "withoutExample": 32,
-        "reviewed": 667,
-        "withPromptContext": 667,
-        "withExampleWithoutDetails": 667
+        "withExample": 688,
+        "withoutExample": 11,
+        "reviewed": 688,
+        "withPromptContext": 688,
+        "withExampleWithoutDetails": 688
       },
       "withoutExample": [
-        {
-          "r": 8728,
-          "w": "fourteenth",
-          "t": "אַרְבָּעָה עָשָׂר"
-        },
-        {
-          "r": 8737,
-          "w": "twentieth",
-          "t": "עֶשְׂרִים"
-        },
-        {
-          "r": 8759,
-          "w": "qualifications",
-          "t": "סְמִיכָה"
-        },
         {
           "r": 8780,
           "w": "ff.",
@@ -1603,44 +718,14 @@
           "t": "איסל."
         },
         {
-          "r": 8884,
-          "w": "advent",
-          "t": "הִתגַלוּת"
-        },
-        {
           "r": 8906,
           "w": "MD",
           "t": "MD"
         },
         {
-          "r": 8910,
-          "w": "eleventh",
-          "t": "אַחַד עָשָׂר"
-        },
-        {
-          "r": 8911,
-          "w": "Noah",
-          "t": "נועה"
-        },
-        {
-          "r": 8935,
-          "w": "p.m.",
-          "t": "רֹאשׁ הַמֶמשָׁלָה."
-        },
-        {
-          "r": 8937,
-          "w": "bower",
-          "t": "קשת"
-        },
-        {
           "r": 8948,
           "w": "sg",
           "t": "sg"
-        },
-        {
-          "r": 8950,
-          "w": "nigger",
-          "t": "כּוּשִׁי"
         },
         {
           "r": 9021,
@@ -1658,97 +743,32 @@
           "t": "ty"
         },
         {
-          "r": 9092,
-          "w": "unaccountable",
-          "t": "בלתי אחראי"
-        },
-        {
-          "r": 9143,
-          "w": "Boer",
-          "t": "בור"
-        },
-        {
           "r": 9167,
           "w": "las",
           "t": "לאס"
         },
         {
-          "r": 9189,
-          "w": "Scot",
-          "t": "אַגרָה"
-        },
-        {
-          "r": 9257,
-          "w": "embraces",
-          "t": "מחבקים"
-        },
-        {
-          "r": 9272,
-          "w": "abreast",
-          "t": "בחזית"
-        },
-        {
-          "r": 9282,
-          "w": "consummate",
-          "t": "לְהַגשִׁים"
-        },
-        {
-          "r": 9296,
-          "w": "baronet",
-          "t": "ברונית"
-        },
-        {
-          "r": 9348,
-          "w": "gaping",
-          "t": "פַּהֶקֶת"
-        },
-        {
-          "r": 9364,
-          "w": "oratory",
-          "t": "דַבְּרָנוּת"
-        },
-        {
           "r": 9372,
           "w": "ole",
           "t": "ole"
-        },
-        {
-          "r": 9385,
-          "w": "darkly",
-          "t": "בחושך"
-        },
-        {
-          "r": 9390,
-          "w": "alacrity",
-          "t": "בקיאות"
-        },
-        {
-          "r": 9393,
-          "w": "neutrality",
-          "t": "אֲדִישׁוּת"
         }
       ]
     },
     {
       "start": 9401,
       "end": 10000,
-      "added": 574,
-      "exceptions": 25,
+      "added": 588,
+      "exceptions": 11,
       "previouslyReviewed": 0,
       "coverage": {
         "words": 599,
-        "withExample": 574,
-        "withoutExample": 25,
-        "reviewed": 574,
-        "withPromptContext": 574,
-        "withExampleWithoutDetails": 574
+        "withExample": 588,
+        "withoutExample": 11,
+        "reviewed": 588,
+        "withPromptContext": 588,
+        "withExampleWithoutDetails": 588
       },
       "withoutExample": [
-        {
-          "r": 9434,
-          "w": "nomination",
-          "t": "הְתמַנוּת"
-        },
         {
           "r": 9437,
           "w": "Beth",
@@ -1765,34 +785,9 @@
           "t": "ט"
         },
         {
-          "r": 9489,
-          "w": "stumbling",
-          "t": "הַחלָקָה"
-        },
-        {
-          "r": 9491,
-          "w": "slips",
-          "t": "מחליקים"
-        },
-        {
-          "r": 9570,
-          "w": "scorned",
-          "t": "בוז"
-        },
-        {
-          "r": 9576,
-          "w": "succour",
-          "t": "לִסעוֹד"
-        },
-        {
           "r": 9597,
           "w": "sup",
           "t": "sup"
-        },
-        {
-          "r": 9613,
-          "w": "bat",
-          "t": "בַּת"
         },
         {
           "r": 9657,
@@ -1800,29 +795,9 @@
           "t": "מִסָה."
         },
         {
-          "r": 9660,
-          "w": "verdure",
-          "t": "יֶרֶק"
-        },
-        {
-          "r": 9684,
-          "w": "brace",
-          "t": "לְהַדֵק"
-        },
-        {
           "r": 9710,
           "w": "self-",
           "t": "עַצמִי-"
-        },
-        {
-          "r": 9718,
-          "w": "awed",
-          "t": "יראה"
-        },
-        {
-          "r": 9754,
-          "w": "cheque",
-          "t": "לִבדוֹק"
         },
         {
           "r": 9761,
@@ -1830,29 +805,9 @@
           "t": "KA"
         },
         {
-          "r": 9766,
-          "w": "wast",
-          "t": "בזבוז"
-        },
-        {
-          "r": 9796,
-          "w": "impotent",
-          "t": "עָקָר"
-        },
-        {
-          "r": 9889,
-          "w": "stationary",
-          "t": "יַצִיב"
-        },
-        {
           "r": 9902,
           "w": "aux",
           "t": "aux"
-        },
-        {
-          "r": 9907,
-          "w": "vested",
-          "t": "מוּשׁקָע"
         },
         {
           "r": 9910,
@@ -1874,46 +829,6 @@
   ],
   "top300WithoutExample": [
     {
-      "r": 1,
-      "w": "the",
-      "t": "את"
-    },
-    {
-      "r": 16,
-      "w": "had",
-      "t": "היה"
-    },
-    {
-      "r": 41,
-      "w": "an",
-      "t": "an"
-    },
-    {
-      "r": 45,
-      "w": "who",
-      "t": "WHO"
-    },
-    {
-      "r": 85,
-      "w": "a",
-      "t": "א"
-    },
-    {
-      "r": 89,
-      "w": "two",
-      "t": "דוּ"
-    },
-    {
-      "r": 105,
-      "w": "shall",
-      "t": "יהיה"
-    },
-    {
-      "r": 125,
-      "w": "am",
-      "t": "בבוקר"
-    },
-    {
       "r": 128,
       "w": "def",
       "t": "def"
@@ -1927,21 +842,6 @@
       "r": 214,
       "w": "p",
       "t": "ע"
-    },
-    {
-      "r": 215,
-      "w": "having",
-      "t": "שיש"
-    },
-    {
-      "r": 254,
-      "w": "morning",
-      "t": "שַׁחַר"
-    },
-    {
-      "r": 291,
-      "w": "round",
-      "t": "עִגוּל"
     }
   ]
 }
