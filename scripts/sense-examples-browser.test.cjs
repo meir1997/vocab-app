@@ -13,7 +13,7 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const vocabulary = JSON.parse(fs.readFileSync(path.join(root, 'vocab.json'), 'utf8'));
 const sourceDetails = JSON.parse(fs.readFileSync(path.join(root, 'details.json'), 'utf8'));
-const reviewedWords = ['for', 'it', 'as', 'right'];
+const reviewedWords = ['for', 'it', 'as', 'right', 'arms', 'minutes', 'safe', 'principal', 'refuse', 'royalty', 'foundation', 'Harry', 'etc.'];
 const BAD_EXAMPLE = 'UNREVIEWED EXAMPLE MUST NEVER APPEAR.';
 const screenshotArgument = process.argv.indexOf('--screenshots');
 const screenshotDirectory = screenshotArgument < 0 ? null : path.resolve(process.argv[screenshotArgument + 1] || 'sense-screenshots');
@@ -151,7 +151,8 @@ async function senseRegressions() {
           assert.equal(!!expected.example, fixture.reviewed, `${fixture.word}: safe example availability`);
           if (expected.example && mode !== 'choice') {
             assert.ok(expected.prompt.includes('____'), 'reverse and typing prompts hide the learned English word');
-            assert.doesNotMatch(expected.prompt, new RegExp('\\b' + fixture.word + '\\b', 'i'));
+            const escaped = fixture.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            assert.doesNotMatch(expected.prompt, new RegExp('(?<!\\w)' + escaped + '(?!\\w)', 'i'));
           }
           await assertPrompt(page, expected);
           await showCorrection(page, expected);
@@ -160,7 +161,7 @@ async function senseRegressions() {
         }
       }
       assert.deepEqual(pageErrors, [], 'no uncaught page errors');
-      console.log(`PASS ${details} details: for/it/as/right and omitted frequent/rare/changed-sense examples across choice/reverse/typing prompts, corrections and word cards`);
+      console.log(`PASS ${details} details: ${reviewedWords.length} reviewed senses and omitted frequent/rare/changed-sense examples across choice/reverse/typing prompts, corrections and word cards`);
     } finally {
       await context.close();
     }
