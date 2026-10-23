@@ -22,11 +22,11 @@
   "after": {
     "all": {
       "words": 9998,
-      "withExample": 9885,
-      "withoutExample": 113,
-      "reviewed": 9885,
-      "withPromptContext": 9885,
-      "withExampleWithoutDetails": 9885
+      "withExample": 9978,
+      "withoutExample": 20,
+      "reviewed": 9978,
+      "withPromptContext": 9978,
+      "withExampleWithoutDetails": 9978
     },
     "top300": {
       "words": 300,
@@ -41,109 +41,44 @@
     {
       "start": 301,
       "end": 1000,
-      "added": 661,
-      "exceptions": 9,
+      "added": 669,
+      "exceptions": 1,
       "previouslyReviewed": 30,
       "coverage": {
         "words": 700,
-        "withExample": 691,
-        "withoutExample": 9,
-        "reviewed": 691,
-        "withPromptContext": 691,
-        "withExampleWithoutDetails": 691
+        "withExample": 699,
+        "withoutExample": 1,
+        "reviewed": 699,
+        "withPromptContext": 699,
+        "withExampleWithoutDetails": 699
       },
       "withoutExample": [
-        {
-          "r": 367,
-          "w": "er",
-          "t": "אה"
-        },
         {
           "r": 423,
           "w": "sn",
           "t": "sn"
-        },
-        {
-          "r": 484,
-          "w": "ety",
-          "t": "ety"
-        },
-        {
-          "r": 572,
-          "w": "an'",
-          "t": "א'"
-        },
-        {
-          "r": 672,
-          "w": "u",
-          "t": "u"
-        },
-        {
-          "r": 801,
-          "w": "c.",
-          "t": "ג."
-        },
-        {
-          "r": 844,
-          "w": "c",
-          "t": "ג"
-        },
-        {
-          "r": 952,
-          "w": "o'",
-          "t": "או'"
-        },
-        {
-          "r": 975,
-          "w": "v.",
-          "t": "v."
         }
       ]
     },
     {
       "start": 1001,
       "end": 1700,
-      "added": 687,
-      "exceptions": 7,
+      "added": 692,
+      "exceptions": 2,
       "previouslyReviewed": 6,
       "coverage": {
         "words": 700,
-        "withExample": 693,
-        "withoutExample": 7,
-        "reviewed": 693,
-        "withPromptContext": 693,
-        "withExampleWithoutDetails": 693
+        "withExample": 698,
+        "withoutExample": 2,
+        "reviewed": 698,
+        "withPromptContext": 698,
+        "withExampleWithoutDetails": 698
       },
       "withoutExample": [
-        {
-          "r": 1003,
-          "w": "et",
-          "t": "et"
-        },
-        {
-          "r": 1147,
-          "w": "em",
-          "t": "em"
-        },
-        {
-          "r": 1232,
-          "w": "q",
-          "t": "ש"
-        },
         {
           "r": 1421,
           "w": "pwh",
           "t": "pwh"
-        },
-        {
-          "r": 1449,
-          "w": "sd",
-          "t": "sd"
-        },
-        {
-          "r": 1479,
-          "w": "e",
-          "t": "ה"
         },
         {
           "r": 1566,
@@ -155,169 +90,72 @@
     {
       "start": 1701,
       "end": 2400,
-      "added": 692,
-      "exceptions": 5,
+      "added": 697,
+      "exceptions": 0,
       "previouslyReviewed": 3,
       "coverage": {
         "words": 700,
-        "withExample": 695,
-        "withoutExample": 5,
-        "reviewed": 695,
-        "withPromptContext": 695,
-        "withExampleWithoutDetails": 695
+        "withExample": 700,
+        "withoutExample": 0,
+        "reviewed": 700,
+        "withPromptContext": 700,
+        "withExampleWithoutDetails": 700
       },
-      "withoutExample": [
-        {
-          "r": 1907,
-          "w": "obs",
-          "t": "obs"
-        },
-        {
-          "r": 1918,
-          "w": "fn",
-          "t": "fn"
-        },
-        {
-          "r": 2007,
-          "w": "en",
-          "t": "he"
-        },
-        {
-          "r": 2260,
-          "w": "w",
-          "t": "w"
-        },
-        {
-          "r": 2307,
-          "w": "y",
-          "t": "y"
-        }
-      ]
+      "withoutExample": []
     },
     {
       "start": 2401,
       "end": 3100,
-      "added": 693,
-      "exceptions": 6,
+      "added": 698,
+      "exceptions": 1,
       "previouslyReviewed": 1,
       "coverage": {
         "words": 700,
-        "withExample": 694,
-        "withoutExample": 6,
-        "reviewed": 694,
-        "withPromptContext": 694,
-        "withExampleWithoutDetails": 694
+        "withExample": 699,
+        "withoutExample": 1,
+        "reviewed": 699,
+        "withPromptContext": 699,
+        "withExampleWithoutDetails": 699
       },
       "withoutExample": [
-        {
-          "r": 2552,
-          "w": "th'",
-          "t": "ה'"
-        },
-        {
-          "r": 2578,
-          "w": "les",
-          "t": "les"
-        },
         {
           "r": 2650,
           "w": "rest.",
           "t": "לָנוּחַ."
-        },
-        {
-          "r": 2772,
-          "w": "u.s.",
-          "t": "לָנוּ."
-        },
-        {
-          "r": 2792,
-          "w": "o",
-          "t": "o"
-        },
-        {
-          "r": 2805,
-          "w": "n",
-          "t": "נ"
         }
       ]
     },
     {
       "start": 3101,
       "end": 3800,
-      "added": 695,
-      "exceptions": 5,
+      "added": 700,
+      "exceptions": 0,
       "previouslyReviewed": 0,
       "coverage": {
         "words": 700,
-        "withExample": 695,
-        "withoutExample": 5,
-        "reviewed": 695,
-        "withPromptContext": 695,
-        "withExampleWithoutDetails": 695
+        "withExample": 700,
+        "withoutExample": 0,
+        "reviewed": 700,
+        "withPromptContext": 700,
+        "withExampleWithoutDetails": 700
       },
-      "withoutExample": [
-        {
-          "r": 3139,
-          "w": "Shak",
-          "t": "שאק"
-        },
-        {
-          "r": 3150,
-          "w": "d",
-          "t": "ד"
-        },
-        {
-          "r": 3266,
-          "w": "non",
-          "t": "לֹא"
-        },
-        {
-          "r": 3611,
-          "w": "yer",
-          "t": "כן"
-        },
-        {
-          "r": 3687,
-          "w": "b",
-          "t": "ב"
-        }
-      ]
+      "withoutExample": []
     },
     {
       "start": 3801,
       "end": 4500,
-      "added": 695,
-      "exceptions": 5,
+      "added": 699,
+      "exceptions": 1,
       "previouslyReviewed": 0,
       "coverage": {
         "words": 700,
-        "withExample": 695,
-        "withoutExample": 5,
-        "reviewed": 695,
-        "withPromptContext": 695,
-        "withExampleWithoutDetails": 695
+        "withExample": 699,
+        "withoutExample": 1,
+        "reviewed": 699,
+        "withPromptContext": 699,
+        "withExampleWithoutDetails": 699
       },
       "withoutExample": [
-        {
-          "r": 3983,
-          "w": "adv",
-          "t": "עו\"ד"
-        },
-        {
-          "r": 4077,
-          "w": "na",
-          "t": "לא"
-        },
-        {
-          "r": 4259,
-          "w": "del",
-          "t": "del"
-        },
-        {
-          "r": 4300,
-          "w": "UT",
-          "t": "UT"
-        },
         {
           "r": 4383,
           "w": "imp.",
@@ -328,203 +166,82 @@
     {
       "start": 4501,
       "end": 5200,
-      "added": 692,
-      "exceptions": 8,
+      "added": 700,
+      "exceptions": 0,
       "previouslyReviewed": 0,
       "coverage": {
         "words": 700,
-        "withExample": 692,
-        "withoutExample": 8,
-        "reviewed": 692,
-        "withPromptContext": 692,
-        "withExampleWithoutDetails": 692
+        "withExample": 700,
+        "withoutExample": 0,
+        "reviewed": 700,
+        "withPromptContext": 700,
+        "withExampleWithoutDetails": 700
       },
-      "withoutExample": [
-        {
-          "r": 4552,
-          "w": "m",
-          "t": "מ"
-        },
-        {
-          "r": 4682,
-          "w": "f",
-          "t": "ו"
-        },
-        {
-          "r": 4687,
-          "w": "pseud",
-          "t": "פסוד"
-        },
-        {
-          "r": 4769,
-          "w": "el",
-          "t": "אל"
-        },
-        {
-          "r": 4844,
-          "w": "3d",
-          "t": "3d"
-        },
-        {
-          "r": 4900,
-          "w": "r",
-          "t": "ר"
-        },
-        {
-          "r": 4933,
-          "w": "br",
-          "t": "br"
-        },
-        {
-          "r": 5150,
-          "w": "ein",
-          "t": "ein"
-        }
-      ]
+      "withoutExample": []
     },
     {
       "start": 5201,
       "end": 5900,
-      "added": 691,
-      "exceptions": 9,
+      "added": 699,
+      "exceptions": 1,
       "previouslyReviewed": 0,
       "coverage": {
         "words": 700,
-        "withExample": 691,
-        "withoutExample": 9,
-        "reviewed": 691,
-        "withPromptContext": 691,
-        "withExampleWithoutDetails": 691
+        "withExample": 699,
+        "withoutExample": 1,
+        "reviewed": 699,
+        "withPromptContext": 699,
+        "withExampleWithoutDetails": 699
       },
       "withoutExample": [
-        {
-          "r": 5234,
-          "w": "x",
-          "t": "x"
-        },
-        {
-          "r": 5271,
-          "w": "2d",
-          "t": "2ד"
-        },
-        {
-          "r": 5345,
-          "w": "NM",
-          "t": "NM"
-        },
-        {
-          "r": 5468,
-          "w": "DEC",
-          "t": "DEC"
-        },
-        {
-          "r": 5501,
-          "w": "pub.",
-          "t": "פָּאבּ."
-        },
-        {
-          "r": 5592,
-          "w": "g",
-          "t": "ז"
-        },
-        {
-          "r": 5838,
-          "w": "t'",
-          "t": "לא'"
-        },
         {
           "r": 5881,
           "w": "of.",
           "t": "שֶׁל."
-        },
-        {
-          "r": 5887,
-          "w": "k",
-          "t": "ק"
         }
       ]
     },
     {
       "start": 5901,
       "end": 6600,
-      "added": 695,
-      "exceptions": 5,
+      "added": 699,
+      "exceptions": 1,
       "previouslyReviewed": 0,
       "coverage": {
         "words": 700,
-        "withExample": 695,
-        "withoutExample": 5,
-        "reviewed": 695,
-        "withPromptContext": 695,
-        "withExampleWithoutDetails": 695
+        "withExample": 699,
+        "withoutExample": 1,
+        "reviewed": 699,
+        "withPromptContext": 699,
+        "withExampleWithoutDetails": 699
       },
       "withoutExample": [
-        {
-          "r": 5959,
-          "w": "8vo",
-          "t": "8vo"
-        },
-        {
-          "r": 6014,
-          "w": "oe.",
-          "t": "oe."
-        },
         {
           "r": 6167,
           "w": "as.",
           "t": "כְּמוֹ."
-        },
-        {
-          "r": 6300,
-          "w": "ness",
-          "t": "ness"
-        },
-        {
-          "r": 6540,
-          "w": "li",
-          "t": "לי"
         }
       ]
     },
     {
       "start": 6601,
       "end": 7300,
-      "added": 693,
-      "exceptions": 7,
+      "added": 697,
+      "exceptions": 3,
       "previouslyReviewed": 0,
       "coverage": {
         "words": 700,
-        "withExample": 693,
-        "withoutExample": 7,
-        "reviewed": 693,
-        "withPromptContext": 693,
-        "withExampleWithoutDetails": 693
+        "withExample": 697,
+        "withoutExample": 3,
+        "reviewed": 697,
+        "withPromptContext": 697,
+        "withExampleWithoutDetails": 697
       },
       "withoutExample": [
-        {
-          "r": 6639,
-          "w": "superstitious",
-          "t": "אמונות טפלות"
-        },
         {
           "r": 6728,
           "w": "wid",
           "t": "wid"
-        },
-        {
-          "r": 6810,
-          "w": "NL",
-          "t": "NL"
-        },
-        {
-          "r": 6811,
-          "w": "hastings",
-          "t": "מהרינגס"
-        },
-        {
-          "r": 6883,
-          "w": "med",
-          "t": "med"
         },
         {
           "r": 7121,
@@ -541,288 +258,103 @@
     {
       "start": 7301,
       "end": 8000,
-      "added": 686,
-      "exceptions": 14,
+      "added": 698,
+      "exceptions": 2,
       "previouslyReviewed": 0,
       "coverage": {
         "words": 700,
-        "withExample": 686,
-        "withoutExample": 14,
-        "reviewed": 686,
-        "withPromptContext": 686,
-        "withExampleWithoutDetails": 686
+        "withExample": 698,
+        "withoutExample": 2,
+        "reviewed": 698,
+        "withPromptContext": 698,
+        "withExampleWithoutDetails": 698
       },
       "withoutExample": [
-        {
-          "r": 7301,
-          "w": "v",
-          "t": "v"
-        },
         {
           "r": 7320,
           "w": "cong.",
           "t": "cong."
         },
         {
-          "r": 7331,
-          "w": "ta",
-          "t": "ta"
-        },
-        {
-          "r": 7366,
-          "w": "pa",
-          "t": "pa"
-        },
-        {
-          "r": 7389,
-          "w": "ab",
-          "t": "אב"
-        },
-        {
           "r": 7432,
           "w": "col.",
           "t": "קול."
-        },
-        {
-          "r": 7458,
-          "w": "con",
-          "t": "con"
-        },
-        {
-          "r": 7470,
-          "w": "sez",
-          "t": "סז"
-        },
-        {
-          "r": 7490,
-          "w": "CO",
-          "t": "מְשׁוּתָף"
-        },
-        {
-          "r": 7505,
-          "w": "quod",
-          "t": "quod"
-        },
-        {
-          "r": 7712,
-          "w": "ch.",
-          "t": "ch."
-        },
-        {
-          "r": 7766,
-          "w": "h",
-          "t": "ח"
-        },
-        {
-          "r": 7767,
-          "w": "dey",
-          "t": "dey"
-        },
-        {
-          "r": 7841,
-          "w": "AK",
-          "t": "AK"
         }
       ]
     },
     {
       "start": 8001,
       "end": 8700,
-      "added": 692,
-      "exceptions": 8,
+      "added": 698,
+      "exceptions": 2,
       "previouslyReviewed": 0,
       "coverage": {
         "words": 700,
-        "withExample": 692,
-        "withoutExample": 8,
-        "reviewed": 692,
-        "withPromptContext": 692,
-        "withExampleWithoutDetails": 692
+        "withExample": 698,
+        "withoutExample": 2,
+        "reviewed": 698,
+        "withPromptContext": 698,
+        "withExampleWithoutDetails": 698
       },
       "withoutExample": [
-        {
-          "r": 8017,
-          "w": "AC",
-          "t": "AC"
-        },
-        {
-          "r": 8030,
-          "w": "ft.",
-          "t": "ft."
-        },
         {
           "r": 8091,
           "w": "ni",
           "t": "ni"
         },
         {
-          "r": 8157,
-          "w": "ti",
-          "t": "ti"
-        },
-        {
-          "r": 8324,
-          "w": "dis",
-          "t": "דיס"
-        },
-        {
           "r": 8486,
           "w": "ll",
           "t": "ll"
-        },
-        {
-          "r": 8570,
-          "w": "sic",
-          "t": "sic"
-        },
-        {
-          "r": 8601,
-          "w": "l",
-          "t": "ל"
         }
       ]
     },
     {
       "start": 8701,
       "end": 9400,
-      "added": 688,
-      "exceptions": 11,
+      "added": 697,
+      "exceptions": 2,
       "previouslyReviewed": 0,
       "coverage": {
         "words": 699,
-        "withExample": 688,
-        "withoutExample": 11,
-        "reviewed": 688,
-        "withPromptContext": 688,
-        "withExampleWithoutDetails": 688
+        "withExample": 697,
+        "withoutExample": 2,
+        "reviewed": 697,
+        "withPromptContext": 697,
+        "withExampleWithoutDetails": 697
       },
       "withoutExample": [
-        {
-          "r": 8780,
-          "w": "ff.",
-          "t": "ff."
-        },
         {
           "r": 8794,
           "w": "val",
           "t": "val"
         },
         {
-          "r": 8817,
-          "w": "re",
-          "t": "מִחָדָשׁ"
-        },
-        {
-          "r": 8878,
-          "w": "Icel.",
-          "t": "איסל."
-        },
-        {
-          "r": 8906,
-          "w": "MD",
-          "t": "MD"
-        },
-        {
-          "r": 8948,
-          "w": "sg",
-          "t": "sg"
-        },
-        {
-          "r": 9021,
-          "w": "sub",
-          "t": "תַת"
-        },
-        {
-          "r": 9055,
-          "w": "cor",
-          "t": "cor"
-        },
-        {
-          "r": 9077,
-          "w": "ty",
-          "t": "ty"
-        },
-        {
           "r": 9167,
           "w": "las",
           "t": "לאס"
-        },
-        {
-          "r": 9372,
-          "w": "ole",
-          "t": "ole"
         }
       ]
     },
     {
       "start": 9401,
       "end": 10000,
-      "added": 588,
-      "exceptions": 11,
+      "added": 598,
+      "exceptions": 1,
       "previouslyReviewed": 0,
       "coverage": {
         "words": 599,
-        "withExample": 588,
-        "withoutExample": 11,
-        "reviewed": 588,
-        "withPromptContext": 588,
-        "withExampleWithoutDetails": 588
+        "withExample": 598,
+        "withoutExample": 1,
+        "reviewed": 598,
+        "withPromptContext": 598,
+        "withExampleWithoutDetails": 598
       },
       "withoutExample": [
-        {
-          "r": 9437,
-          "w": "Beth",
-          "t": "בֵּית"
-        },
-        {
-          "r": 9439,
-          "w": "e'en",
-          "t": "e'en"
-        },
-        {
-          "r": 9467,
-          "w": "t",
-          "t": "ט"
-        },
-        {
-          "r": 9597,
-          "w": "sup",
-          "t": "sup"
-        },
-        {
-          "r": 9657,
-          "w": "Mass.",
-          "t": "מִסָה."
-        },
-        {
-          "r": 9710,
-          "w": "self-",
-          "t": "עַצמִי-"
-        },
         {
           "r": 9761,
           "w": "KA",
           "t": "KA"
-        },
-        {
-          "r": 9902,
-          "w": "aux",
-          "t": "aux"
-        },
-        {
-          "r": 9910,
-          "w": "sous",
-          "t": "סו"
-        },
-        {
-          "r": 9914,
-          "w": "CA",
-          "t": "CA"
-        },
-        {
-          "r": 9966,
-          "w": "n'",
-          "t": "לא"
         }
       ]
     }

@@ -6,7 +6,7 @@ import unittest
 
 
 class WebVocabularyParityTests(unittest.TestCase):
-    def test_all_native_words_keep_web_spelling_serial_and_translation(self):
+    def test_all_native_words_keep_web_spelling_and_serial(self):
         repository = Path(__file__).resolve().parents[2]
         web = json.loads((repository / "vocab.json").read_text(encoding="utf-8-sig"))
         native = json.loads(
@@ -18,10 +18,20 @@ class WebVocabularyParityTests(unittest.TestCase):
         # Original spelling is the Firestore map key; the source serial selects
         # the same 100-word band on either client. Preserve gaps from duplicates.
         self.assertEqual(
-            [(entry["rank"], entry["english"], entry["hebrew"]) for entry in native],
-            [(entry["r"], entry["w"], entry["t"]) for entry in web],
-            "iOS and web vocabulary identities, original serials or translations drifted",
+            [(entry["rank"], entry["english"]) for entry in native],
+            [(entry["r"], entry["w"]) for entry in web],
+            "iOS and web vocabulary identities, or original serials drifted",
         )
+
+        # Translations may differ only for the explicit, reviewed web gloss
+        # corrections listed in docs/web-gloss-divergence.json.
+        recorded = json.loads((repository / "docs/web-gloss-divergence.json").read_text(encoding="utf-8"))["entries"]
+        drift = [
+            {"word": w["w"], "rank": w["r"], "native": n["hebrew"], "web": w["t"]}
+            for n, w in zip(native, web)
+            if n["hebrew"] != w["t"]
+        ]
+        self.assertEqual(drift, recorded, "translation drift outside the recorded web gloss corrections")
 
 
 if __name__ == "__main__":

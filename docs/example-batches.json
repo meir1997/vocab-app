@@ -4,99 +4,99 @@
     {
       "start": 301,
       "end": 1000,
-      "added": 661,
-      "exceptions": 9,
+      "added": 669,
+      "exceptions": 1,
       "previouslyReviewed": 30
     },
     {
       "start": 1001,
       "end": 1700,
-      "added": 687,
-      "exceptions": 7,
+      "added": 692,
+      "exceptions": 2,
       "previouslyReviewed": 6
     },
     {
       "start": 1701,
       "end": 2400,
-      "added": 692,
-      "exceptions": 5,
+      "added": 697,
+      "exceptions": 0,
       "previouslyReviewed": 3
     },
     {
       "start": 2401,
       "end": 3100,
-      "added": 693,
-      "exceptions": 6,
+      "added": 698,
+      "exceptions": 1,
       "previouslyReviewed": 1
     },
     {
       "start": 3101,
       "end": 3800,
-      "added": 695,
-      "exceptions": 5,
+      "added": 700,
+      "exceptions": 0,
       "previouslyReviewed": 0
     },
     {
       "start": 3801,
       "end": 4500,
-      "added": 695,
-      "exceptions": 5,
+      "added": 699,
+      "exceptions": 1,
       "previouslyReviewed": 0
     },
     {
       "start": 4501,
       "end": 5200,
-      "added": 692,
-      "exceptions": 8,
+      "added": 700,
+      "exceptions": 0,
       "previouslyReviewed": 0
     },
     {
       "start": 5201,
       "end": 5900,
-      "added": 691,
-      "exceptions": 9,
+      "added": 699,
+      "exceptions": 1,
       "previouslyReviewed": 0
     },
     {
       "start": 5901,
       "end": 6600,
-      "added": 695,
-      "exceptions": 5,
+      "added": 699,
+      "exceptions": 1,
       "previouslyReviewed": 0
     },
     {
       "start": 6601,
       "end": 7300,
-      "added": 693,
-      "exceptions": 7,
+      "added": 697,
+      "exceptions": 3,
       "previouslyReviewed": 0
     },
     {
       "start": 7301,
       "end": 8000,
-      "added": 686,
-      "exceptions": 14,
+      "added": 698,
+      "exceptions": 2,
       "previouslyReviewed": 0
     },
     {
       "start": 8001,
       "end": 8700,
-      "added": 692,
-      "exceptions": 8,
+      "added": 698,
+      "exceptions": 2,
       "previouslyReviewed": 0
     },
     {
       "start": 8701,
       "end": 9400,
-      "added": 688,
-      "exceptions": 11,
+      "added": 697,
+      "exceptions": 2,
       "previouslyReviewed": 0
     },
     {
       "start": 9401,
       "end": 10000,
-      "added": 588,
-      "exceptions": 11,
+      "added": 598,
+      "exceptions": 1,
       "previouslyReviewed": 0
     }
   ]

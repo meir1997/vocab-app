@@ -223,3 +223,8 @@ These 219 words had a displayed primary Hebrew gloss that belonged to another wo
 | 9796 | impotent | <span dir="rtl" lang="he">עָקָר</span> | <span dir="rtl" lang="he">חסר אונים</span> | <span dir="rtl" lang="he"></span> | He felt impotent as the storm destroyed his home. |
 | 9889 | stationary | <span dir="rtl" lang="he">יַצִיב</span> | <span dir="rtl" lang="he">נייח</span> | <span dir="rtl" lang="he">עומד במקום</span> | The car was stationary at the light. |
 | 9907 | vested | <span dir="rtl" lang="he">מוּשׁקָע</span> | <span dir="rtl" lang="he">מוקנה</span> | <span dir="rtl" lang="he">בעל אינטרס</span> | He has a vested interest in the company. |
+
+## C-token pass (cache v19)
+93 abbreviations, letters, state codes, dialect forms and prefixes received a grounded gloss and a sentence (for example MD, CA, UT, NM, CO, AK, sub, re, non, dis, con, self-). `superstitious` was corrected too, and the layout tests now use `mother+'s` as the unreviewed long-token fixture.
+
+17 tokens stay without an example because no reliable standalone sense exists: sn, pwh, mother+'s, rest., imp., of., as., wid, te, gen., cong., col., ni, ll, val, las, KA. They are malformed or ambiguous fragments; they are listed in docs/example-exceptions.md.
