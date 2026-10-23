@@ -15,14 +15,23 @@ class WebVocabularyParityTests(unittest.TestCase):
         self.assertEqual(len(web), 9_998)
         self.assertEqual(len(native), len(web))
         self.assertEqual(len({entry["english"].lower() for entry in native}), len(native))
-        # Web glosses are corrected independently of the paused native app, so
-        # translations are intentionally not compared. Original spelling is the Firestore map key; the source serial selects
+        # Original spelling is the Firestore map key; the source serial selects
         # the same 100-word band on either client. Preserve gaps from duplicates.
         self.assertEqual(
             [(entry["rank"], entry["english"]) for entry in native],
             [(entry["r"], entry["w"]) for entry in web],
             "iOS and web vocabulary identities, or original serials drifted",
         )
+
+        # Translations may differ only for the explicit, reviewed web gloss
+        # corrections listed in docs/web-gloss-divergence.json.
+        recorded = json.loads((repository / "docs/web-gloss-divergence.json").read_text(encoding="utf-8"))["entries"]
+        drift = [
+            {"word": w["w"], "rank": w["r"], "native": n["hebrew"], "web": w["t"]}
+            for n, w in zip(native, web)
+            if n["hebrew"] != w["t"]
+        ]
+        self.assertEqual(drift, recorded, "translation drift outside the recorded web gloss corrections")
 
 
 if __name__ == "__main__":
