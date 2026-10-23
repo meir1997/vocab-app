@@ -71,6 +71,7 @@ function onVocabReady() {
   $('vocabCount').textContent = vocab.length.toLocaleString('he-IL');
   renderBandSelect();
   refreshHome(); renderLibrary();
+  loadDetails().catch(() => {}); // Warm local/offline examples and synonym exclusions.
 }
 
 /* ---------- Bands ---------- */
@@ -307,16 +308,24 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v5');
-    const required = ['index.html', 'app.js', 'vocab.json', 'details.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
+    const cache = await caches.open('four-words-offline-v6');
+    const required = ['index.html', 'app.js', 'quiz-content.js', 'vocab.json', 'details.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
     else label.textContent = 'מכינים שימוש אופליין… השאירו פתוח עם אינטרנט עד שמופיע אישור';
   } catch { label.textContent = 'שמירה אופליין לא זמינה בדפדפן זה'; }
 }
 /* ---------- Quiz ---------- */
-function startSession() {
-  if (!vocab.length) return;
+let startingSession = false;
+async function startSession() {
+  if (!vocab.length || startingSession) return;
+  startingSession = true;
+  let waitTimer;
+  try {
+    // A stalled optional details request must not block locally cached practice.
+    await Promise.race([loadDetails(), new Promise(resolve => { waitTimer = setTimeout(resolve, 1200); })]);
+  } catch {} // Choices still use Hebrew aliases if details are unavailable.
+  finally { clearTimeout(waitTimer); startingSession = false; }
   session = { queue: buildQueue(), index: 0, correct: 0, wrong: 0, active: true };
   $('practiceHome').classList.add('hidden'); $('summary').classList.add('hidden'); $('quizCard').classList.remove('hidden');
   $('sessionLabel').textContent = settings.length === 'all' ? 'כל הדחופות' : `${session.queue.length} מילים`;
@@ -339,52 +348,50 @@ function showQuestion() {
   $('progressBar').style.width = `${(session.index / session.queue.length) * 100}%`;
   $('serial').textContent = `#${item.r.toLocaleString('he-IL')}`;
   $('hint').textContent = ''; $('hint').className = 'hint';
+  $('quizCard').classList.remove('reviewing');
+  $('answerFeedback').replaceChildren(); $('answerFeedback').classList.add('hidden');
   $('nextBtn').classList.add('hidden'); $('dontKnowBtn').classList.remove('hidden');
+  $('typingCheck').disabled = false; $('typingInput').disabled = false;
   const mode = settings.mode;
+  const content = VocabQuiz.getWordContent(item, wordDetails[item.r]);
+  const context = VocabQuiz.getPromptContext(item, mode, wordDetails[item.r]);
+  $('questionContext').textContent = context;
+  $('questionContext').classList.toggle('hidden', !context);
   const answers = $('answers'); answers.replaceChildren();
-  if (mode === 'reverse') {
-    $('promptLabel').textContent = 'מה המילה באנגלית עבור';
-    $('word').textContent = item.t; $('word').setAttribute('lang', 'he');
-    $('typingBox').classList.add('hidden');
-    const distractors = shuffle(vocab.filter(v => v.w !== item.w)).slice(0, 3).map(v => v.w);
-    shuffle([item.w, ...distractors]).forEach(text => {
-      const b = document.createElement('button');
-      b.className = 'answer'; b.textContent = text; b.dir = 'ltr';
-      b.addEventListener('click', () => answerChoice(text === item.w, b, item.w));
-      answers.append(b);
-    });
-  } else if (mode === 'typing') {
+  if (mode === 'typing') {
     $('promptLabel').textContent = 'כתבו באנגלית את המילה';
-    $('word').textContent = item.t; $('word').setAttribute('lang', 'he');
+    $('word').textContent = content.meaning; $('word').setAttribute('lang', 'he'); $('word').dir = 'rtl';
     $('typingBox').classList.remove('hidden');
     const input = $('typingInput'); input.value = ''; input.focus();
   } else {
-    $('promptLabel').textContent = 'מה התרגום של';
-    $('word').textContent = item.w; $('word').setAttribute('lang', 'en');
+    const reverse = mode === 'reverse';
+    $('promptLabel').textContent = reverse ? 'מה המילה באנגלית עבור' : 'מה התרגום של';
+    $('word').textContent = reverse ? content.meaning : item.w;
+    $('word').setAttribute('lang', reverse ? 'he' : 'en'); $('word').dir = reverse ? 'rtl' : 'ltr';
     $('typingBox').classList.add('hidden');
-    const distractors = shuffle(vocab.filter(v => v.t !== item.t)).slice(0, 3).map(v => v.t);
-    shuffle([item.t, ...distractors]).forEach(text => {
+    VocabQuiz.buildChoices(item, vocab, mode, wordDetails).forEach(choice => {
       const b = document.createElement('button');
-      b.className = 'answer'; b.textContent = text;
-      b.addEventListener('click', () => answerChoice(text === item.t, b, item.t));
+      b.className = 'answer'; b.textContent = choice.label; b.dir = reverse ? 'ltr' : 'rtl';
+      b.dataset.correct = String(choice.correct);
+      b.addEventListener('click', () => answerChoice(choice.correct, b));
       answers.append(b);
     });
   }
   fitWord();
 }
 let locked = false;
-function answerChoice(ok, btn, correctText) {
+function answerChoice(ok, btn) {
   if (locked) return; locked = true;
   const item = session.queue[session.index];
   markWord(item.w, ok); markAnswer(ok);
   document.querySelectorAll('.answer').forEach(b => {
     b.disabled = true;
-    if (b.textContent === correctText) b.classList.add(ok ? 'correct' : 'reveal');
+    if (b.dataset.correct === 'true') b.classList.add(ok ? 'correct' : 'reveal');
   });
   if (ok) { session.correct++; btn.classList.add('correct'); $('hint').textContent = 'מעולה — תשובה נכונה!'; $('hint').classList.add('good'); }
-  else { session.wrong++; if (btn) btn.classList.add('wrong'); $('hint').textContent = `התשובה: ${correctText}`; $('hint').classList.add('bad'); }
+  else { session.wrong++; if (btn) btn.classList.add('wrong'); $('hint').textContent = btn ? 'נלמד את המילה ונמשיך' : 'זו הזדמנות להכיר את המילה'; }
   persist(); refreshHome();
-  advanceWhenReady(() => { locked = false; session.index++; showQuestion(); }, ok ? 900 : 1600);
+  completeAnswer(ok, item);
 }
 function checkTyping() {
   if (locked) return;
@@ -397,8 +404,42 @@ function checkTyping() {
   locked = true;
   markWord(item.w, ok); markAnswer(ok); persist(); refreshHome();
   if (ok) { session.correct++; $('hint').textContent = 'מעולה — נכון!'; $('hint').classList.add('good'); }
-  else { session.wrong++; $('hint').textContent = `התשובה: ${item.w}`; $('hint').classList.add('bad'); }
-  advanceWhenReady(() => { locked = false; session.index++; showQuestion(); }, ok ? 900 : 1800);
+  else { session.wrong++; $('hint').textContent = 'נלמד את המילה ונמשיך'; }
+  completeAnswer(ok, item);
+}
+function nextQuestion() {
+  if (!locked || !session.active) return;
+  locked = false; session.index++; showQuestion();
+}
+function completeAnswer(ok, item) {
+  $('dontKnowBtn').classList.add('hidden');
+  $('typingCheck').disabled = true; $('typingInput').disabled = true;
+  if (ok) return advanceWhenReady(nextQuestion, 900);
+  $('quizCard').classList.add('reviewing');
+  renderAnswerFeedback(item);
+  $('nextBtn').classList.remove('hidden');
+  $('nextBtn').focus({ preventScroll: true });
+  loadDetails().then(() => {
+    if (locked && session.queue[session.index] === item) renderAnswerFeedback(item);
+  }).catch(() => {});
+}
+function renderAnswerFeedback(item) {
+  const content = VocabQuiz.getWordContent(item, wordDetails[item.r]);
+  const box = $('answerFeedback'); box.replaceChildren(); box.classList.remove('hidden');
+  const label = document.createElement('p'); label.className = 'feedback-label'; label.textContent = 'המשמעות הנלמדת';
+  const meaning = document.createElement('p'); meaning.className = 'feedback-meaning'; meaning.textContent = content.meaning;
+  const word = document.createElement('bdi'); word.lang = 'en'; word.dir = 'ltr'; word.textContent = item.w;
+  const example = document.createElement('p'); example.className = 'example-text'; example.lang = 'en'; example.dir = 'ltr';
+  example.textContent = content.example || '';
+  box.append(label, meaning, word);
+  if (content.example) box.append(example);
+  else { const empty = document.createElement('p'); empty.className = 'detail-empty'; empty.textContent = 'משפט לדוגמה עדיין לא זמין למילה הזו.'; box.append(empty); }
+  requestAnimationFrame(() => {
+    if (!locked || sheetOpen || session.queue[session.index] !== item) return;
+    const bottom = $('nextBtn').getBoundingClientRect().bottom;
+    const navTop = document.querySelector('.tabbar').getBoundingClientRect().top;
+    if (bottom > navTop - 16) window.scrollBy(0, bottom - navTop + 16);
+  });
 }
 function finishSession() {
   session.active = false;
@@ -486,10 +527,10 @@ function renderLibrary(reset = true) {
   $('moreBtn').classList.toggle('hidden', libShown >= items.length);
 }
 /* ---------- Word details card (synonyms, meanings, example) ---------- */
-let detailsPromise = null, sheetOpen = false, pendingAdvance = null;
+let detailsPromise = null, wordDetails = {}, sheetOpen = false, pendingAdvance = null, sheetTrigger = null;
 const POS_HE = { n: 'שם עצם', v: 'פועל', a: 'תואר', r: 'תואר הפועל' };
 function loadDetails() {
-  if (!detailsPromise) detailsPromise = fetch('details.json').then(r => { if (!r.ok) throw new Error('details'); return r.json(); }).catch(err => { detailsPromise = null; throw err; });
+  if (!detailsPromise) detailsPromise = fetch('details.json').then(r => { if (!r.ok) throw new Error('details'); return r.json(); }).then(data => { wordDetails = data; return data; }).catch(err => { detailsPromise = null; throw err; });
   return detailsPromise;
 }
 function addDetailSection(parent, title, nodes) {
@@ -498,41 +539,53 @@ function addDetailSection(parent, title, nodes) {
 }
 async function openDetails(item) {
   const body = $('detailBody');
+  if (!sheetOpen) sheetTrigger = document.activeElement;
   $('detailWord').textContent = item.w; $('detailSerial').textContent = `#${item.r.toLocaleString('he-IL')}`;
-  $('detailTranslation').textContent = item.t;
+  $('detailTranslation').textContent = VocabQuiz.getWordContent(item).meaning;
   $('detailSpeak').onclick = () => speak(item.w);
   body.replaceChildren(); const loading = document.createElement('p'); loading.className = 'detail-empty'; loading.textContent = 'טוען…'; body.append(loading);
   $('detailSheet').classList.remove('hidden'); sheetOpen = true;
+  $('detailClose').focus();
   let data;
   try { data = (await loadDetails())[item.r] || null; }
-  catch { body.replaceChildren(); const p = document.createElement('p'); p.className = 'detail-empty'; p.textContent = 'הפרטים עדיין לא נטענו — פתחו פעם אחת עם אינטרנט.'; body.append(p); return; }
+  catch {
+    if (!sheetOpen || $('detailWord').textContent !== item.w) return;
+    data = null;
+  }
   if (!sheetOpen || $('detailWord').textContent !== item.w) return;
   body.replaceChildren();
-  if (!data) { const p = document.createElement('p'); p.className = 'detail-empty'; p.textContent = 'אין פרטים נוספים למילה הזו.'; body.append(p); return; }
-  if (data.s && data.s.length) {
-    const wrap = document.createElement('div'); wrap.className = 'chips-row'; wrap.dir = 'ltr';
-    data.s.forEach(s => { const c = document.createElement('span'); c.className = 'syn-chip'; c.textContent = s; wrap.append(c); });
-    addDetailSection(body, 'מילים נרדפות', [wrap]);
-  }
-  if (data.d && data.d.length) {
+  const content = VocabQuiz.getWordContent(item, data);
+  if (content.example) {
+    const row = document.createElement('div'); row.className = 'example-row';
+    const q = document.createElement('p'); q.className = 'example-text'; q.lang = 'en'; q.dir = 'ltr'; q.textContent = content.example;
+    const b = document.createElement('button'); b.className = 'speak-btn'; b.setAttribute('aria-label', 'השמעת המשפט'); b.textContent = '🔊'; b.addEventListener('click', () => speak(content.example));
+    row.append(q, b); addDetailSection(body, 'משפט לדוגמה', [row]);
+  } else { const p = document.createElement('p'); p.className = 'detail-empty'; p.textContent = 'משפט לדוגמה עדיין לא זמין למילה הזו.'; body.append(p); }
+  const disclosure = (label, node) => {
+    const extra = document.createElement('details'); extra.className = 'detail-extra';
+    const summary = document.createElement('summary'); summary.textContent = label;
+    extra.append(summary, node); body.append(extra);
+  };
+  if (data?.d?.length) {
     const list = document.createElement('ol'); list.className = 'meaning-list'; list.dir = 'ltr';
     data.d.forEach(entry => {
       const cut = entry.indexOf('|'); const pos = entry.slice(0, cut), text = entry.slice(cut + 1);
       const li = document.createElement('li');
       const tag = document.createElement('span'); tag.className = 'pos-tag'; tag.textContent = POS_HE[pos] || pos; tag.dir = 'rtl';
-      li.append(tag, document.createTextNode(text)); list.append(li);
+      const definition = document.createElement('span'); definition.lang = 'en'; definition.textContent = text;
+      li.append(tag, definition); list.append(li);
     });
-    addDetailSection(body, 'משמעויות', [list]);
+    disclosure('עוד משמעויות באנגלית', list);
   }
-  if (data.e) {
-    const row = document.createElement('div'); row.className = 'example-row';
-    const q = document.createElement('p'); q.className = 'example-text'; q.dir = 'ltr'; q.textContent = data.e;
-    const b = document.createElement('button'); b.className = 'speak'; b.setAttribute('aria-label', 'השמעת המשפט'); b.textContent = '🔊'; b.addEventListener('click', () => speak(data.e));
-    row.append(q, b); addDetailSection(body, 'משפט לדוגמה', [row]);
+  if (data?.s?.length) {
+    const wrap = document.createElement('div'); wrap.className = 'chips-row'; wrap.dir = 'ltr'; wrap.lang = 'en';
+    data.s.forEach(s => { const c = document.createElement('span'); c.className = 'syn-chip'; c.textContent = s; wrap.append(c); });
+    disclosure('מילים נרדפות', wrap);
   }
 }
 function closeDetails() {
   $('detailSheet').classList.add('hidden'); sheetOpen = false;
+  if (sheetTrigger?.isConnected) sheetTrigger.focus({ preventScroll: true });
   if (pendingAdvance) { const fn = pendingAdvance; pendingAdvance = null; fn(); }
 }
 function advanceWhenReady(fn, delay) {
@@ -630,21 +683,31 @@ $('againBtn').addEventListener('click', startSession);
 $('homeBtn').addEventListener('click', () => { $('summary').classList.add('hidden'); $('practiceHome').classList.remove('hidden'); });
 $('dontKnowBtn').addEventListener('click', () => {
   if (settings.mode === 'typing') { locked || checkTypingDontKnow(); }
-  else answerChoice(false, null, settings.mode === 'reverse' ? session.queue[session.index].w : session.queue[session.index].t);
+  else answerChoice(false, null);
 });
 function checkTypingDontKnow() {
   locked = true;
   const item = session.queue[session.index];
   markWord(item.w, false); markAnswer(false); session.wrong++; persist(); refreshHome();
-  $('hint').textContent = `התשובה: ${item.w}`; $('hint').classList.add('bad');
-  advanceWhenReady(() => { locked = false; session.index++; showQuestion(); }, 1800);
+  $('hint').textContent = 'זו הזדמנות להכיר את המילה';
+  completeAnswer(false, item);
 }
+$('nextBtn').addEventListener('click', nextQuestion);
 $('typingCheck').addEventListener('click', checkTyping);
 $('typingInput').addEventListener('keydown', e => { if (e.key === 'Enter') checkTyping(); });
 $('detailBtn').addEventListener('click', () => { const item = session.queue[session.index]; if (item) openDetails(item); });
 $('detailClose').addEventListener('click', closeDetails);
 $('detailSheet').addEventListener('click', e => { if (e.target === $('detailSheet')) closeDetails(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && sheetOpen) closeDetails(); });
+document.addEventListener('keydown', e => {
+  if (!sheetOpen) return;
+  if (e.key === 'Escape') closeDetails();
+  if (e.key === 'Tab') {
+    const focusable = [...$('detailSheet').querySelectorAll('button, summary')];
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+});
 $('speakBtn').addEventListener('click', () => { const item = session.queue[session.index]; if (item) speak(item.w); });
 $('sessionBtn').addEventListener('click', () => switchTab('settings'));
 $('modeBtn').addEventListener('click', () => switchTab('settings'));
@@ -677,7 +740,7 @@ $('authBtn').addEventListener('click', async () => {
   }
 });
 document.addEventListener('keydown', e => {
-  if (!session.active || locked) return;
+  if (!session.active || locked || sheetOpen || e.target.matches('input, select, textarea')) return;
   const idx = ['1', '2', '3', '4'].indexOf(e.key);
   if (idx >= 0) { const btns = document.querySelectorAll('.answer'); if (btns[idx]) btns[idx].click(); }
 });
