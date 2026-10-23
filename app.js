@@ -387,7 +387,7 @@ function showQuestion() {
     $('promptLabel').textContent = 'כתבו באנגלית את המילה';
     $('word').textContent = content.meaning; $('word').setAttribute('lang', 'he'); $('word').dir = 'rtl';
     $('typingBox').classList.remove('hidden');
-    const input = $('typingInput'); input.value = ''; input.focus();
+    const input = $('typingInput'); input.value = ''; input.focus({ preventScroll: true });
   } else {
     const reverse = mode === 'reverse';
     $('promptLabel').textContent = reverse ? 'מה המילה באנגלית עבור' : 'מה התרגום של';
@@ -463,12 +463,6 @@ function renderAnswerFeedback(item) {
   example.textContent = content.example || '';
   box.append(label, meaning, word);
   if (content.example) box.append(example);
-  requestAnimationFrame(() => {
-    if (!locked || sheetOpen || session.queue[session.index] !== item) return;
-    const bottom = $('nextBtn').getBoundingClientRect().bottom;
-    const navTop = document.querySelector('.tabbar').getBoundingClientRect().top;
-    if (bottom > navTop - 16) window.scrollBy(0, bottom - navTop + 16);
-  });
 }
 function finishSession() {
   session.active = false;
@@ -574,7 +568,7 @@ async function openDetails(item) {
   $('detailSpeak').onclick = () => speak(item.w);
   body.replaceChildren(); const loading = document.createElement('p'); loading.className = 'detail-empty'; loading.textContent = 'טוען…'; body.append(loading);
   $('detailSheet').classList.remove('hidden'); sheetOpen = true;
-  $('detailClose').focus();
+  $('detailClose').focus({ preventScroll: true });
   let data;
   try { data = (await loadDetails())[item.r] || null; }
   catch {
@@ -733,8 +727,8 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Tab') {
     const focusable = [...$('detailSheet').querySelectorAll('button, summary')];
     const first = focusable[0], last = focusable[focusable.length - 1];
-    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus({ preventScroll: true }); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus({ preventScroll: true }); }
   }
 });
 $('speakBtn').addEventListener('click', () => { const item = session.queue[session.index]; if (item) speak(item.w); });

@@ -10,7 +10,7 @@ html, body { margin: 0; }
 body {
   font-family: -apple-system, 'Segoe UI', 'Heebo', Arial, sans-serif;
   background: linear-gradient(160deg, #f6f4ff 0%, var(--bg) 45%, #eaf6ff 100%);
-  color: var(--ink); min-height: 100vh;
+  color: var(--ink); min-height: 100vh; min-height: 100dvh;
 }
 .shell { max-width: 560px; margin: 0 auto; padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 96px; }
 .topbar { display: flex; align-items: center; justify-content: space-between; padding: 8px 2px 14px; }
@@ -127,9 +127,9 @@ body {
 .feedback-meaning { margin: 0 0 4px; font-size: 21px; font-weight: 800; }
 .answer-feedback bdi { display: block; color: var(--muted); font-size: 14px; text-align: left; }
 .answer-feedback .example-text { margin-top: 8px; font-size: 15px; }
-.reviewing #questionContext { display: none; }
+.reviewing #questionContext { visibility: hidden; }
 /* The feedback panel owns the correction; do not repeat the correct option. */
-.reviewing .answer:not(.wrong) { display: none; }
+.reviewing .answers, .reviewing .typing-box { visibility: hidden; pointer-events: none; }
 .reviewing .word[lang="he"], .reviewing .prompt-label { display: none; }
 
 /* Library */
@@ -235,7 +235,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 
 /* Compact reserved question slots keep the controls above small-phone nav. */
 @media (max-width: 360px) {
-  .shell { padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 84px; }
+  .shell { padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 70px; }
   .topbar { gap: 6px; padding: 4px 0 10px; }
   .brand { font-size: 16px; gap: 6px; }
   .brand-mark { width: 28px; height: 28px; }
@@ -284,7 +284,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   .quiz-footer { grid-column: 2; grid-row: 6; }
   .answers, .typing-box { grid-column: 2; grid-row: 4; align-self: start; margin-top: 0; }
   .answer-feedback { grid-column: 2; grid-row: 5; }
-  .reviewing .word-row { grid-row: 4 / span 2; }
   #practiceHome { max-width: 800px; margin-inline: auto; }
   .library-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   #tab-settings, #tab-stats, #summary { max-width: 800px; margin-inline: auto; }
@@ -292,3 +291,75 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   .sheet-backdrop { align-items: center; padding: 32px; }
   .sheet { max-width: 720px; border-radius: 22px; padding: 28px; }
 }
+
+@media (min-width: 361px) and (max-width: 600px) {
+  body:has(#quizCard:not(.hidden)) .shell { padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 70px; }
+  body:has(#quizCard:not(.hidden)) .topbar { gap: 6px; padding: 4px 0 10px; }
+  body:has(#quizCard:not(.hidden)) .brand { font-size: 16px; gap: 6px; }
+  body:has(#quizCard:not(.hidden)) .brand-mark { width: 28px; height: 28px; }
+  body:has(#quizCard:not(.hidden)) .top-actions { gap: 6px; }
+  body:has(#quizCard:not(.hidden)) .sync-status { font-size: 10px; }
+  body:has(#quizCard:not(.hidden)) .auth-btn { padding: 6px 8px; font-size: 11px; }
+  body:has(#quizCard:not(.hidden)) #quizCard { padding: 10px; border-radius: 18px; }
+  body:has(#quizCard:not(.hidden)) .quiz-head { gap: 4px; margin-bottom: 4px; }
+  body:has(#quizCard:not(.hidden)) .quiz-head .chip { padding: 5px 8px; font-size: 11px; }
+  body:has(#quizCard:not(.hidden)) #quizBandLabel { padding: 4px 8px; font-size: 11px; }
+  body:has(#quizCard:not(.hidden)) .progress-text { font-size: 11px; }
+  body:has(#quizCard:not(.hidden)) .progress-track { margin-bottom: 6px; }
+  body:has(#quizCard:not(.hidden)) .prompt-label { font-size: 12px; }
+  body:has(#quizCard:not(.hidden)) .word-row { flex-wrap: nowrap; gap: 6px; }
+  body:has(#quizCard:not(.hidden)) .word { flex: 1; flex-basis: auto; height: 36px; font-size: 30px; margin: 2px 0; }
+  body:has(#quizCard:not(.hidden)) .serial { width: 43px; font-size: 10px; padding: 2px 5px; }
+  body:has(#quizCard:not(.hidden)) .question-context { height: 40px; margin-top: 2px; padding: 2px 10px; font-size: 13px; line-height: 1.4; }
+  body:has(#quizCard:not(.hidden)) .hint { font-size: 12px; }
+  body:has(#quizCard:not(.hidden)) .answers { margin-top: 8px; gap: 6px; }
+  body:has(#quizCard:not(.hidden)) .answer { height: 44px; min-height: 44px; padding: 6px 10px; font-size: 15px; border-radius: 12px; }
+  body:has(#quizCard:not(.hidden)) #dontKnowBtn { min-height: 44px; padding: 10px; font-size: 13px; }
+  body:has(#quizCard:not(.hidden)) #nextBtn { min-height: 44px; padding: 11px; font-size: 15px; }
+  body:has(#quizCard:not(.hidden)) .answer-feedback { margin-top: 8px; padding: 10px 12px; }
+  body:has(#quizCard:not(.hidden)) .feedback-meaning { font-size: 19px; }
+  body:has(#quizCard:not(.hidden)) .answer-feedback .example-text { font-size: 13px; line-height: 1.4; }
+  body:has(#quizCard:not(.hidden)) .typing-box { gap: 6px; }
+  body:has(#quizCard:not(.hidden)) .typing-box input { padding: 10px; font-size: 16px; }
+  body:has(#quizCard:not(.hidden)) .typing-box .primary-btn { padding: 10px 12px; font-size: 14px; }
+  body:has(#quizCard:not(.hidden)) .sheet { padding-inline: 16px; }
+}
+
+/* Permanent tracks: correction overlays answers without changing geometry. */
+#quizCard { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: 76px 26px 20px 106px 78px 248px 48px; overflow-anchor: none; }
+#quizCard > * { min-width: 0; min-height: 0; }
+.quiz-head { grid-area: 1 / 1; }
+.progress-track { grid-area: 2 / 1; }
+.prompt-label { grid-area: 3 / 1; }
+.word-row { grid-area: 4 / 1; }
+.question-context { grid-area: 5 / 1; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.answers, .typing-box, .answer-feedback { grid-area: 6 / 1; }
+.answers { height: 232px; }
+.typing-box { align-self: start; height: 52px; }
+.answer-feedback { margin: 16px 0 0; height: 232px; overflow: hidden; }
+.feedback-meaning { line-height: 1.3; overflow-wrap: anywhere; }
+.answer-feedback .example-text { height: 2.9em; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.answer-feedback bdi { overflow-wrap: anywhere; }
+.quiz-footer { grid-area: 7 / 1; height: 48px; }
+#nextBtn { margin: 0; padding-block: 10px; }
+@media (max-width: 600px) {
+  #quizCard { grid-template-rows: 52px 12px 18px 44px 40px 202px 44px; }
+  .question-context { height: 40px; padding-block: 2px; }
+  .answers { height: 194px; }
+  .answer-feedback { height: 194px; margin-top: 8px; }
+  .typing-box { height: 44px; margin-top: 8px; }
+  .quiz-footer { height: 44px; }
+}
+@media (min-width: 960px) {
+  #quizCard { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: 52px 26px 20px 232px 82px 48px; }
+  .quiz-head { grid-area: 1 / 1 / 2 / 3; }
+  .progress-track { grid-area: 2 / 1 / 3 / 3; }
+  .prompt-label { grid-area: 3 / 1; }
+  .word-row { grid-area: 4 / 1; }
+  .question-context { grid-area: 5 / 1; }
+  .answers, .typing-box, .answer-feedback { grid-area: 4 / 2; }
+  .answer-feedback { margin: 0; }
+  .quiz-footer { grid-area: 6 / 2; }
+}
+/* Keep grid tracks while exposing the correction only once to readers. */
+.reviewing .answer, .reviewing .word[lang="he"], .reviewing .prompt-label { display: none; }
