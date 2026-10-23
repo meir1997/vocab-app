@@ -10,6 +10,73 @@ function seeded(seed = 17) {
 }
 function word(r, w, t) { return Object.freeze({ r, w, t }); }
 
+test('frequency batches account for every source word with reviewed content or a documented omission', () => {
+  const vocab = JSON.parse(readFileSync(join(__dirname, '../vocab.json'), 'utf8'));
+  const { batches } = JSON.parse(readFileSync(join(__dirname, '../docs/example-batches.json'), 'utf8'));
+  const report = JSON.parse(readFileSync(join(__dirname, '../docs/example-coverage.json'), 'utf8'));
+  const exceptions = readFileSync(join(__dirname, '../docs/example-exceptions.md'), 'utf8');
+  const omittedRanks = [...exceptions.matchAll(/^\| (\d+) \|/gm)].map(match => Number(match[1]));
+  assert.equal(new Set(omittedRanks).size, omittedRanks.length, 'no duplicate exceptions');
+  let next = 301;
+  for (const batch of batches) {
+    assert.equal(batch.start, next, 'batches are contiguous');
+    assert.equal(batch.end - batch.start + 1, 700);
+    next = batch.end + 1;
+    const entries = vocab.filter(item => item.r >= batch.start && item.r <= batch.end);
+    const reviewed = entries.filter(item => getWordContent(item).reviewed);
+    const omitted = entries.filter(item => !getWordContent(item).reviewed);
+    assert.equal(reviewed.length, batch.added + batch.previouslyReviewed);
+    assert.equal(omitted.length, batch.exceptions);
+    for (const item of omitted) {
+      assert.ok(omittedRanks.includes(item.r), item.w + ': exception documented');
+      assert.ok(exceptions.includes('| ' + item.r + ' | ' + item.w + ' | <span dir="rtl" lang="he">' + getWordContent(item).meaning + '</span> |'), item.w + ': exact primary gloss');
+      assert.equal(getWordContent(item, { e: 'Generated content must stay hidden.' }).example, '');
+    }
+    for (const item of reviewed) {
+      const content = getWordContent(item);
+      const escaped = item.w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const target = new RegExp('(?<!\\w)' + escaped + '(?!\\w)', 'i');
+      assert.match(content.example, target, item.w + ': exact word form');
+      assert.ok(content.example.split(/\s+/).length <= 20, item.w + ': short sentence');
+      for (const mode of ['reverse', 'typing']) {
+        const prompt = getPromptContext(item, mode);
+        assert.ok(prompt.includes('____'), item.w + ': masked target');
+        assert.doesNotMatch(prompt, target, item.w + ': no target leak');
+      }
+    }
+    const recorded = report.frequencyBatches.find(value => value.start === batch.start);
+    assert.equal(recorded.coverage.reviewed, reviewed.length, 'committed coverage is current');
+    assert.deepEqual(recorded.withoutExample.map(item => item.r), omitted.map(item => item.r));
+  }
+  assert.equal(omittedRanks.length, batches.reduce((sum, batch) => sum + batch.exceptions, 0));
+  assert.equal(report.after.all.reviewed, vocab.filter(item => getWordContent(item).reviewed).length);
+});
+
+test('punctuated targets are fully masked without altering larger words', () => {
+  const item = word(872, 'etc.', "וכו'");
+  assert.equal(getPromptContext(item, 'typing'), 'The shop sells pens, paper, notebooks, ____');
+  assert.equal(getPromptContext(word(79, 'can', 'פחית'), 'typing'), 'She opened a ____ of beans.');
+  assert.equal(getPromptContext(word(10, 'he', 'הוא'), 'reverse'), '____ is my brother.');
+});
+
+test('new polysemous entries keep the less common displayed sense', () => {
+  const vocab = JSON.parse(readFileSync(join(__dirname, '../vocab.json'), 'utf8'));
+  const expected = {
+    ground: ['טחון', 'Add some ground pepper to the soup.'],
+    minutes: ['פרוטוקול', 'Please read the minutes of the last meeting.'],
+    safe: ['כספת', 'Keep your passport in the safe.'],
+    principal: ['קרן', 'The loan payments reduced the principal.'],
+    refuse: ['אשפה', 'Please put the refuse in the bin.'],
+    royalty: ['תמלוג', 'The author receives a royalty for each copy sold.']
+  };
+  for (const [w, [meaning, example]] of Object.entries(expected)) {
+    const item = vocab.find(item => item.w.toLowerCase() === w);
+    assert.equal(normalizeHebrew(getWordContent(item).meaning), meaning, w);
+    assert.equal(getWordContent(item, { e: 'An unrelated generated sentence.' }).example, example, w);
+    assert.equal(getWordContent({ ...item, t: 'משמעות אחרת' }).example, '', w);
+  }
+});
+
 test('Hebrew comparison ignores niqqud, directional marks, spacing and punctuation', () => {
   assert.equal(normalizeHebrew('  \u200fעַל־יְדֵי '), normalizeHebrew('על ידי'));
   assert.equal(normalizeHebrew('ד״ר'), normalizeHebrew('דר'));
@@ -159,9 +226,11 @@ test('every reviewed source word has an example containing its English word and 
   for (const item of reviewed) {
     const content = getWordContent(item);
     assert.equal(content.meaning, item.t, item.w);
-    assert.match(content.example.toLowerCase(), new RegExp('\\b' + item.w.toLowerCase() + '\\b'), item.w);
+    const escaped = item.w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const target = new RegExp('(?<!\\w)' + escaped + '(?!\\w)', 'i');
+    assert.match(content.example, target, item.w);
     assert.ok(getPromptContext(item, 'typing').includes('____'), item.w);
-    assert.ok(!new RegExp('\\b' + item.w + '\\b', 'i').test(getPromptContext(item, 'reverse')), item.w);
+    assert.doesNotMatch(getPromptContext(item, 'reverse'), target, item.w);
   }
 });
 

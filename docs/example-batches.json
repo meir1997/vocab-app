@@ -1,0 +1,33 @@
+{
+  "policy": "Original authored English; second self-review against displayed primary Hebrew sense. Doubtful examples dropped; no generated or copied examples approved.",
+  "batches": [
+    {
+      "start": 301,
+      "end": 1000,
+      "added": 639,
+      "exceptions": 31,
+      "previouslyReviewed": 30
+    },
+    {
+      "start": 1001,
+      "end": 1700,
+      "added": 671,
+      "exceptions": 23,
+      "previouslyReviewed": 6
+    },
+    {
+      "start": 1701,
+      "end": 2400,
+      "added": 669,
+      "exceptions": 28,
+      "previouslyReviewed": 3
+    },
+    {
+      "start": 2401,
+      "end": 3100,
+      "added": 666,
+      "exceptions": 33,
+      "previouslyReviewed": 1
+    }
+  ]
+}

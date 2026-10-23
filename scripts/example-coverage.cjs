@@ -10,6 +10,7 @@ const root = resolve(__dirname, '..');
 const vocab = JSON.parse(readFileSync(join(root, 'vocab.json'), 'utf8'));
 const details = JSON.parse(readFileSync(join(root, 'details.json'), 'utf8'));
 const current = require('../quiz-content.js');
+const batches = JSON.parse(readFileSync(join(root, 'docs/example-batches.json'), 'utf8')).batches;
 const baselineRef = process.argv[2] || '591ed5a13e7355090ab2ab8b781ad7b489232644'; // merged PR 13
 const baselineModule = { exports: {} };
 const source = execFileSync(process.env.GIT_EXECUTABLE || 'git', ['show', `${baselineRef}:quiz-content.js`], { cwd: root, encoding: 'utf8' });
@@ -33,6 +34,12 @@ console.log(JSON.stringify({
   policy: 'Only reviewed authored examples matching the displayed primary Hebrew meaning; generated examples are omitted.',
   before: snapshot(baselineModule.exports),
   after: snapshot(current),
+  frequencyBatches: batches.map(batch => ({
+    ...batch,
+    coverage: coverage(current, vocab.filter(item => item.r >= batch.start && item.r <= batch.end)),
+    withoutExample: vocab.filter(item => item.r >= batch.start && item.r <= batch.end && !current.getWordContent(item).example)
+      .map(({ r, w, t }) => ({ r, w, t }))
+  })),
   top300WithoutExample: vocab.filter(item => item.r <= 300 && !current.getWordContent(item, details[item.r]).example)
     .map(({ r, w, t }) => ({ r, w, t }))
 }, null, 2));
