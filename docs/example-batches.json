@@ -39,15 +39,15 @@
     {
       "start": 3801,
       "end": 4500,
-      "added": 676,
-      "exceptions": 24,
+      "added": 675,
+      "exceptions": 25,
       "previouslyReviewed": 0
     },
     {
       "start": 4501,
       "end": 5200,
-      "added": 671,
-      "exceptions": 29,
+      "added": 670,
+      "exceptions": 30,
       "previouslyReviewed": 0
     },
     {
@@ -83,6 +83,20 @@
       "end": 8700,
       "added": 663,
       "exceptions": 37,
+      "previouslyReviewed": 0
+    },
+    {
+      "start": 8701,
+      "end": 9400,
+      "added": 651,
+      "exceptions": 48,
+      "previouslyReviewed": 0
+    },
+    {
+      "start": 9401,
+      "end": 10000,
+      "added": 560,
+      "exceptions": 39,
       "previouslyReviewed": 0
     }
   ]

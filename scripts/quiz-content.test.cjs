@@ -20,7 +20,7 @@ test('frequency batches account for every source word with reviewed content or a
   let next = 301;
   for (const batch of batches) {
     assert.equal(batch.start, next, 'batches are contiguous');
-    assert.equal(batch.end - batch.start + 1, 700);
+    assert.equal(batch.end - batch.start + 1, Math.min(700, Math.max(...vocab.map(item => item.r)) - batch.start + 1));
     next = batch.end + 1;
     const entries = vocab.filter(item => item.r >= batch.start && item.r <= batch.end);
     const reviewed = entries.filter(item => getWordContent(item).reviewed);
@@ -48,6 +48,7 @@ test('frequency batches account for every source word with reviewed content or a
     assert.equal(recorded.coverage.reviewed, reviewed.length, 'committed coverage is current');
     assert.deepEqual(recorded.withoutExample.map(item => item.r), omitted.map(item => item.r));
   }
+  assert.equal(next, Math.max(...vocab.map(item => item.r)) + 1, 'batches reach the actual source end');
   assert.equal(omittedRanks.length, batches.reduce((sum, batch) => sum + batch.exceptions, 0));
   assert.equal(report.after.all.reviewed, vocab.filter(item => getWordContent(item).reviewed).length);
 });
