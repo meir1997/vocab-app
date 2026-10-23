@@ -227,4 +227,4 @@ These 219 words had a displayed primary Hebrew gloss that belonged to another wo
 ## C-token pass (cache v19)
 93 abbreviations, letters, state codes, dialect forms and prefixes received a grounded gloss and a sentence (for example MD, CA, UT, NM, CO, AK, sub, re, non, dis, con, self-). `superstitious` was corrected too, and the layout tests now use `mother+'s` as the unreviewed long-token fixture.
 
-16 tokens stay without an example because no reliable standalone sense exists: sn, pwh, mother+'s, rest., imp., of., as., wid, te, gen., cong., col., ni, ll, val, las, KA. They are malformed or ambiguous fragments; they are listed in docs/example-exceptions.md.
+17 tokens stay without an example because no reliable standalone sense exists: sn, pwh, mother+'s, rest., imp., of., as., wid, te, gen., cong., col., ni, ll, val, las, KA. They are malformed or ambiguous fragments; they are listed in docs/example-exceptions.md.
