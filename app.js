@@ -133,16 +133,21 @@ function priorityOf(w) {
   if (!p || (p.r + p.w) === 0) return 1;           // new
   return 2;
 }
-// "In learning" = attempted at least once and not yet learned (streak < 2).
-const isLearning = p => !!p && (p.r + p.w) > 0 && p.s < 2;
+const isAttempted = p => !!p && (p.r + p.w) > 0;
+// A clean first answer is learned immediately; after any miss, two consecutive
+// correct answers are still required. Derive this from the unchanged history.
+const isLearned = p => isAttempted(p) && p.s >= (p.w === 0 ? 1 : 2);
+const isLearning = p => isAttempted(p) && !isLearned(p);
 const learningCount = () => Object.values(progress).filter(isLearning).length;
 function buildQueue() {
   const now = Date.now();
-  const attempted = v => { const p = progress[v.w]; return p && (p.r + p.w) > 0; };
+  const attempted = v => isAttempted(progress[v.w]);
   // Never-attempted words may enter learning only while fewer than
   // LEARNING_LIMIT words are in learning. Existing words are never removed.
-  let slots = Math.max(0, LEARNING_LIMIT - learningCount());
-  const admit = v => { if (attempted(v)) return true; if (slots <= 0) return false; slots--; return true; };
+  // Queuing a word does not reserve a learning slot. Check the real count again
+  // before showing each question, because an earlier miss can fill the cap.
+  const canIntroduce = learningCount() < LEARNING_LIMIT;
+  const admit = v => attempted(v) || canIntroduce;
   // Current band plus due reviews of words already attempted anywhere;
   // words outside the band that were never attempted are not introduced.
   const due = vocab.filter(v => (progress[v.w] ? progress[v.w].next : 0) <= now && (inCurrentBand(v) || attempted(v)));
@@ -157,6 +162,14 @@ function buildQueue() {
     for (const v of vocab) { if (picked.length >= want) break; if (!ids.has(v.w) && inCurrentBand(v) && admit(v)) { ids.add(v.w); picked.push(v); } }
   }
   return shuffle(picked);
+}
+function skipUnadmittedQuestions() {
+  let removed = false;
+  while (session.queue[session.index] && !isAttempted(progress[session.queue[session.index].w]) && learningCount() >= LEARNING_LIMIT) {
+    session.queue.splice(session.index, 1);
+    removed = true;
+  }
+  if (removed) $('sessionLabel').textContent = settings.length === 'all' ? 'כל הדחופות' : `${session.queue.length} מילים`;
 }
 const shuffle = arr => { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
@@ -177,7 +190,7 @@ function dayStreak() {
   }
   return n;
 }
-const learnedCount = () => Object.values(progress).filter(p => p.s >= 2).length;
+const learnedCount = () => Object.values(progress).filter(isLearned).length;
 const dueCount = () => { const now = Date.now(); return vocab.filter(v => progress[v.w] && progress[v.w].next <= now && (progress[v.w].r + progress[v.w].w) > 0).length; };
 const pct = (a, b) => b ? `${Math.round(a / b * 100)}%` : '—';
 
@@ -309,7 +322,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v8');
+    const cache = await caches.open('four-words-offline-v9');
     const required = ['index.html', 'app.js', 'quiz-content.js', 'vocab.json', 'details.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
@@ -339,17 +352,26 @@ function fitWord() {
   el.style.fontSize = '';
   let size = parseFloat(getComputedStyle(el).fontSize) || 42;
   el.style.whiteSpace = 'nowrap';
-  while (size > 20 && el.scrollWidth > el.clientWidth + 1) { size -= 2; el.style.fontSize = size + 'px'; }
-  el.style.whiteSpace = '';
+  while (size > 14 && el.scrollWidth > el.clientWidth) { size -= 2; el.style.fontSize = size + 'px'; }
+  // Keep the fitted line intact: re-enabling wrapping can add a line because
+  // fractional glyph widths round differently from scrollWidth.
+}
+function renderReviewBadge(item) {
+  const badge = $('reviewBadge');
+  const reviewing = !inCurrentBand(item);
+  badge.textContent = reviewing ? `חזרה · רמה ${Math.ceil(item.r / BAND_SIZE)}` : '';
+  badge.setAttribute('aria-hidden', String(!reviewing));
 }
 function showQuestion() {
+  skipUnadmittedQuestions();
   const item = session.queue[session.index];
   if (!item) return finishSession();
   $('progressText').textContent = `מילה ${session.index + 1} מתוך ${session.queue.length}`;
   $('progressBar').style.width = `${(session.index / session.queue.length) * 100}%`;
   $('serial').textContent = `#${item.r.toLocaleString('he-IL')}`;
+  renderReviewBadge(item);
   $('hint').textContent = ''; $('hint').className = 'hint';
-  $('quizCard').classList.remove('reviewing');
+  $('quizCard').classList.remove('reviewing', 'answering-correct');
   $('answerFeedback').replaceChildren(); $('answerFeedback').classList.add('hidden');
   $('nextBtn').classList.add('hidden'); $('dontKnowBtn').classList.remove('hidden');
   $('typingCheck').disabled = false; $('typingInput').disabled = false;
@@ -357,7 +379,9 @@ function showQuestion() {
   const content = VocabQuiz.getWordContent(item, wordDetails[item.r]);
   const context = VocabQuiz.getPromptContext(item, mode, wordDetails[item.r]);
   $('questionContext').textContent = context;
-  $('questionContext').classList.toggle('hidden', !context);
+  // Keep the context slot even when a later question needs no example.
+  $('questionContext').classList.remove('hidden');
+  $('questionContext').classList.toggle('empty', !context);
   const answers = $('answers'); answers.replaceChildren();
   if (mode === 'typing') {
     $('promptLabel').textContent = 'כתבו באנגלית את המילה';
@@ -413,9 +437,12 @@ function nextQuestion() {
   locked = false; session.index++; showQuestion();
 }
 function completeAnswer(ok, item) {
-  $('dontKnowBtn').classList.add('hidden');
   $('typingCheck').disabled = true; $('typingInput').disabled = true;
-  if (ok) return advanceWhenReady(nextQuestion, 900);
+  if (ok) {
+    $('quizCard').classList.add('answering-correct');
+    return advanceWhenReady(nextQuestion, 900);
+  }
+  $('dontKnowBtn').classList.add('hidden');
   $('quizCard').classList.add('reviewing');
   renderAnswerFeedback(item);
   $('nextBtn').classList.remove('hidden');
@@ -425,6 +452,8 @@ function completeAnswer(ok, item) {
   }).catch(() => {});
 }
 function renderAnswerFeedback(item) {
+  // The answer may have advanced the current band since the prompt rendered.
+  renderReviewBadge(item);
   const content = VocabQuiz.getWordContent(item, wordDetails[item.r]);
   const box = $('answerFeedback'); box.replaceChildren(); box.classList.remove('hidden');
   const label = document.createElement('p'); label.className = 'feedback-label'; label.textContent = 'המשמעות הנלמדת';

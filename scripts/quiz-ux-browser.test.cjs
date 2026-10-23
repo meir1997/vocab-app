@@ -87,6 +87,11 @@ async function assertCorrection(page) {
   assert.match(await feedback.innerText(), /[\u05d0-\u05ea]/, 'correction includes Hebrew');
   const meaning = await page.evaluate(() => VocabQuiz.getWordContent(session.queue[session.index], null).meaning);
   assert.ok((await feedback.innerText()).includes(meaning), 'correction includes the intended Hebrew translation');
+  const visibleMeaningCount = await page.locator('#quizCard').evaluate((card, meaning) =>
+    [...card.querySelectorAll('*')].filter(element =>
+      element.children.length === 0 && element.checkVisibility() && element.textContent.trim() === meaning
+    ).length, meaning);
+  assert.equal(visibleMeaningCount, 1, 'correction shows the Hebrew answer exactly once in every mode');
   const example = feedback.locator('.example-text[lang="en"]');
   assert.ok(await example.count(), 'correction has an English example with its language marked');
   assert.match(await example.first().innerText(), /[A-Za-z].*[.!?]/, 'correction contains a sentence');
@@ -246,8 +251,8 @@ async function preservedLearningRules() {
       const fullNoSideEffects = Object.keys(progress).length === 200;
       progress = Object.fromEntries(vocab.slice(0, 199).map(item => [item.w, { r: 0, w: 1, s: 0, next: Date.now() + DAY }]));
       const oneSlotQueue = buildQueue();
-      const reservedCap = oneSlotQueue.length === 1 && !progress[oneSlotQueue[0].w] && learningCount() === 199;
-      return { sixStays, sevenAdvances, noUnseenProgress, levelBounds, thousandAdvances, otherThousandIgnored, fullCap, fullNoSideEffects, reservedCap };
+      const noReservedSlots = oneSlotQueue.length === 20 && oneSlotQueue.every(item => !progress[item.w]) && learningCount() === 199;
+      return { sixStays, sevenAdvances, noUnseenProgress, levelBounds, thousandAdvances, otherThousandIgnored, fullCap, fullNoSideEffects, noReservedSlots };
     });
     assert.deepEqual(result, Object.fromEntries(Object.keys(result).map(key => [key, true])));
   } finally { await context.close(); }

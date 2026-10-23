@@ -21,7 +21,16 @@ jobs:
       - run: node --test scripts/vocabulary.test.mjs scripts/quiz-content.test.cjs
       - run: node scripts/example-coverage.cjs
       - run: node scripts/quiz-ux-browser.test.cjs
+      - run: node scripts/learning-rule-browser.test.cjs
+      - run: node scripts/feedback-layout-browser.test.cjs --screenshots test-results/feedback
+      - run: node scripts/safe-area-browser.test.cjs --screenshots test-results/safe-area
       - run: node scripts/sense-examples-browser.test.cjs
       - run: node scripts/visual-layout-browser.test.cjs
       - run: node scripts/offline-browser.test.cjs
       - run: node scripts/reconnect-browser.test.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: web-layout-evidence
+          path: test-results/
+          if-no-files-found: ignore
