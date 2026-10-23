@@ -141,7 +141,7 @@ async function senseRegressions() {
       const cases = [
         ...reviewedWords.map(word => ({ word, reviewed: true })),
         { word: unreviewedFrequent, reviewed: false },
-        { word: 'superstitious', reviewed: false },
+        { word: "mother+'s", reviewed: false },
         { word: 'right', reviewed: false, changedSense: true }
       ];
       for (const fixture of cases) {

@@ -55,7 +55,7 @@ function assertStable(reference, actual, label) {
 async function screenshot(page, name) {
   if (screenshotDirectory) await page.screenshot({ path: path.join(screenshotDirectory, name + '.png'), fullPage: false, animations: 'disabled' });
 }
-async function seed(page, mode, words = ['right', 'superstitious', 'run']) {
+async function seed(page, mode, words = ['right', "mother+'s", 'run']) {
   await page.evaluate(({ mode, words }) => {
     let random = 312413;
     Math.random = () => { random = (Math.imul(random, 1664525) + 1013904223) >>> 0; return random / 4294967296; };
