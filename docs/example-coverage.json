@@ -1,0 +1,247 @@
+{
+  "baselineRef": "591ed5a13e7355090ab2ab8b781ad7b489232644",
+  "policy": "Only reviewed authored examples matching the displayed primary Hebrew meaning; generated examples are omitted.",
+  "before": {
+    "all": {
+      "words": 9998,
+      "withExample": 9816,
+      "withoutExample": 182,
+      "reviewed": 60,
+      "withPromptContext": 60,
+      "withExampleWithoutDetails": 60
+    },
+    "top300": {
+      "words": 300,
+      "withExample": 299,
+      "withoutExample": 1,
+      "reviewed": 19,
+      "withPromptContext": 19,
+      "withExampleWithoutDetails": 19
+    }
+  },
+  "after": {
+    "all": {
+      "words": 9998,
+      "withExample": 299,
+      "withoutExample": 9699,
+      "reviewed": 299,
+      "withPromptContext": 299,
+      "withExampleWithoutDetails": 299
+    },
+    "top300": {
+      "words": 300,
+      "withExample": 259,
+      "withoutExample": 41,
+      "reviewed": 259,
+      "withPromptContext": 259,
+      "withExampleWithoutDetails": 259
+    }
+  },
+  "top300WithoutExample": [
+    {
+      "r": 1,
+      "w": "the",
+      "t": "את"
+    },
+    {
+      "r": 16,
+      "w": "had",
+      "t": "היה"
+    },
+    {
+      "r": 41,
+      "w": "an",
+      "t": "an"
+    },
+    {
+      "r": 45,
+      "w": "who",
+      "t": "WHO"
+    },
+    {
+      "r": 85,
+      "w": "a",
+      "t": "א"
+    },
+    {
+      "r": 89,
+      "w": "two",
+      "t": "דוּ"
+    },
+    {
+      "r": 105,
+      "w": "shall",
+      "t": "יהיה"
+    },
+    {
+      "r": 106,
+      "w": "day",
+      "t": "יְוֹם"
+    },
+    {
+      "r": 125,
+      "w": "am",
+      "t": "בבוקר"
+    },
+    {
+      "r": 128,
+      "w": "def",
+      "t": "def"
+    },
+    {
+      "r": 145,
+      "w": "eyes",
+      "t": "עיניים"
+    },
+    {
+      "r": 153,
+      "w": "though",
+      "t": "אמנם"
+    },
+    {
+      "r": 159,
+      "w": "god",
+      "t": "אֵל"
+    },
+    {
+      "r": 160,
+      "w": "years",
+      "t": "שנים"
+    },
+    {
+      "r": 173,
+      "w": "three",
+      "t": "שְׁלוֹשָׁה"
+    },
+    {
+      "r": 177,
+      "w": "always",
+      "t": "תָמִיד"
+    },
+    {
+      "r": 180,
+      "w": "night",
+      "t": "לַיְלָה"
+    },
+    {
+      "r": 196,
+      "w": "de",
+      "t": "דה"
+    },
+    {
+      "r": 205,
+      "w": "days",
+      "t": "ימים"
+    },
+    {
+      "r": 214,
+      "w": "p",
+      "t": "ע"
+    },
+    {
+      "r": 215,
+      "w": "having",
+      "t": "שיש"
+    },
+    {
+      "r": 221,
+      "w": "father",
+      "t": "אַבָּא"
+    },
+    {
+      "r": 223,
+      "w": "course",
+      "t": "קוּרס"
+    },
+    {
+      "r": 224,
+      "w": "hands",
+      "t": "ידיים"
+    },
+    {
+      "r": 225,
+      "w": "woman",
+      "t": "אִשָׁה"
+    },
+    {
+      "r": 228,
+      "w": "mother",
+      "t": "אִמָא"
+    },
+    {
+      "r": 229,
+      "w": "soon",
+      "t": "בְּקָרוּב"
+    },
+    {
+      "r": 234,
+      "w": "almost",
+      "t": "כִּמעַט"
+    },
+    {
+      "r": 236,
+      "w": "thou",
+      "t": "אַתָה"
+    },
+    {
+      "r": 238,
+      "w": "water",
+      "t": "מַיִם"
+    },
+    {
+      "r": 248,
+      "w": "door",
+      "t": "דֶלֶת"
+    },
+    {
+      "r": 254,
+      "w": "morning",
+      "t": "שַׁחַר"
+    },
+    {
+      "r": 256,
+      "w": "Gutenberg",
+      "t": "גוטנברג"
+    },
+    {
+      "r": 267,
+      "w": "others",
+      "t": "אחרים"
+    },
+    {
+      "r": 271,
+      "w": "money",
+      "t": "כֶּסֶף"
+    },
+    {
+      "r": 274,
+      "w": "death",
+      "t": "מָוֶת"
+    },
+    {
+      "r": 280,
+      "w": "thy",
+      "t": "שלך"
+    },
+    {
+      "r": 284,
+      "w": "often",
+      "t": "לְעִתִים קְרוֹבוֹת"
+    },
+    {
+      "r": 287,
+      "w": "year",
+      "t": "שָׁנָה"
+    },
+    {
+      "r": 288,
+      "w": "friend",
+      "t": "חבר"
+    },
+    {
+      "r": 291,
+      "w": "round",
+      "t": "עִגוּל"
+    }
+  ]
+}

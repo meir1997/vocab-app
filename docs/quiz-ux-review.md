@@ -1,5 +1,8 @@
 # Quiz and word-card UX review — 2026-10-23
 
+Historical PR 13 review. Its generated-example policy and coverage notes are
+superseded by the sense-aligned content follow-up in [REVIEW.md](../REVIEW.md).
+
 Based on main `acaf5ae` (including the 200-word learning cap and long-word fix).
 This change updates the web app; the native Swift UI is unchanged.
 
