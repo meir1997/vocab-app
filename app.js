@@ -308,7 +308,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v6');
+    const cache = await caches.open('four-words-offline-v7');
     const required = ['index.html', 'app.js', 'quiz-content.js', 'vocab.json', 'details.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
@@ -433,7 +433,6 @@ function renderAnswerFeedback(item) {
   example.textContent = content.example || '';
   box.append(label, meaning, word);
   if (content.example) box.append(example);
-  else { const empty = document.createElement('p'); empty.className = 'detail-empty'; empty.textContent = 'משפט לדוגמה עדיין לא זמין למילה הזו.'; box.append(empty); }
   requestAnimationFrame(() => {
     if (!locked || sheetOpen || session.queue[session.index] !== item) return;
     const bottom = $('nextBtn').getBoundingClientRect().bottom;
@@ -560,7 +559,7 @@ async function openDetails(item) {
     const q = document.createElement('p'); q.className = 'example-text'; q.lang = 'en'; q.dir = 'ltr'; q.textContent = content.example;
     const b = document.createElement('button'); b.className = 'speak-btn'; b.setAttribute('aria-label', 'השמעת המשפט'); b.textContent = '🔊'; b.addEventListener('click', () => speak(content.example));
     row.append(q, b); addDetailSection(body, 'משפט לדוגמה', [row]);
-  } else { const p = document.createElement('p'); p.className = 'detail-empty'; p.textContent = 'משפט לדוגמה עדיין לא זמין למילה הזו.'; body.append(p); }
+  }
   const disclosure = (label, node) => {
     const extra = document.createElement('details'); extra.className = 'detail-extra';
     const summary = document.createElement('summary'); summary.textContent = label;

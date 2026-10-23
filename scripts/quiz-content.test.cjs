@@ -28,7 +28,75 @@ test('the reviewed sense, short example and masked prompt agree with the source 
   assert.equal(getPromptContext(can, 'typing'), 'She opened a ____ of beans.');
   // A changed source meaning must not inherit the old authored context.
   assert.equal(getWordContent(word(79, 'can', 'יכול'), generated).reviewed, false);
+  assert.equal(getWordContent(word(79, 'can', 'יכול'), generated).example, '');
   assert.equal(getPromptContext(word(79, 'can', 'יכול'), 'choice', generated), '');
+});
+
+test('generated examples never establish Hebrew sense alignment, even with a single definition', () => {
+  for (const item of [word(1, 'the', 'את'), word(8407, 'incomprehensible', 'לא מובן')]) {
+    for (const detail of [null, {}, { e: 'A plausible but unverified sentence.' },
+      { e: 'An unrelated sense.', d: ['n|one retained definition'] },
+      { e: 'An unrelated sense.', d: ['n|first sense', 'v|second sense'] }]) {
+      const content = getWordContent(item, detail);
+      assert.equal(content.example, '', item.w);
+      assert.equal(content.context, '', item.w);
+      assert.equal(content.reviewed, false, item.w);
+      for (const mode of ['choice', 'reverse', 'typing']) assert.equal(getPromptContext(item, mode, detail), '', item.w);
+    }
+  }
+});
+
+test('review approval is bound to the displayed primary meaning, not an alternative or matching gloss fragment', () => {
+  for (const t of ['יכול; פחית', 'פחית שתיה אחרת', '']) {
+    const item = word(79, 'can', t);
+    const detail = { e: 'All you can do is trust one another.', d: ['v|be able'], t: 'פחית' };
+    assert.equal(getWordContent(item, detail).example, '', t);
+    assert.equal(getPromptContext(item, 'typing', detail), '', t);
+  }
+  assert.equal(getWordContent(word(79, 'CAN', '\u200fפַּחִית; יכול')).example, 'She opened a can of beans.');
+});
+
+test('for, it, as and directional right teach the displayed Hebrew sense across every surface', () => {
+  const vocab = JSON.parse(readFileSync(join(__dirname, '../vocab.json'), 'utf8'));
+  const expected = {
+    for: ['עבור', 'This gift is for you.'],
+    it: ['זה', 'What is it? It is a small bird.'],
+    as: ['כמו', 'Do as I do.'],
+    right: ['ימינה', 'Turn right at the next street.']
+  };
+  for (const [w, [meaning, example]] of Object.entries(expected)) {
+    const item = vocab.find(item => item.w === w);
+    const detail = { e: w === 'for' ? 'You should not give him up for lost.' : 'This is always the way it has been.' };
+    const content = getWordContent(item, detail);
+    assert.equal(normalizeHebrew(content.meaning), meaning, w);
+    assert.equal(content.example, example, w);
+    assert.equal(content.context, example, w);
+    assert.equal(getPromptContext(item, 'choice', detail), example, w);
+    for (const mode of ['reverse', 'typing']) {
+      assert.ok(getPromptContext(item, mode, detail).includes('____'), w);
+      assert.doesNotMatch(getPromptContext(item, mode, detail), new RegExp('\\b' + w + '\\b', 'i'), w);
+    }
+  }
+});
+
+test('all source entries use the same reviewed-only gate with loaded, missing and late details', () => {
+  const vocab = JSON.parse(readFileSync(join(__dirname, '../vocab.json'), 'utf8'));
+  const details = JSON.parse(readFileSync(join(__dirname, '../details.json'), 'utf8'));
+  const original = JSON.stringify(details);
+  for (const item of vocab) {
+    const offline = getWordContent(item);
+    const loaded = getWordContent(item, details[item.r]);
+    assert.equal(loaded.example, offline.example, item.w);
+    assert.equal(loaded.context, loaded.example, item.w);
+    assert.equal(!!loaded.example, loaded.reviewed, item.w);
+    const changed = { ...item, t: 'משמעות שלא נבדקה' };
+    assert.equal(getWordContent(changed, details[item.r]).example, '', item.w);
+    for (const mode of ['choice', 'reverse', 'typing']) {
+      assert.equal(getPromptContext(item, mode, details[item.r]), getPromptContext(item, mode), item.w);
+      assert.equal(getPromptContext(changed, mode, details[item.r]), '', item.w);
+    }
+  }
+  assert.equal(JSON.stringify(details), original);
 });
 
 test('single primary labels never combine a correct sense with a distractor sense', () => {

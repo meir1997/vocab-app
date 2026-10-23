@@ -182,7 +182,7 @@ async function simpleWordCardAndLongWords() {
   for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844 }, { width: 320, height: 812 }]) {
     const { page, context } = await newPage(viewport);
     try {
-      await seedQuestion(page, 'choice', ['run', 'incomprehensible']);
+      await seedQuestion(page, 'choice', ['right', 'incomprehensible']);
       await page.locator('#detailBtn').click();
       await page.locator('#detailBody .example-text').waitFor({ state: 'visible' });
       const card = await page.locator('#detailBody').evaluate(body => ({
@@ -205,7 +205,9 @@ async function simpleWordCardAndLongWords() {
       await seedQuestion(page, 'choice', ['incomprehensible']);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'long quiz word causes no horizontal overflow');
       await page.locator('#detailBtn').click();
-      await page.locator('#detailBody .example-text').waitFor({ state: 'visible' });
+      await page.waitForFunction(() => sheetOpen && !document.getElementById('detailBody').textContent.includes('טוען…'));
+      assert.equal(await page.locator('#detailBody .example-text').count(), 0, 'unreviewed long-word example is omitted');
+      assert.equal(await page.locator('#detailBody .detail-empty').count(), 0, 'omitted example leaves no placeholder');
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'long word card fits the viewport');
       await page.locator('#detailClose').click();
       await seedQuestion(page, 'typing', ['right']);
