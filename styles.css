@@ -363,3 +363,10 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 }
 /* Keep grid tracks while exposing the correction only once to readers. */
 .reviewing .answer, .reviewing .word[lang="he"], .reviewing .prompt-label { display: none; }
+
+/* Fixed single-row header: sync text and sign-in label never wrap, so the page cannot shift. */
+.topbar, body:has(#quizCard:not(.hidden)) .topbar { flex-wrap: nowrap; }
+.brand { flex: 0 0 auto; }
+.top-actions { flex: 1 1 auto; flex-wrap: nowrap; min-width: 0; justify-content: flex-end; }
+.sync-status { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: end; }
+.auth-btn { flex: 0 0 auto; max-width: 58vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
