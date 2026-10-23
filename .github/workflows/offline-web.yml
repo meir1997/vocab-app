@@ -26,6 +26,7 @@ jobs:
       - run: node scripts/safe-area-browser.test.cjs --screenshots test-results/safe-area
       - run: node scripts/sense-examples-browser.test.cjs
       - run: node scripts/visual-layout-browser.test.cjs
+      - run: node scripts/topbar-stability-browser.test.cjs
       - run: node scripts/offline-browser.test.cjs
       - run: node scripts/reconnect-browser.test.cjs
       - uses: actions/upload-artifact@v4
