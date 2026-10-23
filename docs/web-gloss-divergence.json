@@ -1,0 +1,1877 @@
+{
+ "note": "Web glosses were corrected after the native snapshot was built. The native iOS snapshot (paused) keeps the original source glosses. Any other translation drift fails ios/Scripts/test_web_vocabulary.py.",
+ "entries": [
+  {
+   "word": "the",
+   "rank": 1,
+   "native": "את",
+   "web": "ה- (תווית היידוע)"
+  },
+  {
+   "word": "had",
+   "rank": 16,
+   "native": "היה",
+   "web": "היה ל-"
+  },
+  {
+   "word": "an",
+   "rank": 41,
+   "native": "an",
+   "web": "אחד (לפני תנועה)"
+  },
+  {
+   "word": "who",
+   "rank": 45,
+   "native": "WHO",
+   "web": "מי"
+  },
+  {
+   "word": "a",
+   "rank": 85,
+   "native": "א",
+   "web": "אחד (תווית לא מוגדרת)"
+  },
+  {
+   "word": "two",
+   "rank": 89,
+   "native": "דוּ",
+   "web": "שניים"
+  },
+  {
+   "word": "shall",
+   "rank": 105,
+   "native": "יהיה",
+   "web": "עתיד (פועל עזר)"
+  },
+  {
+   "word": "am",
+   "rank": 125,
+   "native": "בבוקר",
+   "web": "אני (הפועל להיות)"
+  },
+  {
+   "word": "having",
+   "rank": 215,
+   "native": "שיש",
+   "web": "כשיש לו"
+  },
+  {
+   "word": "morning",
+   "rank": 254,
+   "native": "שַׁחַר",
+   "web": "בוקר"
+  },
+  {
+   "word": "round",
+   "rank": 291,
+   "native": "עִגוּל",
+   "web": "עגול"
+  },
+  {
+   "word": "least",
+   "rank": 327,
+   "native": "פָּחוּת",
+   "web": "הכי פחות"
+  },
+  {
+   "word": "er",
+   "rank": 367,
+   "native": "אה",
+   "web": "אה (קול היסוס)"
+  },
+  {
+   "word": "reason",
+   "rank": 370,
+   "native": "לְנַמֵק",
+   "web": "סיבה"
+  },
+  {
+   "word": "I'll",
+   "rank": 387,
+   "native": "חוֹלֶה",
+   "web": "אני (עתיד)"
+  },
+  {
+   "word": "turn",
+   "rank": 434,
+   "native": "פִּנָה",
+   "web": "לפנות"
+  },
+  {
+   "word": "followed",
+   "rank": 439,
+   "native": "בעקבותיו",
+   "web": "עקב אחרי"
+  },
+  {
+   "word": "ye",
+   "rank": 451,
+   "native": "אתה",
+   "web": "אתם (ארכאי)"
+  },
+  {
+   "word": "can't",
+   "rank": 462,
+   "native": "צְבִיעוּת",
+   "web": "לא יכול"
+  },
+  {
+   "word": "ety",
+   "rank": 484,
+   "native": "ety",
+   "web": "אטימולוגיה (קיצור)"
+  },
+  {
+   "word": "real",
+   "rank": 527,
+   "native": "רִיאָל",
+   "web": "אמיתי"
+  },
+  {
+   "word": "an'",
+   "rank": 572,
+   "native": "א'",
+   "web": "ו (קיצור דיבורי של and)"
+  },
+  {
+   "word": "wrong",
+   "rank": 637,
+   "native": "טָעוּת",
+   "web": "שגוי"
+  },
+  {
+   "word": "u",
+   "rank": 672,
+   "native": "u",
+   "web": "אתה (קיצור של you)"
+  },
+  {
+   "word": "won't",
+   "rank": 673,
+   "native": "רָגִיל",
+   "web": "לא יעשה"
+  },
+  {
+   "word": "c.",
+   "rank": 801,
+   "native": "ג.",
+   "web": "בערך בשנה (circa)"
+  },
+  {
+   "word": "c",
+   "rank": 844,
+   "native": "ג",
+   "web": "האות C (סי)"
+  },
+  {
+   "word": "marriage",
+   "rank": 854,
+   "native": "חֲתוּנָה",
+   "web": "נישואין"
+  },
+  {
+   "word": "corner",
+   "rank": 923,
+   "native": "קֶרֶן",
+   "web": "פינה"
+  },
+  {
+   "word": "o'",
+   "rank": 952,
+   "native": "או'",
+   "web": "של (בקיצור o'clock)"
+  },
+  {
+   "word": "I'd",
+   "rank": 969,
+   "native": "תְעוּדַת זֶהוּת",
+   "web": "הייתי רוצה"
+  },
+  {
+   "word": "v.",
+   "rank": 975,
+   "native": "v.",
+   "web": "נגד (versus)"
+  },
+  {
+   "word": "et",
+   "rank": 1003,
+   "native": "et",
+   "web": "ו (בלטינית)"
+  },
+  {
+   "word": "class",
+   "rank": 1018,
+   "native": "מַחלָקָה",
+   "web": "כיתה"
+  },
+  {
+   "word": "hart",
+   "rank": 1043,
+   "native": "הארט",
+   "web": "אייל"
+  },
+  {
+   "word": "pride",
+   "rank": 1052,
+   "native": "גֵאָה",
+   "web": "גאווה"
+  },
+  {
+   "word": "em",
+   "rank": 1147,
+   "native": "em",
+   "web": "אותם (דיבורי)"
+  },
+  {
+   "word": "possessed",
+   "rank": 1175,
+   "native": "דיבוק",
+   "web": "אחוז דיבוק"
+  },
+  {
+   "word": "q",
+   "rank": 1232,
+   "native": "ש",
+   "web": "שאלה (קיצור של question)"
+  },
+  {
+   "word": "companion",
+   "rank": 1347,
+   "native": "לוויה",
+   "web": "בן לוויה"
+  },
+  {
+   "word": "sd",
+   "rank": 1449,
+   "native": "sd",
+   "web": "סטיית תקן (sd)"
+  },
+  {
+   "word": "e",
+   "rank": 1479,
+   "native": "ה",
+   "web": "האות E"
+  },
+  {
+   "word": "phrase",
+   "rank": 1591,
+   "native": "מִשׁפָּט",
+   "web": "ביטוי"
+  },
+  {
+   "word": "don",
+   "rank": 1676,
+   "native": "דוֹן",
+   "web": "ללבוש"
+  },
+  {
+   "word": "yards",
+   "rank": 1858,
+   "native": "מטרים",
+   "web": "יארדים"
+  },
+  {
+   "word": "becoming",
+   "rank": 1879,
+   "native": "הִתהַוּוּת",
+   "web": "מתאים"
+  },
+  {
+   "word": "obs",
+   "rank": 1907,
+   "native": "obs",
+   "web": "מיושן (קיצור של obsolete)"
+  },
+  {
+   "word": "fn",
+   "rank": 1918,
+   "native": "fn",
+   "web": "הערת שוליים (קיצור)"
+  },
+  {
+   "word": "kissed",
+   "rank": 1960,
+   "native": "התנשקה",
+   "web": "נישק"
+  },
+  {
+   "word": "companions",
+   "rank": 1968,
+   "native": "לוויה",
+   "web": "בני לוויה"
+  },
+  {
+   "word": "en",
+   "rank": 2007,
+   "native": "he",
+   "web": "ב (בצרפתית)"
+  },
+  {
+   "word": "sell",
+   "rank": 2025,
+   "native": "מְכִירָה",
+   "web": "למכור"
+  },
+  {
+   "word": "shalt",
+   "rank": 2082,
+   "native": "shalt",
+   "web": "אתה תעשה (ארכאי)"
+  },
+  {
+   "word": "compliance",
+   "rank": 2164,
+   "native": "הַתאָמָה",
+   "web": "ציות"
+  },
+  {
+   "word": "we'll",
+   "rank": 2214,
+   "native": "טוֹב",
+   "web": "אנחנו (עתיד)"
+  },
+  {
+   "word": "w",
+   "rank": 2260,
+   "native": "w",
+   "web": "עם (קיצור של with)"
+  },
+  {
+   "word": "render",
+   "rank": 2268,
+   "native": "לְדַקלֵם",
+   "web": "להציג"
+  },
+  {
+   "word": "y",
+   "rank": 2307,
+   "native": "y",
+   "web": "האות Y (וואי)"
+  },
+  {
+   "word": "email",
+   "rank": 2354,
+   "native": "אֶלֶקטרוֹנִי",
+   "web": "אימייל"
+  },
+  {
+   "word": "recent",
+   "rank": 2414,
+   "native": "לאחרונה",
+   "web": "אחרון"
+  },
+  {
+   "word": "bade",
+   "rank": 2475,
+   "native": "הציע",
+   "web": "אמר (ארכאי)"
+  },
+  {
+   "word": "th'",
+   "rank": 2552,
+   "native": "ה'",
+   "web": "ה (ארכאי)"
+  },
+  {
+   "word": "les",
+   "rank": 2578,
+   "native": "les",
+   "web": "ה- (צרפתית רבים)"
+  },
+  {
+   "word": "sorts",
+   "rank": 2606,
+   "native": "מיון",
+   "web": "סוגים"
+  },
+  {
+   "word": "o'er",
+   "rank": 2668,
+   "native": "או''ר",
+   "web": "מעל"
+  },
+  {
+   "word": "referred",
+   "rank": 2694,
+   "native": "הפניה",
+   "web": "הפנה"
+  },
+  {
+   "word": "u.s.",
+   "rank": 2772,
+   "native": "לָנוּ.",
+   "web": "ארצות הברית (U.S.)"
+  },
+  {
+   "word": "o",
+   "rank": 2792,
+   "native": "o",
+   "web": "הו (קריאה)"
+  },
+  {
+   "word": "n",
+   "rank": 2805,
+   "native": "נ",
+   "web": "האות N"
+  },
+  {
+   "word": "contrast",
+   "rank": 3022,
+   "native": "לְהַשְׁווֹת",
+   "web": "ניגוד"
+  },
+  {
+   "word": "relieved",
+   "rank": 3023,
+   "native": "הקלה",
+   "web": "נרגע"
+  },
+  {
+   "word": "owns",
+   "rank": 3055,
+   "native": "הבעלים",
+   "web": "הבעלים של"
+  },
+  {
+   "word": "stirred",
+   "rank": 3058,
+   "native": "בוחשים",
+   "web": "בחש"
+  },
+  {
+   "word": "testimony",
+   "rank": 3111,
+   "native": "עֵד",
+   "web": "עדות"
+  },
+  {
+   "word": "Shak",
+   "rank": 3139,
+   "native": "שאק",
+   "web": "שייקספיר (קיצור)"
+  },
+  {
+   "word": "d",
+   "rank": 3150,
+   "native": "ד",
+   "web": "האות D"
+  },
+  {
+   "word": "forming",
+   "rank": 3168,
+   "native": "טְבִיעָה",
+   "web": "יוצר"
+  },
+  {
+   "word": "resources",
+   "rank": 3193,
+   "native": "אֶמְצָעִי",
+   "web": "משאבים"
+  },
+  {
+   "word": "preparing",
+   "rank": 3218,
+   "native": "עֲרִיכָה",
+   "web": "מכין"
+  },
+  {
+   "word": "missed",
+   "rank": 3233,
+   "native": "החמצה",
+   "web": "פספס"
+  },
+  {
+   "word": "agony",
+   "rank": 3238,
+   "native": "יָגוֹן",
+   "web": "ייסורים"
+  },
+  {
+   "word": "respects",
+   "rank": 3239,
+   "native": "מכבדים",
+   "web": "מכבד"
+  },
+  {
+   "word": "non",
+   "rank": 3266,
+   "native": "לֹא",
+   "web": "לא (תחילית non)"
+  },
+  {
+   "word": "sore",
+   "rank": 3297,
+   "native": "דַלֶקֶת",
+   "web": "כואב"
+  },
+  {
+   "word": "fancied",
+   "rank": 3308,
+   "native": "דִמיוֹנִי",
+   "web": "חשק ב-"
+  },
+  {
+   "word": "he'll",
+   "rank": 3343,
+   "native": "גֵיהִנוֹם",
+   "web": "הוא (עתיד)"
+  },
+  {
+   "word": "attained",
+   "rank": 3451,
+   "native": "מוּשָׂג",
+   "web": "השיג"
+  },
+  {
+   "word": "swung",
+   "rank": 3480,
+   "native": "התנופה",
+   "web": "הניף"
+  },
+  {
+   "word": "occasional",
+   "rank": 3530,
+   "native": "מִקרִי",
+   "web": "מזדמן"
+  },
+  {
+   "word": "roused",
+   "rank": 3577,
+   "native": "מתעורר",
+   "web": "עורר"
+  },
+  {
+   "word": "abode",
+   "rank": 3590,
+   "native": "מָקוֹם",
+   "web": "מעון"
+  },
+  {
+   "word": "yer",
+   "rank": 3611,
+   "native": "כן",
+   "web": "שלך (דיבורי)"
+  },
+  {
+   "word": "afforded",
+   "rank": 3638,
+   "native": "הניתן",
+   "web": "סיפק"
+  },
+  {
+   "word": "b",
+   "rank": 3687,
+   "native": "ב",
+   "web": "האות B"
+  },
+  {
+   "word": "faced",
+   "rank": 3810,
+   "native": "מתמודד",
+   "web": "התמודד עם"
+  },
+  {
+   "word": "fro",
+   "rank": 3833,
+   "native": "קדימה",
+   "web": "אחורה (בצירוף הלוך ושוב)"
+  },
+  {
+   "word": "commanding",
+   "rank": 3952,
+   "native": "פיקוד",
+   "web": "מרשים"
+  },
+  {
+   "word": "adv",
+   "rank": 3983,
+   "native": "עו\"ד",
+   "web": "תואר פועל (קיצור של adverb)"
+  },
+  {
+   "word": "learnt",
+   "rank": 4002,
+   "native": "מְלוּמָד",
+   "web": "למד"
+  },
+  {
+   "word": "wishing",
+   "rank": 4034,
+   "native": "משאלה",
+   "web": "מאחל"
+  },
+  {
+   "word": "stopping",
+   "rank": 4045,
+   "native": "סְתִימָה",
+   "web": "עוצר"
+  },
+  {
+   "word": "dost",
+   "rank": 4058,
+   "native": "דוסט",
+   "web": "אתה עושה (ארכאי)"
+  },
+  {
+   "word": "na",
+   "rank": 4077,
+   "native": "לא",
+   "web": "לא (דיבורי)"
+  },
+  {
+   "word": "hereafter",
+   "rank": 4118,
+   "native": "הַבָּא",
+   "web": "להלן"
+  },
+  {
+   "word": "desirous",
+   "rank": 4206,
+   "native": "צָמֵא",
+   "web": "משתוקק"
+  },
+  {
+   "word": "del",
+   "rank": 4259,
+   "native": "del",
+   "web": "מקש Delete (del)"
+  },
+  {
+   "word": "acres",
+   "rank": 4275,
+   "native": "דונם",
+   "web": "אקרים"
+  },
+  {
+   "word": "UT",
+   "rank": 4300,
+   "native": "UT",
+   "web": "יוטה (מדינה בארה\"ב)"
+  },
+  {
+   "word": "quoth",
+   "rank": 4336,
+   "native": "ציטוט",
+   "web": "אמר (ארכאי)"
+  },
+  {
+   "word": "neat",
+   "rank": 4365,
+   "native": "בְּהֵמָה",
+   "web": "מסודר"
+  },
+  {
+   "word": "fain",
+   "rank": 4457,
+   "native": "חלש",
+   "web": "ברצון"
+  },
+  {
+   "word": "blowing",
+   "rank": 4524,
+   "native": "מַשָׁב",
+   "web": "נושב"
+  },
+  {
+   "word": "pitch",
+   "rank": 4529,
+   "native": "פְּסִיעָה",
+   "web": "גובה צליל"
+  },
+  {
+   "word": "m",
+   "rank": 4552,
+   "native": "מ",
+   "web": "מטר (m)"
+  },
+  {
+   "word": "pan",
+   "rank": 4643,
+   "native": "פָּאן",
+   "web": "מחבת"
+  },
+  {
+   "word": "f",
+   "rank": 4682,
+   "native": "ו",
+   "web": "נקבה (קיצור f)"
+  },
+  {
+   "word": "pseud",
+   "rank": 4687,
+   "native": "פסוד",
+   "web": "שם בדוי (קיצור)"
+  },
+  {
+   "word": "glittering",
+   "rank": 4696,
+   "native": "הַברָקָה",
+   "web": "נוצץ"
+  },
+  {
+   "word": "eagle",
+   "rank": 4716,
+   "native": "נֶשֶׁר",
+   "web": "נשר"
+  },
+  {
+   "word": "el",
+   "rank": 4769,
+   "native": "אל",
+   "web": "ה- (בספרדית)"
+  },
+  {
+   "word": "glancing",
+   "rank": 4789,
+   "native": "מבט",
+   "web": "מציץ"
+  },
+  {
+   "word": "3d",
+   "rank": 4844,
+   "native": "3d",
+   "web": "תלת-ממדי (3D)"
+  },
+  {
+   "word": "r",
+   "rank": 4900,
+   "native": "ר",
+   "web": "האות R"
+  },
+  {
+   "word": "br",
+   "rank": 4933,
+   "native": "br",
+   "web": "חדר שינה (br)"
+  },
+  {
+   "word": "fundamental",
+   "rank": 4934,
+   "native": "יְסוֹד",
+   "web": "יסודי"
+  },
+  {
+   "word": "pool",
+   "rank": 5018,
+   "native": "פּוּל",
+   "web": "בריכה"
+  },
+  {
+   "word": "didst",
+   "rank": 5025,
+   "native": "didst",
+   "web": "עשית (ארכאי)"
+  },
+  {
+   "word": "ein",
+   "rank": 5150,
+   "native": "ein",
+   "web": "אחד (בגרמנית)"
+  },
+  {
+   "word": "reckoned",
+   "rank": 5174,
+   "native": "התחשבנו",
+   "web": "העריך"
+  },
+  {
+   "word": "rubbed",
+   "rank": 5209,
+   "native": "מְשׁוּפשָׁף",
+   "web": "שפשף"
+  },
+  {
+   "word": "x",
+   "rank": 5234,
+   "native": "x",
+   "web": "האות X"
+  },
+  {
+   "word": "morals",
+   "rank": 5268,
+   "native": "מוֹרָל",
+   "web": "מוסר"
+  },
+  {
+   "word": "2d",
+   "rank": 5271,
+   "native": "2ד",
+   "web": "שני (מספר סידורי)"
+  },
+  {
+   "word": "welcomed",
+   "rank": 5322,
+   "native": "בברכה",
+   "web": "קיבל בברכה"
+  },
+  {
+   "word": "NM",
+   "rank": 5345,
+   "native": "NM",
+   "web": "ניו מקסיקו (NM)"
+  },
+  {
+   "word": "indies",
+   "rank": 5392,
+   "native": "אינדי",
+   "web": "איי הודו"
+  },
+  {
+   "word": "slew",
+   "rank": 5414,
+   "native": "בְּרֵכָה",
+   "web": "הרג"
+  },
+  {
+   "word": "DEC",
+   "rank": 5468,
+   "native": "DEC",
+   "web": "דצמבר (DEC)"
+  },
+  {
+   "word": "pub.",
+   "rank": 5501,
+   "native": "פָּאבּ.",
+   "web": "פורסם (pub.)"
+  },
+  {
+   "word": "cherished",
+   "rank": 5574,
+   "native": "מְטוּפָּח",
+   "web": "יקר ללבו"
+  },
+  {
+   "word": "g",
+   "rank": 5592,
+   "native": "ז",
+   "web": "גרם (g)"
+  },
+  {
+   "word": "flashing",
+   "rank": 5659,
+   "native": "הַברָקָה",
+   "web": "מהבהב"
+  },
+  {
+   "word": "encoding",
+   "rank": 5677,
+   "native": "הַצפָּנָה",
+   "web": "קידוד"
+  },
+  {
+   "word": "honoured",
+   "rank": 5686,
+   "native": "כבוד",
+   "web": "מכובד"
+  },
+  {
+   "word": "draught",
+   "rank": 5703,
+   "native": "טְיוּטָה",
+   "web": "משב אוויר"
+  },
+  {
+   "word": "she'd",
+   "rank": 5749,
+   "native": "לִשְׁפּוֹך",
+   "web": "הייתה רוצה"
+  },
+  {
+   "word": "quest",
+   "rank": 5763,
+   "native": "לַחקוֹר",
+   "web": "מסע"
+  },
+  {
+   "word": "dainty",
+   "rank": 5790,
+   "native": "מְעַדֵן",
+   "web": "עדין"
+  },
+  {
+   "word": "singularly",
+   "rank": 5793,
+   "native": "באופן יחידני",
+   "web": "באופן יוצא דופן"
+  },
+  {
+   "word": "t'",
+   "rank": 5838,
+   "native": "לא'",
+   "web": "ה (דיאלקט)"
+  },
+  {
+   "word": "grieved",
+   "rank": 5848,
+   "native": "צער",
+   "web": "התאבל"
+  },
+  {
+   "word": "bursting",
+   "rank": 5850,
+   "native": "בִּצבּוּץ",
+   "web": "מתפרץ"
+  },
+  {
+   "word": "k",
+   "rank": 5887,
+   "native": "ק",
+   "web": "אלף (k)"
+  },
+  {
+   "word": "accounted",
+   "rank": 5934,
+   "native": "התחשב",
+   "web": "נחשב"
+  },
+  {
+   "word": "8vo",
+   "rank": 5959,
+   "native": "8vo",
+   "web": "אוקטבו (גודל ספר)"
+  },
+  {
+   "word": "pitched",
+   "rank": 5979,
+   "native": "זָפוּף",
+   "web": "הקים (אוהל)"
+  },
+  {
+   "word": "oe.",
+   "rank": 6014,
+   "native": "oe.",
+   "web": "אנגלית עתיקה (OE.)"
+  },
+  {
+   "word": "resulted",
+   "rank": 6036,
+   "native": "התוצאה",
+   "web": "הביא ל-"
+  },
+  {
+   "word": "springing",
+   "rank": 6063,
+   "native": "קפיצה",
+   "web": "נובע"
+  },
+  {
+   "word": "she'll",
+   "rank": 6068,
+   "native": "פָּגָז",
+   "web": "היא (עתיד)"
+  },
+  {
+   "word": "eighteenth",
+   "rank": 6180,
+   "native": "שמונה עשרה",
+   "web": "השמונה עשר"
+  },
+  {
+   "word": "we'd",
+   "rank": 6287,
+   "native": "לְהִתְחַתֵן",
+   "web": "היינו רוצים"
+  },
+  {
+   "word": "ness",
+   "rank": 6300,
+   "native": "ness",
+   "web": "כף יבשה"
+  },
+  {
+   "word": "margin",
+   "rank": 6360,
+   "native": "מֶתַח",
+   "web": "שוליים"
+  },
+  {
+   "word": "Prussian",
+   "rank": 6399,
+   "native": "פרוסיה",
+   "web": "פרוסי"
+  },
+  {
+   "word": "honored",
+   "rank": 6478,
+   "native": "כבוד",
+   "web": "מכובד"
+  },
+  {
+   "word": "fishes",
+   "rank": 6494,
+   "native": "מַזַל דָגִים",
+   "web": "דגים"
+  },
+  {
+   "word": "ropes",
+   "rank": 6508,
+   "native": "חִבֵּל",
+   "web": "חבלים"
+  },
+  {
+   "word": "dazzling",
+   "rank": 6530,
+   "native": "הִסתַנוְרוּת",
+   "web": "מסנוור"
+  },
+  {
+   "word": "novelty",
+   "rank": 6534,
+   "native": "טְרִיוּת",
+   "web": "חידוש"
+  },
+  {
+   "word": "li",
+   "rank": 6540,
+   "native": "לי",
+   "web": "לי (יחידת אורך סינית)"
+  },
+  {
+   "word": "ingenuity",
+   "rank": 6576,
+   "native": "שְׁנִינוּת",
+   "web": "תושייה"
+  },
+  {
+   "word": "superstitious",
+   "rank": 6639,
+   "native": "אמונות טפלות",
+   "web": "מאמין באמונות טפלות"
+  },
+  {
+   "word": "compilation",
+   "rank": 6655,
+   "native": "הַהדָרָה",
+   "web": "אוסף"
+  },
+  {
+   "word": "nineteenth",
+   "rank": 6677,
+   "native": "תֵשַׁע עֶשׂרֵה",
+   "web": "התשעה עשר"
+  },
+  {
+   "word": "captivity",
+   "rank": 6684,
+   "native": "גָלוּת",
+   "web": "שבי"
+  },
+  {
+   "word": "writ",
+   "rank": 6733,
+   "native": "כתב",
+   "web": "צו"
+  },
+  {
+   "word": "anon",
+   "rank": 6781,
+   "native": "אנון",
+   "web": "בקרוב"
+  },
+  {
+   "word": "turf",
+   "rank": 6798,
+   "native": "טוֹרף",
+   "web": "דשא"
+  },
+  {
+   "word": "NL",
+   "rank": 6810,
+   "native": "NL",
+   "web": "הולנד (NL)"
+  },
+  {
+   "word": "hastings",
+   "rank": 6811,
+   "native": "מהרינגס",
+   "web": "הייסטינגס (עיר באנגליה)"
+  },
+  {
+   "word": "yon",
+   "rank": 6862,
+   "native": "יון",
+   "web": "ההוא"
+  },
+  {
+   "word": "waistcoat",
+   "rank": 6863,
+   "native": "חֲזִיָה",
+   "web": "אפודה"
+  },
+  {
+   "word": "med",
+   "rank": 6883,
+   "native": "med",
+   "web": "תרופה (קיצור דיבורי)"
+  },
+  {
+   "word": "sixteenth",
+   "rank": 6962,
+   "native": "שש עשרה",
+   "web": "השש עשרה"
+  },
+  {
+   "word": "odds",
+   "rank": 6966,
+   "native": "קְטָטָה",
+   "web": "סיכויים"
+  },
+  {
+   "word": "irritation",
+   "rank": 6979,
+   "native": "הַקפָּדָה",
+   "web": "עצבנות"
+  },
+  {
+   "word": "devised",
+   "rank": 6997,
+   "native": "המהווה",
+   "web": "המציא"
+  },
+  {
+   "word": "satin",
+   "rank": 7045,
+   "native": "מֶשִׁי",
+   "web": "סאטן"
+  },
+  {
+   "word": "starving",
+   "rank": 7065,
+   "native": "הַרעָבָה",
+   "web": "גווע ברעב"
+  },
+  {
+   "word": "excused",
+   "rank": 7070,
+   "native": "מתרץ",
+   "web": "פטור"
+  },
+  {
+   "word": "ay",
+   "rank": 7084,
+   "native": "אה",
+   "web": "כן (ארכאי)"
+  },
+  {
+   "word": "transported",
+   "rank": 7090,
+   "native": "הובלה",
+   "web": "הוביל"
+  },
+  {
+   "word": "eighth",
+   "rank": 7101,
+   "native": "ח",
+   "web": "השמיני"
+  },
+  {
+   "word": "mentions",
+   "rank": 7105,
+   "native": "מזכירים",
+   "web": "מזכיר"
+  },
+  {
+   "word": "wan",
+   "rank": 7130,
+   "native": "wan",
+   "web": "חיוור"
+  },
+  {
+   "word": "insensible",
+   "rank": 7202,
+   "native": "חסר היגיון",
+   "web": "חסר הכרה"
+  },
+  {
+   "word": "desiring",
+   "rank": 7237,
+   "native": "הִתאַוּוּת",
+   "web": "מתאווה"
+  },
+  {
+   "word": "rushes",
+   "rank": 7238,
+   "native": "ממהרים",
+   "web": "ממהר"
+  },
+  {
+   "word": "sob",
+   "rank": 7294,
+   "native": "בֶּן כַּלבָּה",
+   "web": "לבכות בקול"
+  },
+  {
+   "word": "v",
+   "rank": 7301,
+   "native": "v",
+   "web": "נגד (v)"
+  },
+  {
+   "word": "disclaim",
+   "rank": 7314,
+   "native": "התנערות",
+   "web": "להתנער מ-"
+  },
+  {
+   "word": "ta",
+   "rank": 7331,
+   "native": "ta",
+   "web": "תודה (דיבורי בריטי)"
+  },
+  {
+   "word": "impose",
+   "rank": 7364,
+   "native": "לֶאֱכוֹף",
+   "web": "לכפות"
+  },
+  {
+   "word": "pa",
+   "rank": 7366,
+   "native": "pa",
+   "web": "אבא (דיבורי)"
+  },
+  {
+   "word": "ab",
+   "rank": 7389,
+   "native": "אב",
+   "web": "שריר בטן (ab)"
+  },
+  {
+   "word": "anticipation",
+   "rank": 7397,
+   "native": "הֶקדֵם",
+   "web": "ציפייה"
+  },
+  {
+   "word": "temporal",
+   "rank": 7457,
+   "native": "זְמַנִי",
+   "web": "של זמן"
+  },
+  {
+   "word": "con",
+   "rank": 7458,
+   "native": "con",
+   "web": "הונאה"
+  },
+  {
+   "word": "lapse",
+   "rank": 7460,
+   "native": "לִשְׁגוֹת",
+   "web": "כשל"
+  },
+  {
+   "word": "eyed",
+   "rank": 7465,
+   "native": "עיניים",
+   "web": "הביט"
+  },
+  {
+   "word": "sez",
+   "rank": 7470,
+   "native": "סז",
+   "web": "אומר (דיבורי)"
+  },
+  {
+   "word": "CO",
+   "rank": 7490,
+   "native": "מְשׁוּתָף",
+   "web": "קולורדו (CO)"
+  },
+  {
+   "word": "quod",
+   "rank": 7505,
+   "native": "quod",
+   "web": "אשר (לטינית)"
+  },
+  {
+   "word": "befallen",
+   "rank": 7519,
+   "native": "נפל",
+   "web": "קרה ל-"
+  },
+  {
+   "word": "wheeled",
+   "rank": 7536,
+   "native": "גלגלים",
+   "web": "גלגל"
+  },
+  {
+   "word": "fifteenth",
+   "rank": 7545,
+   "native": "חֲמִישָׁה עָשָׂר",
+   "web": "החמישה עשר"
+  },
+  {
+   "word": "imaginative",
+   "rank": 7554,
+   "native": "דִמיוֹנִי",
+   "web": "מלא דמיון"
+  },
+  {
+   "word": "vowed",
+   "rank": 7567,
+   "native": "מוּקדָשׁ",
+   "web": "נדר"
+  },
+  {
+   "word": "regained",
+   "rank": 7583,
+   "native": "חזר",
+   "web": "החזיר לעצמו"
+  },
+  {
+   "word": "overboard",
+   "rank": 7603,
+   "native": "הַחוּצָה",
+   "web": "מעבר לסיפון"
+  },
+  {
+   "word": "plucked",
+   "rank": 7618,
+   "native": "מרפה",
+   "web": "תלש"
+  },
+  {
+   "word": "ch.",
+   "rank": 7712,
+   "native": "ch.",
+   "web": "פרק (ch.)"
+  },
+  {
+   "word": "e-mail",
+   "rank": 7721,
+   "native": "אֶלֶקטרוֹנִי",
+   "web": "אימייל"
+  },
+  {
+   "word": "trod",
+   "rank": 7757,
+   "native": "דרוך",
+   "web": "דרך"
+  },
+  {
+   "word": "h",
+   "rank": 7766,
+   "native": "ח",
+   "web": "שעה (h)"
+  },
+  {
+   "word": "dey",
+   "rank": 7767,
+   "native": "dey",
+   "web": "הם (דיאלקט)"
+  },
+  {
+   "word": "AK",
+   "rank": 7841,
+   "native": "AK",
+   "web": "אלסקה (AK)"
+  },
+  {
+   "word": "paced",
+   "rank": 7845,
+   "native": "בקצב",
+   "web": "צעד"
+  },
+  {
+   "word": "asunder",
+   "rank": 7853,
+   "native": "להתנתק",
+   "web": "לגזרים"
+  },
+  {
+   "word": "denounced",
+   "rank": 7893,
+   "native": "הוקעה",
+   "web": "גינה"
+  },
+  {
+   "word": "blest",
+   "rank": 7924,
+   "native": "מברך",
+   "web": "מבורך"
+  },
+  {
+   "word": "heroine",
+   "rank": 7947,
+   "native": "אֲלִילָה",
+   "web": "גיבורה"
+  },
+  {
+   "word": "gal",
+   "rank": 7958,
+   "native": "גל",
+   "web": "ילדה"
+  },
+  {
+   "word": "laborious",
+   "rank": 8012,
+   "native": "חָרוּץ",
+   "web": "מפרך"
+  },
+  {
+   "word": "AC",
+   "rank": 8017,
+   "native": "AC",
+   "web": "מזגן (AC)"
+  },
+  {
+   "word": "ninth",
+   "rank": 8020,
+   "native": "ט",
+   "web": "התשיעי"
+  },
+  {
+   "word": "ft.",
+   "rank": 8030,
+   "native": "ft.",
+   "web": "רגל (יחידת אורך)"
+  },
+  {
+   "word": "rides",
+   "rank": 8073,
+   "native": "רוכבים",
+   "web": "רוכב"
+  },
+  {
+   "word": "Otto",
+   "rank": 8132,
+   "native": "אוטוטו",
+   "web": "אוטו (שם פרטי)"
+  },
+  {
+   "word": "apparition",
+   "rank": 8134,
+   "native": "הוֹפָעָה",
+   "web": "רוח רפאים"
+  },
+  {
+   "word": "ti",
+   "rank": 8157,
+   "native": "ti",
+   "web": "סי (תו מוזיקלי)"
+  },
+  {
+   "word": "twelfth",
+   "rank": 8160,
+   "native": "שְׁנֵים עָשָׂר",
+   "web": "השנים עשר"
+  },
+  {
+   "word": "incline",
+   "rank": 8284,
+   "native": "שְׁפִיָה",
+   "web": "שיפוע"
+  },
+  {
+   "word": "burroughs",
+   "rank": 8314,
+   "native": "מבורות",
+   "web": "בורו (שם משפחה)"
+  },
+  {
+   "word": "dis",
+   "rank": 8324,
+   "native": "דיס",
+   "web": "לזלזל (דיבורי)"
+  },
+  {
+   "word": "knave",
+   "rank": 8375,
+   "native": "אומללה",
+   "web": "נבל"
+  },
+  {
+   "word": "adieu",
+   "rank": 8419,
+   "native": "adieu",
+   "web": "שלום (בפרידה)"
+  },
+  {
+   "word": "screw",
+   "rank": 8435,
+   "native": "לִדפּוֹק",
+   "web": "בורג"
+  },
+  {
+   "word": "daresay",
+   "rank": 8462,
+   "native": "להעיז",
+   "web": "אני מעז לומר"
+  },
+  {
+   "word": "constantine",
+   "rank": 8534,
+   "native": "קבועה",
+   "web": "קונסטנטינוס"
+  },
+  {
+   "word": "quart",
+   "rank": 8564,
+   "native": "רְבִיעִית",
+   "web": "קוורט"
+  },
+  {
+   "word": "sic",
+   "rank": 8570,
+   "native": "sic",
+   "web": "כך במקור (sic)"
+  },
+  {
+   "word": "l",
+   "rank": 8601,
+   "native": "ל",
+   "web": "ליטר (l)"
+  },
+  {
+   "word": "durst",
+   "rank": 8621,
+   "native": "סבל",
+   "web": "העז (ארכאי)"
+  },
+  {
+   "word": "wert",
+   "rank": 8625,
+   "native": "wert",
+   "web": "היית (ארכאי)"
+  },
+  {
+   "word": "disinterested",
+   "rank": 8627,
+   "native": "חֲסַר עִניָן",
+   "web": "חסר פניות"
+  },
+  {
+   "word": "fringe",
+   "rank": 8644,
+   "native": "עַיִט",
+   "web": "שוליים"
+  },
+  {
+   "word": "thirteenth",
+   "rank": 8650,
+   "native": "שְׁלוֹשׁ עֶשׂרֵה",
+   "web": "השלושה עשר"
+  },
+  {
+   "word": "fourteenth",
+   "rank": 8728,
+   "native": "אַרְבָּעָה עָשָׂר",
+   "web": "הארבעה עשר"
+  },
+  {
+   "word": "twentieth",
+   "rank": 8737,
+   "native": "עֶשְׂרִים",
+   "web": "העשרים"
+  },
+  {
+   "word": "qualifications",
+   "rank": 8759,
+   "native": "סְמִיכָה",
+   "web": "כישורים"
+  },
+  {
+   "word": "ff.",
+   "rank": 8780,
+   "native": "ff.",
+   "web": "ואילך (ff.)"
+  },
+  {
+   "word": "re",
+   "rank": 8817,
+   "native": "מִחָדָשׁ",
+   "web": "בנוגע ל (re)"
+  },
+  {
+   "word": "Icel.",
+   "rank": 8878,
+   "native": "איסל.",
+   "web": "איסלנדית (Icel.)"
+  },
+  {
+   "word": "advent",
+   "rank": 8884,
+   "native": "הִתגַלוּת",
+   "web": "בוא"
+  },
+  {
+   "word": "MD",
+   "rank": 8906,
+   "native": "MD",
+   "web": "דוקטור לרפואה (MD)"
+  },
+  {
+   "word": "eleventh",
+   "rank": 8910,
+   "native": "אַחַד עָשָׂר",
+   "web": "האחד עשר"
+  },
+  {
+   "word": "Noah",
+   "rank": 8911,
+   "native": "נועה",
+   "web": "נח"
+  },
+  {
+   "word": "p.m.",
+   "rank": 8935,
+   "native": "רֹאשׁ הַמֶמשָׁלָה.",
+   "web": "אחר הצהריים"
+  },
+  {
+   "word": "bower",
+   "rank": 8937,
+   "native": "קשת",
+   "web": "סוכת צמחים"
+  },
+  {
+   "word": "sg",
+   "rank": 8948,
+   "native": "sg",
+   "web": "יחיד (sg)"
+  },
+  {
+   "word": "sub",
+   "rank": 9021,
+   "native": "תַת",
+   "web": "מחליף"
+  },
+  {
+   "word": "cor",
+   "rank": 9055,
+   "native": "cor",
+   "web": "וואו (בריטי)"
+  },
+  {
+   "word": "ty",
+   "rank": 9077,
+   "native": "ty",
+   "web": "תודה (ty)"
+  },
+  {
+   "word": "unaccountable",
+   "rank": 9092,
+   "native": "בלתי אחראי",
+   "web": "בלתי מוסבר"
+  },
+  {
+   "word": "Boer",
+   "rank": 9143,
+   "native": "בור",
+   "web": "בואר"
+  },
+  {
+   "word": "Scot",
+   "rank": 9189,
+   "native": "אַגרָה",
+   "web": "סקוטי"
+  },
+  {
+   "word": "embraces",
+   "rank": 9257,
+   "native": "מחבקים",
+   "web": "מחבק"
+  },
+  {
+   "word": "abreast",
+   "rank": 9272,
+   "native": "בחזית",
+   "web": "זה לצד זה"
+  },
+  {
+   "word": "consummate",
+   "rank": 9282,
+   "native": "לְהַגשִׁים",
+   "web": "מושלם"
+  },
+  {
+   "word": "baronet",
+   "rank": 9296,
+   "native": "ברונית",
+   "web": "ברונט"
+  },
+  {
+   "word": "gaping",
+   "rank": 9348,
+   "native": "פַּהֶקֶת",
+   "web": "פעור"
+  },
+  {
+   "word": "oratory",
+   "rank": 9364,
+   "native": "דַבְּרָנוּת",
+   "web": "רטוריקה"
+  },
+  {
+   "word": "ole",
+   "rank": 9372,
+   "native": "ole",
+   "web": "אולה (קריאת עידוד)"
+  },
+  {
+   "word": "darkly",
+   "rank": 9385,
+   "native": "בחושך",
+   "web": "באופן קודר"
+  },
+  {
+   "word": "alacrity",
+   "rank": 9390,
+   "native": "בקיאות",
+   "web": "זריזות"
+  },
+  {
+   "word": "neutrality",
+   "rank": 9393,
+   "native": "אֲדִישׁוּת",
+   "web": "ניטרליות"
+  },
+  {
+   "word": "nomination",
+   "rank": 9434,
+   "native": "הְתמַנוּת",
+   "web": "מועמדות"
+  },
+  {
+   "word": "Beth",
+   "rank": 9437,
+   "native": "בֵּית",
+   "web": "בת' (שם פרטי)"
+  },
+  {
+   "word": "e'en",
+   "rank": 9439,
+   "native": "e'en",
+   "web": "אפילו (ארכאי)"
+  },
+  {
+   "word": "t",
+   "rank": 9467,
+   "native": "ט",
+   "web": "האות T"
+  },
+  {
+   "word": "stumbling",
+   "rank": 9489,
+   "native": "הַחלָקָה",
+   "web": "מועד"
+  },
+  {
+   "word": "slips",
+   "rank": 9491,
+   "native": "מחליקים",
+   "web": "מחליק"
+  },
+  {
+   "word": "scorned",
+   "rank": 9570,
+   "native": "בוז",
+   "web": "בז ל-"
+  },
+  {
+   "word": "succour",
+   "rank": 9576,
+   "native": "לִסעוֹד",
+   "web": "עזרה"
+  },
+  {
+   "word": "sup",
+   "rank": 9597,
+   "native": "sup",
+   "web": "מה העניינים (דיבורי)"
+  },
+  {
+   "word": "bat",
+   "rank": 9613,
+   "native": "בַּת",
+   "web": "עטלף"
+  },
+  {
+   "word": "Mass.",
+   "rank": 9657,
+   "native": "מִסָה.",
+   "web": "מסצ'וסטס (Mass.)"
+  },
+  {
+   "word": "verdure",
+   "rank": 9660,
+   "native": "יֶרֶק",
+   "web": "צמחייה ירוקה"
+  },
+  {
+   "word": "brace",
+   "rank": 9684,
+   "native": "לְהַדֵק",
+   "web": "תמיכה"
+  },
+  {
+   "word": "self-",
+   "rank": 9710,
+   "native": "עַצמִי-",
+   "web": "עצמי- (תחילית)"
+  },
+  {
+   "word": "awed",
+   "rank": 9718,
+   "native": "יראה",
+   "web": "נפעם"
+  },
+  {
+   "word": "cheque",
+   "rank": 9754,
+   "native": "לִבדוֹק",
+   "web": "שיק"
+  },
+  {
+   "word": "wast",
+   "rank": 9766,
+   "native": "בזבוז",
+   "web": "היית (ארכאי)"
+  },
+  {
+   "word": "impotent",
+   "rank": 9796,
+   "native": "עָקָר",
+   "web": "חסר אונים"
+  },
+  {
+   "word": "stationary",
+   "rank": 9889,
+   "native": "יַצִיב",
+   "web": "נייח"
+  },
+  {
+   "word": "aux",
+   "rank": 9902,
+   "native": "aux",
+   "web": "כניסת עזר (aux)"
+  },
+  {
+   "word": "vested",
+   "rank": 9907,
+   "native": "מוּשׁקָע",
+   "web": "מוקנה"
+  },
+  {
+   "word": "sous",
+   "rank": 9910,
+   "native": "סו",
+   "web": "תת (בצרפתית)"
+  },
+  {
+   "word": "CA",
+   "rank": 9914,
+   "native": "CA",
+   "web": "קליפורניה (CA)"
+  },
+  {
+   "word": "n'",
+   "rank": 9966,
+   "native": "לא",
+   "web": "ו (קיצור של and)"
+  }
+ ]
+}
