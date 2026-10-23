@@ -22,11 +22,11 @@
   "after": {
     "all": {
       "words": 9998,
-      "withExample": 9665,
-      "withoutExample": 333,
-      "reviewed": 9665,
-      "withPromptContext": 9665,
-      "withExampleWithoutDetails": 9665
+      "withExample": 9666,
+      "withoutExample": 332,
+      "reviewed": 9666,
+      "withPromptContext": 9666,
+      "withExampleWithoutDetails": 9666
     },
     "top300": {
       "words": 300,
@@ -1555,16 +1555,16 @@
     {
       "start": 8701,
       "end": 9400,
-      "added": 667,
-      "exceptions": 32,
+      "added": 668,
+      "exceptions": 31,
       "previouslyReviewed": 0,
       "coverage": {
         "words": 699,
-        "withExample": 667,
-        "withoutExample": 32,
-        "reviewed": 667,
-        "withPromptContext": 667,
-        "withExampleWithoutDetails": 667
+        "withExample": 668,
+        "withoutExample": 31,
+        "reviewed": 668,
+        "withPromptContext": 668,
+        "withExampleWithoutDetails": 668
       },
       "withoutExample": [
         {
@@ -1636,11 +1636,6 @@
           "r": 8948,
           "w": "sg",
           "t": "sg"
-        },
-        {
-          "r": 8950,
-          "w": "nigger",
-          "t": "כּוּשִׁי"
         },
         {
           "r": 9021,

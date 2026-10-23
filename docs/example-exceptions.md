@@ -282,7 +282,6 @@ These entries remain without reviewed examples. Glosses reproduce `vocab.json` u
 | 8935 | p.m. | <span dir="rtl" lang="he">רֹאשׁ הַמֶמשָׁלָה.</span> | Time marker is mistranslated as prime minister. |
 | 8937 | bower | <span dir="rtl" lang="he">קשת</span> | Bower means leafy shelter; gloss means bow or arch. |
 | 8948 | sg | <span dir="rtl" lang="he">sg</span> | Unexplained abbreviation; no meaning supplied. |
-| 8950 | nigger | <span dir="rtl" lang="he">כּוּשִׁי</span> | Offensive racial slur; no learner example authored. |
 | 9021 | sub | <span dir="rtl" lang="he">תַת</span> | Bound prefix sub is glossed as a prefix; no standalone matching sense. |
 | 9055 | cor | <span dir="rtl" lang="he">cor</span> | Untranslated interjection or fragment; defer. |
 | 9077 | ty | <span dir="rtl" lang="he">ty</span> | Untranslated abbreviation or token; defer. |
