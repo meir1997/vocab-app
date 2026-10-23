@@ -121,7 +121,9 @@ body {
 .answer-feedback bdi { display: block; color: var(--muted); font-size: 14px; text-align: left; }
 .answer-feedback .example-text { margin-top: 8px; font-size: 15px; }
 .reviewing #questionContext { display: none; }
-.reviewing .answer:not(.wrong):not(.reveal) { display: none; }
+/* The feedback panel owns the correction; do not repeat the correct option. */
+.reviewing .answer:not(.wrong) { display: none; }
+.reviewing .word[lang="he"], .reviewing .prompt-label { display: none; }
 
 /* Library */
 .search-row input {
@@ -182,9 +184,10 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 /* Word details sheet */
 .sheet-backdrop { position: fixed; inset: 0; z-index: 30; background: rgba(20, 24, 45, .45); display: flex; align-items: flex-end; justify-content: center; }
 .sheet { background: var(--card); width: 100%; max-width: 560px; max-height: 82vh; overflow-y: auto; border-radius: 22px 22px 0 0; padding: 18px 18px calc(18px + env(safe-area-inset-bottom)); box-shadow: 0 -8px 30px rgba(0, 0, 0, .18); }
-.sheet-head { display: flex; align-items: center; gap: 10px; }
+.sheet-head { display: flex; align-items: center; gap: 10px; direction: ltr; }
 .sheet-head > div { flex: 1; min-width: 0; }
-.sheet-head h2 { margin: 0 0 4px; font-size: 28px; overflow-wrap: anywhere; }
+.sheet-head > div { display: grid; justify-items: start; gap: 6px; text-align: left; }
+.sheet-head h2 { margin: 0; font-size: 28px; overflow-wrap: anywhere; }
 .sheet-close { border: 0; background: var(--accent-soft); color: var(--ink); width: 44px; height: 44px; border-radius: 50%; font-size: 16px; cursor: pointer; flex-shrink: 0; }
 .detail-translation { margin: 4px 0 8px; font-size: 18px; color: var(--accent); font-weight: 700; }
 .detail-section { margin-top: 14px; }
@@ -198,10 +201,18 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .meaning-list { margin: 0; padding-inline-start: 22px; font-size: 14.5px; line-height: 1.5; }
 .meaning-list li { margin-bottom: 6px; }
 .pos-tag { display: inline-block; margin-inline-end: 6px; font-size: 11px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 1px 6px; }
-.example-row { display: flex; align-items: center; gap: 8px; }
-.example-text { flex: 1; margin: 0; font-size: 16px; line-height: 1.45; text-align: left; }
+.example-row { display: flex; align-items: center; gap: 12px; direction: ltr; }
+.example-text { flex: 1; min-width: 0; overflow-wrap: anywhere; margin: 0; font-size: 16px; line-height: 1.45; text-align: left; }
 .detail-empty { color: var(--muted); }
-.detail-credit { margin: 16px 0 0; font-size: 11px; color: var(--muted); }
+.detail-credit { margin: 20px 0 0; padding-top: 14px; border-top: 1px solid #e3e7f3; font-size: 12px; line-height: 1.65; color: var(--muted); text-align: right; }
+.detail-credit > span { display: block; }
+.detail-credit > span + span { margin-top: 4px; }
+
+.icon-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+.icon { display: block; flex: none; }
+.speak-btn, .sheet-head .speak, .sheet-close, .word-item .speak { display: inline-flex; align-items: center; justify-content: center; }
+.speak-btn, .sheet-head .speak { color: var(--accent); }
+.word-item .speak { min-width: 44px; min-height: 44px; }
 
 .learning-note { margin-top: 4px; font-weight: 600; }
 .learning-note.full { color: var(--accent); }
@@ -213,4 +224,65 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   .auth-btn { padding-inline: 10px; font-size: 12px; }
   #quizCard { padding: 18px; }
   .quick-settings { flex-wrap: wrap; }
+}
+
+/* Keep the question and its actions in view on small phones. Larger text can
+   still grow naturally; no fixed heights or clipped learning content. */
+@media (max-width: 360px) {
+  .shell { padding: 8px 10px 84px; }
+  .topbar { gap: 6px; padding: 4px 0 10px; }
+  .brand { font-size: 16px; gap: 6px; }
+  .brand-mark { width: 28px; height: 28px; }
+  .top-actions { gap: 6px; }
+  .sync-status { font-size: 10px; }
+  .auth-btn { padding: 6px 8px; font-size: 11px; }
+  #quizCard { padding: 12px; border-radius: 18px; }
+  .quiz-head { gap: 4px; margin-bottom: 8px; }
+  .quiz-head .chip { padding: 5px 8px; font-size: 11px; }
+  #quizBandLabel { padding: 4px 8px; font-size: 11px; }
+  .progress-text { font-size: 11px; }
+  .progress-track { margin-bottom: 10px; }
+  .prompt-label { font-size: 12px; }
+  .word-row { flex-wrap: nowrap; gap: 6px; }
+  .word { flex: 1; flex-basis: auto; font-size: 30px; margin: 2px 0; }
+  .serial { font-size: 10px; padding: 2px 5px; }
+  .question-context { margin-top: 8px; padding: 8px 10px; font-size: 13px; line-height: 1.4; }
+  .hint { margin: 8px 0; font-size: 12px; }
+  .answers { margin-top: 10px; gap: 6px; }
+  .answer { min-height: 44px; padding: 8px 10px; font-size: 15px; border-radius: 12px; }
+  #dontKnowBtn { min-height: 44px; padding: 10px; font-size: 13px; }
+  #nextBtn { min-height: 44px; padding: 11px; font-size: 15px; }
+  .answer-feedback { margin-top: 10px; padding: 10px 12px; }
+  .feedback-meaning { font-size: 19px; }
+  .answer-feedback .example-text { font-size: 13px; line-height: 1.4; }
+  .typing-box { gap: 6px; }
+  .typing-box input { padding: 10px; font-size: 16px; }
+  .typing-box .primary-btn { padding: 10px 12px; font-size: 14px; }
+  .sheet { padding-inline: 16px; }
+}
+
+/* Use the desktop width for the prompt and response side by side. */
+@media (min-width: 960px) {
+  .shell { max-width: 1120px; padding: 28px 32px 112px; }
+  .topbar { padding-bottom: 24px; }
+  #quizCard { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 40px; padding: 32px; }
+  .quiz-head, .progress-track { grid-column: 1 / -1; }
+  .quiz-head { grid-template-columns: auto 1fr auto; gap: 12px; }
+  #quizBandLabel { grid-column: 2; grid-row: 1; }
+  .quiz-head .progress-text { grid-column: 3; }
+  .prompt-label { grid-column: 1; grid-row: 3; }
+  .word-row { grid-column: 1; grid-row: 4; align-content: center; }
+  .word { font-size: 52px; }
+  .question-context { grid-column: 1; grid-row: 5; align-self: start; margin-top: 16px; }
+  .hint { grid-column: 2; grid-row: 3; margin-top: 0; }
+  .answers, .typing-box { grid-column: 2; grid-row: 4; align-self: start; margin-top: 0; }
+  .answer-feedback { grid-column: 2; grid-row: 5; }
+  .reviewing .word-row { grid-row: 4 / span 2; }
+  #dontKnowBtn, #nextBtn { grid-column: 2; grid-row: 6; }
+  #practiceHome { max-width: 800px; margin-inline: auto; }
+  .library-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  #tab-settings, #tab-stats, #summary { max-width: 800px; margin-inline: auto; }
+  .tabbar { grid-template-columns: repeat(4, minmax(0, 220px)); }
+  .sheet-backdrop { align-items: center; padding: 32px; }
+  .sheet { max-width: 720px; border-radius: 22px; padding: 28px; }
 }

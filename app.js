@@ -5,6 +5,7 @@ const K = { vocab: 'fw.vocab.v2', progress: 'fw.progress.v2', settings: 'fw.sett
 const INTERVALS = [1, 3, 7, 14, 30]; // days, mirrors the iOS app
 const DAY = 86400000;
 const $ = id => document.getElementById(id);
+const iconMarkup = name => `<svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#icon-${name}"/></svg>`;
 const readJSON = (key, fb) => { try { return JSON.parse(localStorage.getItem(key)) || fb; } catch { return fb; } };
 const save = (key, val) => localStorage.setItem(key, JSON.stringify(val));
 
@@ -308,7 +309,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v7');
+    const cache = await caches.open('four-words-offline-v8');
     const required = ['index.html', 'app.js', 'quiz-content.js', 'vocab.json', 'details.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
@@ -515,7 +516,7 @@ function renderLibrary(reset = true) {
     const row = document.createElement('div');
     row.className = 'word-item';
     const level = (p.r + p.w) === 0 ? '☆' : p.s >= 4 ? '★★★' : p.s >= 2 ? '★★' : p.s >= 1 ? '★' : '☆';
-    row.innerHTML = `<span class="rank">#${v.r.toLocaleString('he-IL')}</span><span class="w"></span><span class="t"></span><span class="level" aria-label="רמת שליטה">${level}</span><button class="speak" aria-label="השמעה">🔊</button>`;
+    row.innerHTML = `<span class="rank">#${v.r.toLocaleString('he-IL')}</span><span class="w"></span><span class="t"></span><span class="level" aria-label="רמת שליטה">${level}</span><button class="speak" aria-label="השמעה">${iconMarkup('volume')}</button>`;
     row.querySelector('.w').textContent = v.w;
     row.querySelector('.t').textContent = v.t;
     row.querySelector('.speak').addEventListener('click', () => speak(v.w));
@@ -557,7 +558,7 @@ async function openDetails(item) {
   if (content.example) {
     const row = document.createElement('div'); row.className = 'example-row';
     const q = document.createElement('p'); q.className = 'example-text'; q.lang = 'en'; q.dir = 'ltr'; q.textContent = content.example;
-    const b = document.createElement('button'); b.className = 'speak-btn'; b.setAttribute('aria-label', 'השמעת המשפט'); b.textContent = '🔊'; b.addEventListener('click', () => speak(content.example));
+    const b = document.createElement('button'); b.className = 'speak-btn'; b.setAttribute('aria-label', 'השמעת המשפט'); b.innerHTML = iconMarkup('volume'); b.addEventListener('click', () => speak(content.example));
     row.append(q, b); addDetailSection(body, 'משפט לדוגמה', [row]);
   }
   const disclosure = (label, node) => {

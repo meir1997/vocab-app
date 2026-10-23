@@ -90,5 +90,7 @@ Reproduce with `node scripts/sense-examples-browser.test.cjs --screenshots <fold
 - Extend reviewed examples beyond the top 300; keep unverified examples omitted.
 - Review questionable source translations separately before authoring examples.
 - Verify Safari, the virtual keyboard and larger system text on a real iPhone.
-- Consider consistent icons and a wider desktop composition.
-- Explore a more compact initial quiz for short 320px screens.
+
+The icon, desktop composition and compact 320px quiz proposals are implemented
+in the [web visual follow-up](docs/visual-layout-review.md), which also records
+the new isolated before/after screenshot review.
