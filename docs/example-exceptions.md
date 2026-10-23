@@ -1,6 +1,6 @@
 # Example exceptions
 
-Reviewed frequency batches: 301–1000, 1001–1700, 1701–2400, 2401–3100, 3101–3800, 3801–4500, 4501–5200, 5201–5900, 5901–6600, 6601–7300, 7301–8000, 8001–8700.
+Reviewed frequency batches: 301–1000, 1001–1700, 1701–2400, 2401–3100, 3101–3800, 3801–4500, 4501–5200, 5201–5900, 5901–6600, 6601–7300, 7301–8000, 8001–8700, 8701–9400, 9401–10000.
 
 These entries remain without reviewed examples. Glosses reproduce `vocab.json` unchanged. Reasons are in English; Hebrew gloss cells use RTL direction. Archaic forms and unclear tokens are deferred rather than forced into unnatural sentences.
 
@@ -409,3 +409,92 @@ These entries remain without reviewed examples. Glosses reproduce `vocab.json` u
 | 8644 | fringe | <span dir="rtl" lang="he">עַיִט</span> | Fringe is mistranslated as eagle rather than decorative border. |
 | 8645 | raiment | <span dir="rtl" lang="he">כְּסוּת</span> | Archaic clothing term; defer literary wording. |
 | 8650 | thirteenth | <span dir="rtl" lang="he">שְׁלוֹשׁ עֶשׂרֵה</span> | Ordinal is glossed as cardinal thirteen. |
+| 8723 | xi | <span dir="rtl" lang="he">xi</span> | Untranslated Roman numeral token; defer. |
+| 8728 | fourteenth | <span dir="rtl" lang="he">אַרְבָּעָה עָשָׂר</span> | Ordinal is glossed as cardinal fourteen. |
+| 8737 | twentieth | <span dir="rtl" lang="he">עֶשְׂרִים</span> | Ordinal is glossed as cardinal twenty. |
+| 8753 | sojourn | <span dir="rtl" lang="he">לָגוּר</span> | Rare temporary-residence verb; defer forced literary wording. |
+| 8759 | qualifications | <span dir="rtl" lang="he">סְמִיכָה</span> | Plural qualifications is glossed as ordination; doubtful sense and number. |
+| 8761 | 101 | <span dir="rtl" lang="he">101</span> | Bare numeral token; no lexical translation supplied. |
+| 8780 | ff. | <span dir="rtl" lang="he">ff.</span> | Untranslated ambiguous abbreviation; defer. |
+| 8794 | val | <span dir="rtl" lang="he">val</span> | Untranslated fragment or name; no usable meaning. |
+| 8817 | re | <span dir="rtl" lang="he">מִחָדָשׁ</span> | Bound prefix or ambiguous abbreviation; not standalone again. |
+| 8839 | repast | <span dir="rtl" lang="he">סְעוּדָה</span> | Literary meal term; defer unnatural modern learner wording. |
+| 8868 | comely | <span dir="rtl" lang="he">נָאֶה</span> | Archaic literary attractive adjective; defer. |
+| 8878 | Icel. | <span dir="rtl" lang="he">איסל.</span> | Abbreviated language label is merely transliterated; defer. |
+| 8884 | advent | <span dir="rtl" lang="he">הִתגַלוּת</span> | Gloss means revelation; advent means arrival or onset. |
+| 8906 | MD | <span dir="rtl" lang="he">MD</span> | Unexplained abbreviation; no meaning supplied. |
+| 8910 | eleventh | <span dir="rtl" lang="he">אַחַד עָשָׂר</span> | Ordinal is glossed as cardinal eleven. |
+| 8911 | Noah | <span dir="rtl" lang="he">נועה</span> | Name Noah is mistransliterated as the different name Noa. |
+| 8922 | smitten | <span dir="rtl" lang="he">הָלוּם</span> | Gloss means stunned; common smitten examples teach infatuation or afflicted, so defer. |
+| 8935 | p.m. | <span dir="rtl" lang="he">רֹאשׁ הַמֶמשָׁלָה.</span> | Time marker is mistranslated as prime minister. |
+| 8937 | bower | <span dir="rtl" lang="he">קשת</span> | Bower means leafy shelter; gloss means bow or arch. |
+| 8948 | sg | <span dir="rtl" lang="he">sg</span> | Unexplained abbreviation; no meaning supplied. |
+| 8949 | aright | <span dir="rtl" lang="he">כַּהֲלָכָה</span> | Archaic correctly form; defer. |
+| 8950 | nigger | <span dir="rtl" lang="he">כּוּשִׁי</span> | Offensive racial slur; no learner example authored. |
+| 9012 | e'er | <span dir="rtl" lang="he">פעם</span> | Archaic shortened ever; defer literary wording. |
+| 9021 | sub | <span dir="rtl" lang="he">תַת</span> | Bound prefix sub is glossed as a prefix; no standalone matching sense. |
+| 9053 | mien | <span dir="rtl" lang="he">הַבָּעַת פָּנִים</span> | Literary bearing or expression term; defer unnatural learner wording. |
+| 9055 | cor | <span dir="rtl" lang="he">cor</span> | Untranslated interjection or fragment; defer. |
+| 9067 | epistle | <span dir="rtl" lang="he">אִגֶרֶת</span> | Archaic formal letter term; defer literary wording. |
+| 9077 | ty | <span dir="rtl" lang="he">ty</span> | Untranslated abbreviation or token; defer. |
+| 9092 | unaccountable | <span dir="rtl" lang="he">בלתי אחראי</span> | Gloss suggests irresponsible; unaccountable means unexplained or not answerable. |
+| 9129 | ante | <span dir="rtl" lang="he">אנטה</span> | Transliteration does not resolve poker stake versus prefix or foreign word. |
+| 9143 | Boer | <span dir="rtl" lang="he">בור</span> | Boer is mistranslated as ignorant or pit; wrong sense. |
+| 9144 | FTP | <span dir="rtl" lang="he">FTP</span> | Unexplained technical acronym; no primary meaning supplied. |
+| 9156 | pernicious | <span dir="rtl" lang="he">מַמְאִיר</span> | Gloss means malignant; pernicious usually means harmful, so defer doubtful sense. |
+| 9167 | las | <span dir="rtl" lang="he">לאס</span> | Foreign article fragment is merely transliterated; defer. |
+| 9189 | Scot | <span dir="rtl" lang="he">אַגרָה</span> | Nationality Scot is mistranslated as fee; archaic tax sense is unsuitable here. |
+| 9202 | waked | <span dir="rtl" lang="he">התעורר</span> | Rare past form of wake; defer modern learner example. |
+| 9241 | maketh | <span dir="rtl" lang="he">עושה</span> | Archaic third-person verb form; defer. |
+| 9253 | 121 | <span dir="rtl" lang="he">121</span> | Bare numeral token; no lexical translation supplied. |
+| 9257 | embraces | <span dir="rtl" lang="he">מחבקים</span> | Gloss gives plural embracing; embraces requires a singular subject. |
+| 9272 | abreast | <span dir="rtl" lang="he">בחזית</span> | Gloss means at the front; abreast normally means side by side or informed. |
+| 9282 | consummate | <span dir="rtl" lang="he">לְהַגשִׁים</span> | Gloss means fulfill; common consummate verb means complete a marriage or deal, so defer. |
+| 9296 | baronet | <span dir="rtl" lang="he">ברונית</span> | Male hereditary title is mistranslated as baroness. |
+| 9348 | gaping | <span dir="rtl" lang="he">פַּהֶקֶת</span> | Gloss suggests yawning as noun; gaping usually means open wide. |
+| 9364 | oratory | <span dir="rtl" lang="he">דַבְּרָנוּת</span> | Gloss suggests talkativeness; oratory means public-speaking skill or rhetoric, so defer. |
+| 9372 | ole | <span dir="rtl" lang="he">ole</span> | Untranslated dialect spelling of old or foreign interjection; defer. |
+| 9385 | darkly | <span dir="rtl" lang="he">בחושך</span> | Gloss means in darkness; darkly often means ominously, so defer doubtful mapping. |
+| 9390 | alacrity | <span dir="rtl" lang="he">בקיאות</span> | Gloss means expertise; alacrity means cheerful readiness. |
+| 9393 | neutrality | <span dir="rtl" lang="he">אֲדִישׁוּת</span> | Gloss means indifference; neutrality means impartiality or nonparticipation. |
+| 9429 | yore | <span dir="rtl" lang="he">יָמֵי קֶדֶם</span> | Archaic former-times expression; defer literary wording. |
+| 9434 | nomination | <span dir="rtl" lang="he">הְתמַנוּת</span> | Gloss means appointment; nomination normally means proposed candidacy, so defer. |
+| 9437 | Beth | <span dir="rtl" lang="he">בֵּית</span> | Name Beth is mistranslated as house or Hebrew letter. |
+| 9439 | e'en | <span dir="rtl" lang="he">e'en</span> | Untranslated archaic contraction; defer. |
+| 9467 | t | <span dir="rtl" lang="he">ט</span> | Isolated letter token; no lexical sense supplied. |
+| 9476 | coloring | <span dir="rtl" lang="he">גִוּוּן</span> | Gloss suggests variation; coloring may mean applying color or appearance, so defer doubtful mapping. |
+| 9489 | stumbling | <span dir="rtl" lang="he">הַחלָקָה</span> | Gloss means slipping; stumbling means tripping or faltering. |
+| 9491 | slips | <span dir="rtl" lang="he">מחליקים</span> | Gloss gives plural slipping; slips is singular verb or plural noun. |
+| 9505 | forenoon | <span dir="rtl" lang="he">לִפנֵי הַצָהֳרַיִם</span> | Dated morning term; defer unnatural modern learner wording. |
+| 9570 | scorned | <span dir="rtl" lang="he">בוז</span> | Past verb scorned is glossed as noun contempt. |
+| 9576 | succour | <span dir="rtl" lang="he">לִסעוֹד</span> | Archaic assistance verb; defer literary wording. |
+| 9597 | sup | <span dir="rtl" lang="he">sup</span> | Untranslated ambiguous token; no primary meaning supplied. |
+| 9598 | tarry | <span dir="rtl" lang="he">לְהִתְעַכֵּב</span> | Archaic delay verb; defer literary wording. |
+| 9613 | bat | <span dir="rtl" lang="he">בַּת</span> | Bat is mistranslated as Hebrew daughter; wrong sense. |
+| 9656 | evermore | <span dir="rtl" lang="he">לָנֶצַח</span> | Archaic forever form; defer literary wording. |
+| 9657 | Mass. | <span dir="rtl" lang="he">מִסָה.</span> | Ambiguous abbreviation is glossed as physical mass; likely wrong token sense. |
+| 9660 | verdure | <span dir="rtl" lang="he">יֶרֶק</span> | Literary green vegetation term; defer unnatural learner wording. |
+| 9684 | brace | <span dir="rtl" lang="he">לְהַדֵק</span> | Gloss means tighten; brace normally means support or prepare, so defer. |
+| 9687 | 143 | <span dir="rtl" lang="he">143</span> | Bare numeral token; no lexical translation supplied. |
+| 9710 | self- | <span dir="rtl" lang="he">עַצמִי-</span> | Bound prefix with trailing hyphen; no standalone word form. |
+| 9718 | awed | <span dir="rtl" lang="he">יראה</span> | Gloss is awe as noun; awed is participial. |
+| 9725 | unwonted | <span dir="rtl" lang="he">לא רגיל</span> | Archaic unusual adjective; defer modern learner wording. |
+| 9726 | whit | <span dir="rtl" lang="he">שֶׁמֶץ</span> | Archaic amount expression; defer literary wording. |
+| 9754 | cheque | <span dir="rtl" lang="he">לִבדוֹק</span> | Cheque is mistranslated as verb check. |
+| 9761 | KA | <span dir="rtl" lang="he">KA</span> | Unexplained abbreviation; no meaning supplied. |
+| 9766 | wast | <span dir="rtl" lang="he">בזבוז</span> | Archaic were is mistranslated as waste. |
+| 9771 | victuals | <span dir="rtl" lang="he">מִצרַכֵי מָזוֹן</span> | Archaic provisions term; defer literary wording. |
+| 9796 | impotent | <span dir="rtl" lang="he">עָקָר</span> | Impotent does not mean infertile, which the gloss specifies. |
+| 9797 | smite | <span dir="rtl" lang="he">לְהַכּוֹת</span> | Archaic strike verb; defer literary wording. |
+| 9808 | therefrom | <span dir="rtl" lang="he">משם</span> | Archaic from that expression; defer. |
+| 9889 | stationary | <span dir="rtl" lang="he">יַצִיב</span> | Gloss means stable; stationary means not moving, so defer doubtful mapping. |
+| 9902 | aux | <span dir="rtl" lang="he">aux</span> | Untranslated abbreviation or foreign token; defer. |
+| 9907 | vested | <span dir="rtl" lang="he">מוּשׁקָע</span> | Gloss means invested; vested rights means legally secured, so defer wrong sense. |
+| 9910 | sous | <span dir="rtl" lang="he">סו</span> | Ambiguous foreign coin or title fragment; transliteration supplies no clear sense. |
+| 9914 | CA | <span dir="rtl" lang="he">CA</span> | Unexplained abbreviation; no meaning supplied. |
+| 9960 | firmament | <span dir="rtl" lang="he">רָקִיעַ</span> | Archaic sky term; defer literary wording. |
+| 9966 | n' | <span dir="rtl" lang="he">לא</span> | Malformed dialect or contraction fragment; no clear standalone meaning. |
+| 9973 | herein | <span dir="rtl" lang="he">כאן</span> | Archaic formal here expression; defer legal wording. |
+| 9999 | wench | <span dir="rtl" lang="he">בַּחוּרָה</span> | Archaic and often derogatory young-woman term; defer. |
+| 3883 | deer | <span dir="rtl" lang="he">צְבִי</span> | Gloss names a gazelle rather than a deer; defer inaccurate animal mapping. |
+| 4716 | eagle | <span dir="rtl" lang="he">נֶשֶׁר</span> | Gloss names a vulture rather than an eagle; defer inaccurate animal mapping. |
