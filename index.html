@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#0f1730">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -67,12 +67,14 @@
             <button class="speak-btn" id="speakBtn" aria-label="השמעת המילה">🔊</button>
             <button class="speak-btn" id="detailBtn" aria-label="פרטים על המילה">ⓘ</button>
           </div>
+          <p id="questionContext" class="question-context hidden" lang="en" dir="ltr"></p>
           <p class="hint" id="hint" aria-live="polite">בחרו את התשובה הנכונה</p>
           <div class="answers" id="answers"></div>
           <div id="typingBox" class="typing-box hidden">
             <input id="typingInput" type="text" lang="en" dir="ltr" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="כתבו את המילה באנגלית" aria-label="כתבו את המילה באנגלית">
             <button class="primary-btn" id="typingCheck">בדיקה</button>
           </div>
+          <section id="answerFeedback" class="answer-feedback hidden" role="status" aria-live="polite" aria-atomic="true"></section>
           <button class="ghost-btn" id="dontKnowBtn">לא יודע</button>
           <button class="primary-btn hidden" id="nextBtn">המשך</button>
         </div>
@@ -178,13 +180,14 @@
       </div>
       <p class="detail-translation" id="detailTranslation"></p>
       <div id="detailBody"></div>
-      <p class="detail-credit">נתונים אוטומטיים מ־Princeton WordNet ו־Tatoeba (CC BY 2.0 FR). ייתכנו אי־דיוקים בהתאמת המשמעות.</p>
+      <p class="detail-credit">דוגמאות ערוכות לצד נתוני Princeton WordNet ו־Tatoeba (CC BY 2.0 FR). ההגדרות הנוספות עשויות לתאר משמעויות אחרות.</p>
     </div>
   </div>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js" defer></script>
   <script src="firebase-config.js"></script>
+  <script src="quiz-content.js" defer></script>
   <script src="app.js" defer></script>
 </body>
 </html>
