@@ -265,7 +265,7 @@ async function runMatrix() {
           assert.equal(await page.locator('#answerFeedback').isVisible(), false, 'next question clears correction');
         }
         if (mode === 'choice') {
-          const expected = await seedQuestion(page, mode, 'incomprehensible');
+          const expected = await seedQuestion(page, mode, 'superstitious');
           assert.equal(expected.reviewed, false, 'long-word fixture has no reviewed example');
           await record(page, { device, viewport, mode, expected, surface: 'prompt', screenshot: true });
           await correctWrongOrUnknown(page, mode, expected, true);
