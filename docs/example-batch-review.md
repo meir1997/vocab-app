@@ -12,12 +12,16 @@ Original English sentences use the PR 14/17 `REVIEWED` storage and displayed pri
 | 3801–4500 | 676 | 0 | 24 |
 | 4501–5200 | 671 | 0 | 29 |
 | 5201–5900 | 663 | 0 | 37 |
+| 5901–6600 | 661 | 0 | 39 |
+| 6601–7300 | 657 | 0 | 43 |
+| 7301–8000 | 655 | 0 | 45 |
+| 8001–8700 | 663 | 0 | 37 |
 
 Every word in these batches has a reviewed example or a documented omission in [example-exceptions.md](example-exceptions.md), preserving word, rank, primary gloss and reason. Source glosses are unchanged. Exception gloss cells retain Hebrew RTL direction.
 
-Overall coverage: 5620/9,998 reviewed examples; top 300 remains 259. This continuation adds 2676 examples. Batch exceptions total 239. The reproducible [coverage report](example-coverage.json) retains the PR 13 baseline and lists every omission.
+Overall coverage: 8256/9,998 reviewed examples; top 300 remains 259. This continuation adds 5312 examples. Batch exceptions total 403. The reproducible [coverage report](example-coverage.json) retains the PR 13 baseline and lists every omission.
 
-The existing sense gate and masking behavior are preserved, with loaded or missing details. Browser fixtures include less common primary senses from the new batches. Cache and app readiness use `four-words-offline-v11`. Native iOS, vocab.json, details.json, scoring, synchronization and user progress are untouched. Browser suites use isolated synthetic sessions.
+The existing sense gate and masking behavior are preserved, with loaded or missing details. Browser fixtures include less common primary senses from the new batches. Cache and app readiness use `four-words-offline-v12`. Native iOS, vocab.json, details.json, scoring, synchronization and user progress are untouched. Browser suites use isolated synthetic sessions.
 
 Validation commands:
 
