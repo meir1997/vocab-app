@@ -207,7 +207,7 @@ async function simpleWordCardAndLongWords() {
       await page.keyboard.press('Escape');
       assert.equal(await page.evaluate(() => document.activeElement.id), 'detailBtn', 'closing the card restores focus');
 
-      await seedQuestion(page, 'choice', ['incomprehensible']);
+      await seedQuestion(page, 'choice', ['superstitious']);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'long quiz word causes no horizontal overflow');
       await page.locator('#detailBtn').click();
       await page.waitForFunction(() => sheetOpen && !document.getElementById('detailBody').textContent.includes('טוען…'));
