@@ -1,10 +1,6 @@
 # Reviewed example batches
 
-Adds original English sentences to the PR 14 `REVIEWED` map. Every sentence
-was authored against the displayed primary `t` meaning in `vocab.json`, then
-reread in a second self-review for word form, grammar, naturalness and the same
-Hebrew sense. Doubtful candidates were dropped. No WordNet, Morfix or other
-source sentences were copied, and no purchases were made.
+Original English sentences use the PR 14/17 `REVIEWED` storage and displayed primary `t` meaning from `vocab.json`. Each candidate received a second self-review for exact form, grammar, naturalness and Hebrew sense; doubtful candidates were dropped. No WordNet, Morfix or other source sentences were copied. No purchases.
 
 | Frequency ranks | New reviewed examples | Previously reviewed | Exceptions |
 | --- | ---: | ---: | ---: |
@@ -12,27 +8,16 @@ source sentences were copied, and no purchases were made.
 | 1001–1700 | 671 | 6 | 23 |
 | 1701–2400 | 669 | 3 | 28 |
 | 2401–3100 | 666 | 1 | 33 |
-| Total | 2645 | 40 | 115 |
+| 3101–3800 | 666 | 0 | 34 |
+| 3801–4500 | 676 | 0 | 24 |
+| 4501–5200 | 671 | 0 | 29 |
+| 5201–5900 | 663 | 0 | 37 |
 
-All 2,800 words in the four batches have either a reviewed example or an entry
-in [example-exceptions.md](example-exceptions.md). That file preserves each
-word, rank and primary gloss and explains the omission. Some entries are
-deferred for register or malformed tokens, as well as ambiguous/bad glosses.
-The source translations remain unchanged.
+Every word in these batches has a reviewed example or a documented omission in [example-exceptions.md](example-exceptions.md), preserving word, rank, primary gloss and reason. Source glosses are unchanged. Exception gloss cells retain Hebrew RTL direction.
 
-Overall reviewed coverage rises from 299 to 2,944 of 9,998 words. The top-300
-coverage remains 259. Other words continue to omit unreviewed examples.
-The historical PR 13 comparison remains in
-[example-coverage.json](example-coverage.json); `frequencyBatches` adds counts
-and the complete omission list for each new batch. Metadata is in
-[example-batches.json](example-batches.json).
+Overall coverage: 5620/9,998 reviewed examples; top 300 remains 259. This continuation adds 2676 examples. Batch exceptions total 239. The reproducible [coverage report](example-coverage.json) retains the PR 13 baseline and lists every omission.
 
-The reviewed gate still binds every sentence to its stored Hebrew meaning,
-with the same behavior when optional details are absent. Prompt masking now
-handles punctuation-ending targets such as `etc.`; reverse/typing clues hide
-the full literal target. The service-worker cache and readiness check use v10.
-Native iOS, source vocabulary, generated details, learning/scoring/sync and
-user progress data are untouched. Browser tests use isolated synthetic data.
+The existing sense gate and masking behavior are preserved, with loaded or missing details. Browser fixtures include less common primary senses from the new batches. Cache and app readiness use `four-words-offline-v11`. Native iOS, vocab.json, details.json, scoring, synchronization and user progress are untouched. Browser suites use isolated synthetic sessions.
 
 Validation commands:
 
@@ -40,12 +25,15 @@ Validation commands:
 node --test scripts/vocabulary.test.mjs scripts/quiz-content.test.cjs
 node scripts/vocabulary.mjs --check
 node scripts/example-coverage.cjs
+python -m unittest discover -s ios/Scripts -p 'test_*.py' -v
+node scripts/quiz-ux-browser.test.cjs
+node scripts/learning-rule-browser.test.cjs
+node scripts/feedback-layout-browser.test.cjs
+node scripts/safe-area-browser.test.cjs
 node scripts/sense-examples-browser.test.cjs
+node scripts/visual-layout-browser.test.cjs
+node scripts/offline-browser.test.cjs
+node scripts/reconnect-browser.test.cjs
 ```
 
-The content tests account for every batch entry, verify exact target forms,
-short sentences, masked prompts and current coverage, and retain the existing
-all-vocabulary sense gate and 39,992 choice-set checks. Browser sense tests now
-cover 13 reviewed words, including additions from every batch and `etc.`, plus
-omitted and changed-sense cases, in all three quiz modes with loaded/missing
-details: 96 scenarios across prompts, corrections and word cards.
+The Node tests account for every batch entry, verify exact forms, short sentences, masked prompts, current coverage, all-vocabulary sense isolation and 39,992 choice sets. Local browser execution uses the existing external Chromium harness; CI uses the pinned Playwright installation. Green CI is required before each authorized merge.
