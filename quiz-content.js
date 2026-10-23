@@ -9680,6 +9680,7 @@
     "cum": ["בהצטיינות","She graduated cum laude.",[]],
     "ante": ["אנטה","He raised the ante in the game.",[]],
     "hon": ["כבוד","The hon. member spoke to the court.",[]],
+    "nigger": ["כּוּשִׁי","Historians note that nigger was a racial slur used against Black people.",[]],
   };
 
   const HEBREW_MARKS = /[\u0591-\u05BD\u05BF\u05C1-\u05C2\u05C4-\u05C5\u05C7]/g;
