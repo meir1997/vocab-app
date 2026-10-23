@@ -237,17 +237,17 @@ function initFirebase() {
       fb.user = user; fb.ready = !!user;
       setAuthUI(user);
       if (user) {
-        setSync(navigator.onLine ? 'מסנכן…' : 'אופליין · השינויים שמורים במכשיר');
+        setSync(navigator.onLine ? 'מסנכן…' : 'אופליין · נשמר במכשיר');
         const uid = user.uid;
         fb.unsubscribe = fb.db.collection('users').doc(uid).onSnapshot({ includeMetadataChanges: true }, snap => {
           if (fb.user?.uid !== uid) return;
           if (snap.exists && !snap.metadata.hasPendingWrites) mergeRemote(snap.data());
           if (!snap.metadata.fromCache && dirty) schedulePush(0);
-        }, () => { setSync('השינויים שמורים · ממתינים לחיבור'); schedulePush(5000); });
+        }, () => { setSync('נשמר · ממתין לחיבור'); schedulePush(5000); });
         schedulePush(0);
-      } else setSync('מצב מקומי · השינויים שמורים במכשיר');
+      } else setSync('מצב מקומי · נשמר במכשיר');
     });
-  } catch { fb.initialized = false; setSync('מצב מקומי · ניסיון סנכרון כשיחזור החיבור'); }
+  } catch { fb.initialized = false; setSync('מצב מקומי · סנכרון כשהחיבור יחזור'); }
 }
 function setSync(text) { $('syncStatus').textContent = text; }
 function setAuthUI(user) {
@@ -306,15 +306,15 @@ async function pushNow() {
     if (fb.user?.uid !== uid || fb.generation !== generation) return;
     if (sentRevision === localRevision) { dirty = false; save('fw.pending', false); saveAccountState(); }
     save('fw.settingsTs', payload.fwUpdatedAt);
-    setSync(dirty ? 'השינויים שמורים · ממשיכים לסנכרן' : 'מסונכרן ✓');
-  } catch { setSync('השינויים שמורים · ממתינים לחיבור'); }
+    setSync(dirty ? 'נשמר · ממשיך לסנכרן' : 'מסונכרן ✓');
+  } catch { setSync('נשמר · ממתין לחיבור'); }
   finally {
     fb.pushing = false;
     if (dirty && fb.ready) schedulePush(5000);
   }
 }
 window.addEventListener('online', () => { initFirebase(); schedulePush(0); updateOfflineStatus(); });
-window.addEventListener('offline', () => { setSync('אופליין · השינויים שמורים במכשיר'); updateOfflineStatus(); });
+window.addEventListener('offline', () => { setSync('אופליין · נשמר במכשיר'); updateOfflineStatus(); });
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { initFirebase(); schedulePush(0); } });
 
 async function updateOfflineStatus() {
