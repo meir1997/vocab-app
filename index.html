@@ -68,6 +68,7 @@
           <div class="quiz-head">
             <span class="chip" id="sessionLabel">20 מילים</span>
             <span class="chip" id="quizBandLabel">רמה 1</span>
+            <span class="review-badge" id="reviewBadge" aria-hidden="true"></span>
             <span id="progressText" class="progress-text">מילה 1 מתוך 20</span>
           </div>
           <div class="progress-track"><div class="progress-fill" id="progressBar"></div></div>
@@ -79,15 +80,17 @@
             <button class="speak-btn" id="detailBtn" aria-label="פרטים על המילה"><svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#icon-info"/></svg></button>
           </div>
           <p id="questionContext" class="question-context hidden" lang="en" dir="ltr"></p>
-          <p class="hint" id="hint" aria-live="polite">בחרו את התשובה הנכונה</p>
           <div class="answers" id="answers"></div>
           <div id="typingBox" class="typing-box hidden">
             <input id="typingInput" type="text" lang="en" dir="ltr" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="כתבו את המילה באנגלית" aria-label="כתבו את המילה באנגלית">
             <button class="primary-btn" id="typingCheck">בדיקה</button>
           </div>
           <section id="answerFeedback" class="answer-feedback hidden" role="status" aria-live="polite" aria-atomic="true"></section>
-          <button class="ghost-btn" id="dontKnowBtn">לא יודע</button>
-          <button class="primary-btn hidden" id="nextBtn">המשך</button>
+          <div class="quiz-footer">
+            <button class="ghost-btn" id="dontKnowBtn">לא יודע</button>
+            <button class="primary-btn hidden" id="nextBtn">המשך</button>
+            <p class="hint" id="hint" aria-live="polite" aria-atomic="true"></p>
+          </div>
         </div>
 
         <div id="summary" class="hidden">

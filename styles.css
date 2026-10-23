@@ -12,7 +12,7 @@ body {
   background: linear-gradient(160deg, #f6f4ff 0%, var(--bg) 45%, #eaf6ff 100%);
   color: var(--ink); min-height: 100vh;
 }
-.shell { max-width: 560px; margin: 0 auto; padding: 14px 16px 96px; }
+.shell { max-width: 560px; margin: 0 auto; padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 96px; }
 .topbar { display: flex; align-items: center; justify-content: space-between; padding: 8px 2px 14px; }
 .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 20px; }
 .brand-mark {
@@ -81,29 +81,36 @@ body {
 .quiz-head { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: center; margin-bottom: 12px; }
 .quiz-head .chip { cursor: default; white-space: nowrap; width: fit-content; }
 #quizBandLabel { grid-column: 1 / -1; grid-row: 2; font-size: 12px; padding: 6px 10px; }
+.review-badge { grid-column: 2; grid-row: 2; justify-self: end; color: var(--muted); background: #f2f4fb; border-radius: 7px; padding: 3px 7px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.review-badge[aria-hidden="true"] { visibility: hidden; }
 .quiz-head .progress-text { justify-self: end; white-space: nowrap; }
 .progress-text { color: var(--muted); font-size: 13px; font-weight: 700; }
 .progress-track { height: 6px; background: #dfe4f2; border-radius: 999px; overflow: hidden; margin-bottom: 20px; }
 .progress-fill { height: 100%; background: var(--accent); border-radius: 999px; transition: width .3s; }
 .prompt-label { color: var(--muted); font-size: 14px; margin: 0 0 4px; text-align: center; }
 .word-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 8px; }
-.word { flex-basis: 100%; min-width: 0; font-size: 42px; margin: 4px 0 2px; max-width: 100%; overflow-wrap: anywhere; word-break: break-word; text-align: center; line-height: 1.15; }
-.serial { color: var(--muted); font-size: 12px; font-weight: 700; background: #eef1fa; border-radius: 8px; padding: 2px 8px; }
+.word { flex-basis: 100%; min-width: 0; height: 52px; display: flex; align-items: center; justify-content: center; font-size: 42px; margin: 4px 0 2px; max-width: 100%; overflow-wrap: anywhere; word-break: break-word; text-align: center; line-height: 1.15; }
+.serial { width: 58px; flex: none; text-align: center; white-space: nowrap; color: var(--muted); font-size: 12px; font-weight: 700; background: #eef1fa; border-radius: 8px; padding: 2px 8px; }
 .speak-btn, .sheet-head .speak { border: 0; background: var(--accent-soft); border-radius: 12px; min-width: 44px; min-height: 44px; font-size: 20px; cursor: pointer; flex-shrink: 0; }
-.question-context { margin: 12px 0 0; padding: 10px 12px; background: #f3f5fc; border-radius: 12px; color: var(--muted); font-size: 15px; line-height: 1.5; text-align: left; overflow-wrap: anywhere; }
-.hint { text-align: center; color: var(--muted); margin: 12px 0; font-size: 14px; }
-.hint:empty { display: none; }
+.question-context { height: 66px; margin: 12px 0 0; padding: 10px 12px; background: #f3f5fc; border-radius: 12px; color: var(--muted); font-size: 15px; line-height: 1.5; text-align: left; overflow-wrap: anywhere; }
+.question-context.empty { visibility: hidden; }
+/* A permanent bottom slot keeps feedback out of the question/answer flow. */
+.quiz-footer { display: grid; min-height: 44px; }
+.quiz-footer > * { grid-area: 1 / 1; }
+.hint { align-self: center; pointer-events: none; min-height: 20px; line-height: 20px; text-align: center; color: var(--muted); margin: 0; font-size: 14px; }
+.reviewing .hint { display: none; }
+.answering-correct #dontKnowBtn { visibility: hidden; pointer-events: none; }
 .hint.good { color: var(--good); font-weight: 700; }
 .hint.bad { color: var(--bad); font-weight: 700; }
 .answers { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
 .answer {
   border: 0; background: var(--card); box-shadow: var(--shadow); border-radius: 16px;
-  padding: 13px 16px; min-height: 52px; font-size: 17px; cursor: pointer; text-align: right; border: 2px solid #e3e7f3;
+  padding: 8px 16px; height: 52px; min-height: 52px; line-height: 1.25; font-size: 17px; cursor: pointer; text-align: right; border: 2px solid #e3e7f3;
 }
 .answer[dir="ltr"] { text-align: left; }
 .answer:hover { border-color: var(--accent-soft); }
 .answer:disabled { cursor: default; opacity: 1; color: var(--muted); -webkit-text-fill-color: currentColor; box-shadow: none; }
-.answer.correct { background: #e2f6ec; border-color: var(--good); color: var(--good); font-weight: 800; }
+.answer.correct { background: #e2f6ec; border-color: var(--good); color: var(--good); }
 .answer.wrong { background: #fde8ea; border-color: var(--bad); color: var(--bad); }
 .answer.reveal { background: #e2f6ec; border-color: var(--good); color: var(--good); }
 .typing-box { display: flex; gap: 10px; margin-top: 10px; }
@@ -226,30 +233,29 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   .quick-settings { flex-wrap: wrap; }
 }
 
-/* Keep the question and its actions in view on small phones. Larger text can
-   still grow naturally; no fixed heights or clipped learning content. */
+/* Compact reserved question slots keep the controls above small-phone nav. */
 @media (max-width: 360px) {
-  .shell { padding: 8px 10px 84px; }
+  .shell { padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 84px; }
   .topbar { gap: 6px; padding: 4px 0 10px; }
   .brand { font-size: 16px; gap: 6px; }
   .brand-mark { width: 28px; height: 28px; }
   .top-actions { gap: 6px; }
   .sync-status { font-size: 10px; }
   .auth-btn { padding: 6px 8px; font-size: 11px; }
-  #quizCard { padding: 12px; border-radius: 18px; }
-  .quiz-head { gap: 4px; margin-bottom: 8px; }
+  #quizCard { padding: 10px; border-radius: 18px; }
+  .quiz-head { gap: 4px; margin-bottom: 4px; }
   .quiz-head .chip { padding: 5px 8px; font-size: 11px; }
   #quizBandLabel { padding: 4px 8px; font-size: 11px; }
   .progress-text { font-size: 11px; }
-  .progress-track { margin-bottom: 10px; }
+  .progress-track { margin-bottom: 6px; }
   .prompt-label { font-size: 12px; }
   .word-row { flex-wrap: nowrap; gap: 6px; }
-  .word { flex: 1; flex-basis: auto; font-size: 30px; margin: 2px 0; }
-  .serial { font-size: 10px; padding: 2px 5px; }
-  .question-context { margin-top: 8px; padding: 8px 10px; font-size: 13px; line-height: 1.4; }
-  .hint { margin: 8px 0; font-size: 12px; }
-  .answers { margin-top: 10px; gap: 6px; }
-  .answer { min-height: 44px; padding: 8px 10px; font-size: 15px; border-radius: 12px; }
+  .word { flex: 1; flex-basis: auto; height: 36px; font-size: 30px; margin: 2px 0; }
+  .serial { width: 43px; font-size: 10px; padding: 2px 5px; }
+  .question-context { height: 46px; margin-top: 2px; padding: 4px 10px; font-size: 13px; line-height: 1.4; }
+  .hint { font-size: 12px; }
+  .answers { margin-top: 8px; gap: 6px; }
+  .answer { height: 44px; min-height: 44px; padding: 6px 10px; font-size: 15px; border-radius: 12px; }
   #dontKnowBtn { min-height: 44px; padding: 10px; font-size: 13px; }
   #nextBtn { min-height: 44px; padding: 11px; font-size: 15px; }
   .answer-feedback { margin-top: 10px; padding: 10px 12px; }
@@ -263,22 +269,22 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 
 /* Use the desktop width for the prompt and response side by side. */
 @media (min-width: 960px) {
-  .shell { max-width: 1120px; padding: 28px 32px 112px; }
+  .shell { max-width: 1120px; padding: calc(28px + env(safe-area-inset-top, 0px)) 32px 112px; }
   .topbar { padding-bottom: 24px; }
   #quizCard { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 40px; padding: 32px; }
   .quiz-head, .progress-track { grid-column: 1 / -1; }
   .quiz-head { grid-template-columns: auto 1fr auto; gap: 12px; }
   #quizBandLabel { grid-column: 2; grid-row: 1; }
+  .review-badge { grid-column: 2; grid-row: 1; }
   .quiz-head .progress-text { grid-column: 3; }
   .prompt-label { grid-column: 1; grid-row: 3; }
   .word-row { grid-column: 1; grid-row: 4; align-content: center; }
-  .word { font-size: 52px; }
+  .word { height: 60px; font-size: 52px; }
   .question-context { grid-column: 1; grid-row: 5; align-self: start; margin-top: 16px; }
-  .hint { grid-column: 2; grid-row: 3; margin-top: 0; }
+  .quiz-footer { grid-column: 2; grid-row: 6; }
   .answers, .typing-box { grid-column: 2; grid-row: 4; align-self: start; margin-top: 0; }
   .answer-feedback { grid-column: 2; grid-row: 5; }
   .reviewing .word-row { grid-row: 4 / span 2; }
-  #dontKnowBtn, #nextBtn { grid-column: 2; grid-row: 6; }
   #practiceHome { max-width: 800px; margin-inline: auto; }
   .library-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   #tab-settings, #tab-stats, #summary { max-width: 800px; margin-inline: auto; }
