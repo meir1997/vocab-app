@@ -13,7 +13,7 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const vocabulary = JSON.parse(fs.readFileSync(path.join(root, 'vocab.json'), 'utf8'));
 const sourceDetails = JSON.parse(fs.readFileSync(path.join(root, 'details.json'), 'utf8'));
-const reviewedWords = ['for', 'it', 'as', 'right', 'arms', 'minutes', 'safe', 'principal', 'refuse', 'royalty', 'foundation', 'Harry', 'etc.', 'stout', 'customs', 'smart', 'helping', 'bonds', 'abstract', 'flush'];
+const reviewedWords = ['for', 'it', 'as', 'right', 'arms', 'minutes', 'safe', 'principal', 'refuse', 'royalty', 'foundation', 'Harry', 'etc.', 'stout', 'customs', 'smart', 'helping', 'bonds', 'abstract', 'flush', 'lighter', 'trunks', 'ruling', 'duck', 'piles', 'quotation', 'manifold'];
 const BAD_EXAMPLE = 'UNREVIEWED EXAMPLE MUST NEVER APPEAR.';
 const screenshotArgument = process.argv.indexOf('--screenshots');
 const screenshotDirectory = screenshotArgument < 0 ? null : path.resolve(process.argv[screenshotArgument + 1] || 'sense-screenshots');
@@ -141,7 +141,7 @@ async function senseRegressions() {
       const cases = [
         ...reviewedWords.map(word => ({ word, reviewed: true })),
         { word: unreviewedFrequent, reviewed: false },
-        { word: 'incomprehensible', reviewed: false },
+        { word: 'superstitious', reviewed: false },
         { word: 'right', reviewed: false, changedSense: true }
       ];
       for (const fixture of cases) {

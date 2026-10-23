@@ -100,7 +100,7 @@ test('the reviewed sense, short example and masked prompt agree with the source 
 });
 
 test('generated examples never establish Hebrew sense alignment, even with a single definition', () => {
-  for (const item of [word(1, 'the', 'את'), word(8407, 'incomprehensible', 'לא מובן')]) {
+  for (const item of [word(1, 'the', 'את'), word(6639, 'superstitious', 'אמונות טפלות')]) {
     for (const detail of [null, {}, { e: 'A plausible but unverified sentence.' },
       { e: 'An unrelated sense.', d: ['n|one retained definition'] },
       { e: 'An unrelated sense.', d: ['n|first sense', 'v|second sense'] }]) {

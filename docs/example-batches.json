@@ -56,6 +56,34 @@
       "added": 663,
       "exceptions": 37,
       "previouslyReviewed": 0
+    },
+    {
+      "start": 5901,
+      "end": 6600,
+      "added": 661,
+      "exceptions": 39,
+      "previouslyReviewed": 0
+    },
+    {
+      "start": 6601,
+      "end": 7300,
+      "added": 657,
+      "exceptions": 43,
+      "previouslyReviewed": 0
+    },
+    {
+      "start": 7301,
+      "end": 8000,
+      "added": 655,
+      "exceptions": 45,
+      "previouslyReviewed": 0
+    },
+    {
+      "start": 8001,
+      "end": 8700,
+      "added": 663,
+      "exceptions": 37,
+      "previouslyReviewed": 0
     }
   ]
 }
