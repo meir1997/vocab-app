@@ -21,6 +21,13 @@
   - Multi-word entries: none exist in vocab.json, so no phrase handling.
 - 3,430 of 9,998 vocabulary words appear at least once. Missing rank = 0
   occurrences. Keys are vocab ranks (`r`), which are stable word keys.
+- Count scope: the entire spine in reading order, including the title page
+  and running page headers (each chapter file repeats the book title once,
+  e.g. `harry` gets +19 across the book). No navigation documents exist in
+  this EPUB's spine; the NCX table of contents is not counted. Counts describe
+  this exact EPUB edition; a different edition or book yields different
+  counts. The details sheet always names the source book next to the number
+  so a count is never read as describing another imported book.
 - Regeneration: tokenize the EPUB spine in order with
   `[a-z]+(?:'[a-z]+)*` over lowercased, apostrophe-normalized text, then map
   `w.toLowerCase()` to counts. Requires the original EPUB, which is private.
