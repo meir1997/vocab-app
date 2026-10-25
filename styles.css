@@ -431,3 +431,11 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .freq-line { margin: 0; }
 .freq-book { display: block; direction: ltr; text-align: start; margin-top: 2px; }
 .freq-note { margin: 6px 0 0; font-size: 12px; color: var(--muted, #5b6478); }
+
+/* Tappable book words: same look as plain text until pressed. */
+.book-content .bw { cursor: pointer; border-radius: 3px; }
+.book-content .bw:active { background: var(--accent-soft); }
+.word-surface { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+.word-state { margin: 10px 0 14px; font-weight: 600; }
+.word-actions { display: flex; gap: 10px; }
+.word-actions .primary-btn, .word-actions .ghost-btn { flex: 1; }
