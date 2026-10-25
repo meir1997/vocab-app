@@ -597,14 +597,17 @@ async function openDetails(item) {
     const n = (freq.counts && freq.counts[item.r]) || 0;
     const line = document.createElement('p');
     line.className = 'freq-line';
-    const prefix = n === 1 ? 'מופיע פעם אחת בספר '
-      : n > 1 ? `מופיע ${n.toLocaleString('he-IL')} פעמים בספר `
-      : 'לא מופיע בספר ';
+    line.textContent = n === 1 ? 'מופיע פעם אחת בספר:'
+      : n > 1 ? `מופיע ${n.toLocaleString('he-IL')} פעמים בספר:`
+      : 'לא מופיע בספר:';
     const bookTitle = document.createElement('span');
+    bookTitle.className = 'freq-book';
     bookTitle.dir = 'ltr'; bookTitle.lang = 'en';
     bookTitle.textContent = freq.book;
-    line.append(prefix, bookTitle);
-    addDetailSection(body, 'שכיחות בספר', [line]);
+    const note = document.createElement('p');
+    note.className = 'freq-note';
+    note.textContent = 'הספירה לפי צורת המילה המדויקת בלבד (ללא הטיות), בכל הספר כולל כותרות רצות ודפי פתיחה.';
+    addDetailSection(body, 'שכיחות בספר', [line, bookTitle, note]);
   }
   const disclosure = (label, node) => {
     const extra = document.createElement('details'); extra.className = 'detail-extra';
