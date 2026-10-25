@@ -282,13 +282,30 @@
     });
   }
 
+  // Front matter (cover, title page) is often an image-only or near-empty
+  // segment; a fresh open skips those, but keeps any short REAL opening text.
+  // A saved position always wins, so a deliberate choice (even the cover) is
+  // never overridden, and every section stays reachable in the selector.
+  const MIN_READABLE_CHARS = 50;
+  async function firstReadableChapter() {
+    const limit = Math.min(book.chapters.length, 10);
+    for (let i = 0; i < limit; i++) {
+      try {
+        const raw = await book.zip.text(book.chapters[i]);
+        const doc = new DOMParser().parseFromString(raw, 'text/html');
+        if (sanitizeInto(doc.body || doc, document).textContent.trim().length >= MIN_READABLE_CHARS) return i;
+      } catch {}
+    }
+    return 0;
+  }
+
   async function openBook(buffer) {
     book = await loadEpub(buffer, new DOMParser());
     showLoaded();
     const pos = loadPosition();
     fontScale = pos && typeof pos.font === 'number' ? Math.min(1.6, Math.max(0.8, pos.font)) : 1;
     applyFont();
-    const start = pos && Number.isInteger(pos.chapter) && pos.chapter >= 0 && pos.chapter < book.chapters.length ? pos.chapter : 0;
+    const start = pos && Number.isInteger(pos.chapter) && pos.chapter >= 0 && pos.chapter < book.chapters.length ? pos.chapter : await firstReadableChapter();
     await renderChapter(start);
     if (pos && start === pos.chapter && pos.ratio > 0) {
       els.content.scrollTop = Math.round(pos.ratio * els.content.scrollHeight);

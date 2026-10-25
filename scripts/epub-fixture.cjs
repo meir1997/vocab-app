@@ -112,4 +112,47 @@ function buildTestEpub() {
   ]);
 }
 
-module.exports = { buildZip, buildTestEpub, crc32 };
+// Variant with an image-only cover segment first in the spine, like real
+// converted EPUBs: the reader must skip it on a fresh open.
+function buildTestEpubWithCover() {
+  return buildZip([
+    { name: 'mimetype', content: 'application/epub+zip' },
+    { name: 'META-INF/container.xml', content: `<?xml version="1.0"?>
+<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
+  <rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles>
+</container>` },
+    { name: 'OEBPS/content.opf', content: `<?xml version="1.0"?>
+<package xmlns="http://www.idpf.org/2007/opf" version="2.0">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <dc:title>Covered Book</dc:title>
+    <dc:creator>Fixture Author</dc:creator>
+    <dc:language>en</dc:language>
+  </metadata>
+  <manifest>
+    <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
+    <item id="cover" href="cover.xhtml" media-type="application/xhtml+xml"/>
+    <item id="ch1" href="ch1.xhtml" media-type="application/xhtml+xml"/>
+    <item id="ch2" href="ch2.xhtml" media-type="application/xhtml+xml"/>
+  </manifest>
+  <spine toc="ncx"><itemref idref="cover"/><itemref idref="ch1"/><itemref idref="ch2"/></spine>
+</package>` },
+    { name: 'OEBPS/toc.ncx', content: `<?xml version="1.0"?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/">
+  <navMap>
+    <navPoint id="n1"><navLabel><text>Beginning</text></navLabel><content src="ch1.xhtml"/></navPoint>
+    <navPoint id="n2"><navLabel><text>Middle</text></navLabel><content src="ch2.xhtml"/></navPoint>
+  </navMap>
+</ncx>` },
+    { name: 'OEBPS/cover.xhtml', content: `<?xml version="1.0"?>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Cover</title></head>
+<body><div><img src="cover.jpg"/></div></body></html>` },
+    { name: 'OEBPS/ch1.xhtml', compress: true, content: `<?xml version="1.0"?>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Beginning</title></head>
+<body><h2>The Beginning</h2><p>A first chapter with enough real text to count as the readable opening of the book for a fresh reader.</p></body></html>` },
+    { name: 'OEBPS/ch2.xhtml', content: `<?xml version="1.0"?>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Middle</title></head>
+<body><h2>The Middle</h2><p>Second chapter text with <em>emphasis</em> and more words so this section is also comfortably readable.</p></body></html>` }
+  ]);
+}
+
+module.exports = { buildZip, buildTestEpub, buildTestEpubWithCover, crc32 };
