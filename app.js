@@ -325,7 +325,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v26');
+    const cache = await caches.open('four-words-offline-v27');
     const required = ['index.html', 'app.js', 'quiz-content.js', 'vocab.json', 'details.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
@@ -796,6 +796,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click
   if (btn.dataset.tab === 'stats') renderStats();
   if (btn.dataset.tab === 'library') renderLibrary();
   if (btn.dataset.tab === 'book' && window.VocabReader) VocabReader.showBookTab();
+  else document.body.classList.remove('reading');
 }));
 $('startBtn').addEventListener('click', startSession);
 $('againBtn').addEventListener('click', startSession);
