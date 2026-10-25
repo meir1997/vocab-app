@@ -105,6 +105,10 @@ async function frequencyInDetails() {
     const body = await page.locator('#detailBody').innerText();
     assert.match(body, new RegExp(`מופיע ${freq.counts[hit.r].toLocaleString('he-IL')} פעמים`));
     assert.match(body, new RegExp(freq.book.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    assert.match(body, /צורת המילה המדויקת/, 'count-scope caveat is visible in the UI');
+    const titleBox = await page.locator('.freq-book').boundingBox();
+    const lineBox = await page.locator('.freq-line').boundingBox();
+    assert.ok(titleBox.y >= lineBox.y + lineBox.height - 1, 'book title is its own block below the Hebrew count line');
   } finally {
     await context.close();
   }
