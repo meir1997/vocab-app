@@ -96,3 +96,11 @@ test('base64 helpers round-trip binary buffers', () => {
   assert.equal(back.length, bytes.length);
   assert.deepEqual(back[bytes.length - 1], bytes[bytes.length - 1]);
 });
+
+test('splitBookTokens separates words from punctuation and keeps curly apostrophes', () => {
+  const source = 'A small, fox-like word. harry’s “quoted” (yes)';
+  const tokens = reader.splitBookTokens(source);
+  assert.deepEqual(tokens.filter(t => t.word).map(t => t.text),
+    ['A', 'small', 'fox-like', 'word', 'harry’s', 'quoted', 'yes']);
+  assert.equal(tokens.map(t => t.text).join(''), source, 'tokens reassemble into the exact original text');
+});
