@@ -130,6 +130,72 @@ async function missingBookKeepsAppUsable() {
   console.log('PASS app stays usable with no imported book');
 }
 
+function mockFbScript(savedJson) {
+  return `(() => {
+    const saved = ${savedJson || 'null'};
+    const state = { saved, deleted: false };
+    const bookDoc = {
+      set: async d => { state.saved = d; },
+      get: async () => ({ exists: !!state.saved, data: () => state.saved }),
+      delete: async () => { state.saved = null; state.deleted = true; }
+    };
+    fb.ready = true;
+    fb.user = { uid: 'test-uid', email: 'test@example.com' };
+    fb.db = { collection: () => ({ doc: () => ({
+      collection: () => ({ doc: () => bookDoc }),
+      set: async () => {},
+      get: async () => ({ exists: false, data: () => ({}) })
+    }) }) };
+    window.__fbMock = state;
+  })()`;
+}
+
+async function cloudSyncFlow() {
+  // 1. Signed-in import writes a cloud copy to the account.
+  let { page, context } = await newPage();
+  let saved;
+  try {
+    await page.evaluate(mockFbScript());
+    await page.locator('.tab-btn[data-tab="book"]').click();
+    await page.locator('#bookFile').setInputFiles(epubPath);
+    await page.waitForFunction(() => document.getElementById('bookTitle').textContent === 'Fixture Book');
+    await page.waitForFunction(() => !!window.__fbMock.saved, { timeout: 5000 });
+    saved = await page.evaluate(() => window.__fbMock.saved);
+    assert.ok(saved.b64.length > 1000, 'cloud copy carries the book bytes');
+    assert.ok(saved.name.endsWith('.epub'));
+    assert.equal(saved.title, 'Fixture Book');
+  } finally {
+    await context.close();
+  }
+  // 2. A fresh device (no IndexedDB) restores the book from the account cloud copy.
+  ({ page, context } = await newPage());
+  try {
+    await page.evaluate(mockFbScript(JSON.stringify(saved)));
+    await page.locator('.tab-btn[data-tab="book"]').click();
+    await page.waitForFunction(() => document.getElementById('bookTitle').textContent === 'Fixture Book', { timeout: 8000 });
+    assert.equal(await page.locator('#bookChapter').inputValue(), '0');
+    assert.match(await page.locator('#bookContent').innerText(), /The Beginning/);
+    // Local copy is re-established for offline reading.
+    assert.ok(await page.evaluate(() => new Promise(resolve => {
+      const req = indexedDB.open('vocab-reader', 1);
+      req.onsuccess = () => {
+        const get = req.result.transaction('book').objectStore('book').get('current');
+        get.onsuccess = () => resolve(!!get.result);
+        get.onerror = () => resolve(false);
+      };
+      req.onerror = () => resolve(false);
+    })), 'cloud-restored book is cached locally again');
+    // 3. Removal clears the cloud copy as well.
+    page.on('dialog', d => d.accept());
+    await page.locator('#bookRemoveBtn').click();
+    await page.locator('#bookImportBtn').waitFor({ state: 'visible' });
+    await page.waitForFunction(() => window.__fbMock.deleted === true, { timeout: 5000 });
+  } finally {
+    await context.close();
+  }
+  console.log('PASS signed-in import writes account cloud copy, fresh device restores it, removal clears it');
+}
+
 (async () => {
   epubPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'epub-')), 'fixture.epub');
   fs.writeFileSync(epubPath, buildTestEpub());
@@ -140,6 +206,7 @@ async function missingBookKeepsAppUsable() {
     await importFlow();
     await frequencyInDetails();
     await missingBookKeepsAppUsable();
+    await cloudSyncFlow();
   } finally {
     await browser.close();
     server.close();
