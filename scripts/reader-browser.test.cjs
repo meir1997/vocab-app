@@ -155,19 +155,23 @@ async function missingBookKeepsAppUsable() {
   console.log('PASS app stays usable with no imported book');
 }
 
-function mockFbScript(savedJson) {
+function mockFbScript(savedJson, highlightsJson) {
   return `(() => {
-    const saved = ${savedJson || 'null'};
-    const state = { saved, deleted: false };
+    const state = { saved: ${savedJson || 'null'}, deleted: false, highlights: ${highlightsJson || 'null'}, highlightsDeleted: false };
     const bookDoc = {
       set: async d => { state.saved = d; },
       get: async () => ({ exists: !!state.saved, data: () => state.saved }),
       delete: async () => { state.saved = null; state.deleted = true; }
     };
+    const highlightsDoc = {
+      set: async d => { state.highlights = d; },
+      get: async () => ({ exists: !!state.highlights, data: () => state.highlights }),
+      delete: async () => { state.highlights = null; state.highlightsDeleted = true; }
+    };
     fb.ready = true;
     fb.user = { uid: 'test-uid', email: 'test@example.com' };
     fb.db = { collection: () => ({ doc: () => ({
-      collection: () => ({ doc: () => bookDoc }),
+      collection: () => ({ doc: id => id === 'highlights' ? highlightsDoc : bookDoc }),
       set: async () => {},
       get: async () => ({ exists: false, data: () => ({}) })
     }) }) };
@@ -488,6 +492,69 @@ async function highlightFlow() {
   console.log('PASS word highlight: sheet button, long-press toggle, persistence, removal cleanup');
 }
 
+
+async function highlightCloudSyncFlow() {
+  // 1. Marks made before sync existed (localStorage without a stamp) migrate up.
+  let { page, context } = await newPage();
+  let saved;
+  try {
+    await page.evaluate(mockFbScript());
+    await page.locator('.tab-btn[data-tab="book"]').click();
+    await page.locator('#bookFile').setInputFiles(epubPath);
+    await page.waitForFunction(() => document.getElementById('bookTitle').textContent === 'Fixture Book');
+    await page.waitForFunction(() => !!window.__fbMock.saved, { timeout: 5000 });
+    saved = await page.evaluate(() => window.__fbMock.saved);
+    // Legacy device-local marks: no stamp key, cloud copy does not exist yet.
+    await page.evaluate(() => localStorage.setItem('vocab-reader-highlights', JSON.stringify(['0:3'])));
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => vocab.length > 9000 && typeof VocabReader !== 'undefined');
+    await page.evaluate(mockFbScript());
+    await page.locator('.tab-btn[data-tab="book"]').click();
+    await page.waitForFunction(() => document.getElementById('bookTitle').textContent === 'Fixture Book');
+    await page.waitForFunction(() => (window.__fbMock.highlights?.list || []).join(',') === '0:3', { timeout: 8000 });
+  } finally {
+    await context.close();
+  }
+  // 2. A fresh device pulls the account's marks; a local removal overwrites the cloud list.
+  ({ page, context } = await newPage());
+  let hlState;
+  try {
+    await page.evaluate(mockFbScript(JSON.stringify(saved), JSON.stringify({ list: ['0:3', '0:7'], updatedAt: Date.now() })));
+    await page.locator('.tab-btn[data-tab="book"]').click();
+    await page.waitForFunction(() => document.querySelectorAll('#bookContent .bw.hl').length === 2, { timeout: 8000 });
+    const spans = await page.evaluate(() => [...document.querySelectorAll('#bookContent .bw')]);
+    await page.evaluate(() => VocabReader.toggleWordHighlight(document.querySelectorAll('#bookContent .bw')[3]));
+    await page.waitForFunction(() => (window.__fbMock.highlights?.list || []).join(',') === '0:7', { timeout: 5000 });
+    hlState = await page.evaluate(() => window.__fbMock.highlights);
+    assert.equal(await page.locator('#bookContent .bw.hl').count(), 1, 'removal reflected locally');
+  } finally {
+    await context.close();
+  }
+  // 3. A stale device does not resurrect the removed mark (last write wins).
+  ({ page, context } = await newPage());
+  try {
+    await page.evaluate(mockFbScript(JSON.stringify(saved), JSON.stringify(hlState)));
+    await page.evaluate(() => {
+      localStorage.setItem('vocab-reader-highlights', JSON.stringify(['0:3', '0:7']));
+      localStorage.setItem('vocab-reader-highlights-at', '1'); // stale
+    });
+    await page.locator('.tab-btn[data-tab="book"]').click();
+    await page.waitForFunction(() => document.getElementById('bookTitle').textContent === 'Fixture Book');
+    await page.waitForFunction(() => document.querySelectorAll('#bookContent .bw').length > 10);
+    await page.waitForFunction(() => localStorage.getItem('vocab-reader-highlights') === '["0:7"]', { timeout: 8000 });
+    assert.equal(await page.locator('#bookContent .bw.hl').count(), 1, 'stale local mark not resurrected');
+    // 4. Removing the book clears the cloud highlights doc too.
+    page.on('dialog', d => d.accept());
+    await openReaderPanel(page);
+    await page.locator('#bookRemoveBtn').click();
+    await page.waitForFunction(() => window.__fbMock.highlightsDeleted === true, { timeout: 5000 });
+    assert.equal(await page.evaluate(() => localStorage.getItem('vocab-reader-highlights')), null);
+  } finally {
+    await context.close();
+  }
+  console.log('PASS highlight cloud sync: legacy migration, fresh-device restore, LWW removal, cleared with book');
+}
+
 (async () => {
   epubPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'epub-')), 'fixture.epub');
   fs.writeFileSync(epubPath, buildTestEpub());
@@ -503,6 +570,7 @@ async function highlightFlow() {
     await paginationFlow();
     await wordTapFlow();
     await highlightFlow();
+    await highlightCloudSyncFlow();
   } finally {
     await browser.close();
     server.close();
