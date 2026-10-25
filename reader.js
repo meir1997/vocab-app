@@ -245,6 +245,7 @@
     els.error.textContent = '';
     try {
       const buffer = await file.arrayBuffer();
+      localStorage.removeItem(POS_KEY); // a fresh import starts at its own beginning
       await openBook(buffer); // validate before persisting
       await saveBookFile({ name: file.name, buffer });
     } catch (err) {
