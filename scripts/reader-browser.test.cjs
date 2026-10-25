@@ -10,7 +10,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const http = require('node:http');
 const path = require('node:path');
-const { buildTestEpub, buildTestEpubWithCover } = require('./epub-fixture.cjs');
+const { buildTestEpub, buildTestEpubWithCover, buildLongEpub } = require('./epub-fixture.cjs');
 
 const root = path.resolve(__dirname, '..');
 const server = http.createServer((request, response) => {
@@ -247,6 +247,61 @@ async function coverOpeningFlow() {
   console.log('PASS fresh open and cloud restore skip an image-only cover, saved cover position respected');
 }
 
+
+async function paginationFlow() {
+  const longPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'epub-long-')), 'long.epub');
+  fs.writeFileSync(longPath, buildLongEpub());
+  const { page, context } = await newPage();
+  try {
+    await page.locator('.tab-btn[data-tab="book"]').click();
+    await page.locator('#bookFile').setInputFiles(longPath);
+    await page.waitForFunction(() => document.getElementById('bookTitle').textContent === 'Long Book');
+    // Long chapter spans multiple pages; the indicator counts them.
+    await page.waitForFunction(() => {
+      const m = document.getElementById('bookPageInfo').textContent.match(/עמוד (\d+) מתוך (\d+)/);
+      return m && Number(m[1]) === 1 && Number(m[2]) >= 4;
+    });
+    const transformOf = () => page.evaluate(() => document.getElementById('bookContent').style.transform);
+    const first = await transformOf();
+    // Turning forward and back.
+    await page.locator('#bookNext').click();
+    await page.waitForFunction(() => document.getElementById('bookPageInfo').textContent.startsWith('עמוד 2 '));
+    assert.notEqual(await transformOf(), first, 'page turn moves the page strip');
+    await page.locator('#bookPrev').click();
+    await page.waitForFunction(() => document.getElementById('bookPageInfo').textContent.startsWith('עמוד 1 '));
+    assert.equal(await transformOf(), first, 'back returns to the first page');
+    // Page position survives a reload.
+    await page.locator('#bookNext').click();
+    await page.waitForFunction(() => document.getElementById('bookPageInfo').textContent.startsWith('עמוד 2 '));
+    const pagesBefore = await page.evaluate(() => document.getElementById('bookPageInfo').textContent);
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => vocab.length > 9000 && typeof VocabReader !== 'undefined');
+    await page.locator('.tab-btn[data-tab="book"]').click();
+    await page.waitForFunction(() => document.getElementById('bookTitle').textContent === 'Long Book');
+    await page.waitForFunction(() => document.getElementById('bookPageInfo').textContent.startsWith('עמוד 2 '));
+    assert.equal(await page.evaluate(() => document.getElementById('bookPageInfo').textContent), pagesBefore, 'page position restored after reload');
+    // Last page disables the forward arrow.
+    await page.evaluate(() => new Promise(resolve => {
+      const btn = document.getElementById('bookNext');
+      const click = () => { if (btn.disabled) return resolve(); btn.click(); setTimeout(click, 60); };
+      click();
+    }));
+    const lastInfo = await page.evaluate(() => document.getElementById('bookPageInfo').textContent);
+    assert.ok(await page.locator('#bookNext').isDisabled(), 'forward arrow disabled on the last page');
+    assert.ok(!(await page.locator('#bookPrev').isDisabled()), 'back arrow enabled past the first page');
+    // Bigger font repaginates to at least as many pages and stays near the end.
+    await page.locator('#bookFontUp').click();
+    await page.waitForFunction(info => document.getElementById('bookPageInfo').textContent !== info, lastInfo);
+    const m = (await page.evaluate(() => document.getElementById('bookPageInfo').textContent)).match(/עמוד (\d+) מתוך (\d+)/);
+    const last = lastInfo.match(/עמוד (\d+) מתוך (\d+)/);
+    assert.ok(Number(m[2]) >= Number(last[2]), 'bigger font does not shrink the page count');
+    assert.ok(Number(m[1]) >= Number(m[2]) - 1, 'relative position kept near the end after repagination');
+  } finally {
+    await context.close();
+  }
+  console.log('PASS paged reading: page turns, indicator, persistence, arrows and repagination');
+}
+
 (async () => {
   epubPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'epub-')), 'fixture.epub');
   fs.writeFileSync(epubPath, buildTestEpub());
@@ -259,6 +314,7 @@ async function coverOpeningFlow() {
     await missingBookKeepsAppUsable();
     await cloudSyncFlow();
     await coverOpeningFlow();
+    await paginationFlow();
   } finally {
     await browser.close();
     server.close();
