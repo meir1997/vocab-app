@@ -285,11 +285,15 @@
     showPage();
   }
 
+  let slideTimer = null;
   function showPage() {
     els.content.style.transform = `translateX(${-pageIndex * pageAdvance}px)`;
     els.pageInfo.textContent = `עמוד ${pageIndex + 1} מתוך ${pageCount}`;
-    els.prev.disabled = pageIndex <= 0;
-    els.next.disabled = pageIndex >= pageCount - 1;
+    // While the strip slides, moving words must not catch taps meant as
+    // page turns; re-enable them once the page settles.
+    els.content.classList.add('sliding');
+    clearTimeout(slideTimer);
+    slideTimer = setTimeout(() => els.content.classList.remove('sliding'), 200);
   }
 
   function goToPage(i) {
@@ -330,7 +334,9 @@
   function showLoaded() {
     els.empty.classList.add('hidden');
     els.loaded.classList.remove('hidden');
+    document.body.classList.add('reading');
     els.title.textContent = book.title;
+    els.readerTitle.textContent = book.title;
     els.author.textContent = book.creator || '';
     els.author.classList.toggle('hidden', !book.creator);
     const select = els.chapter;
@@ -393,6 +399,7 @@
     cloudClearBook().catch(() => {});
     localStorage.removeItem(POS_KEY);
     book = null;
+    document.body.classList.remove('reading');
     els.loaded.classList.add('hidden');
     els.empty.classList.remove('hidden');
     els.pageInfo.textContent = '';
@@ -407,14 +414,45 @@
       chapter: $('bookChapter'), content: $('bookContent'), error: $('bookError'),
       importBtn: $('bookImportBtn'), removeBtn: $('bookRemoveBtn'), file: $('bookFile'),
       fontUp: $('bookFontUp'), fontDown: $('bookFontDown'),
-      prev: $('bookPrev'), next: $('bookNext'), pageInfo: $('bookPageInfo')
+      pageInfo: $('bookPageInfo'), viewport: $('bookViewport'),
+      closeBtn: $('readerClose'), menuBtn: $('readerMenu'), panel: $('readerPanel'), readerTitle: $('readerTitle')
     };
     els.importBtn.addEventListener('click', () => els.file.click());
     els.file.addEventListener('change', e => { if (e.target.files[0]) importFile(e.target.files[0]); });
     els.removeBtn.addEventListener('click', () => { if (confirm('להסיר את הספר מהמכשיר?')) removeBook(); });
     els.chapter.addEventListener('change', e => renderChapter(Number(e.target.value)));
-    els.prev.addEventListener('click', () => goToPage(pageIndex - 1));
-    els.next.addEventListener('click', () => goToPage(pageIndex + 1));
+    // Immersive reading: X leaves the book, the menu toggles the controls
+    // panel, and pages turn by tapping the outer edges of the page (or the
+    // arrow keys). Taps on words are the app's clickable-word feature.
+    els.closeBtn.addEventListener('click', () => {
+      document.body.classList.remove('reading');
+      els.panel.classList.add('hidden');
+      if (typeof switchTab === 'function') switchTab('practice');
+    });
+    els.menuBtn.addEventListener('click', () => {
+      const open = els.panel.classList.toggle('hidden');
+      els.menuBtn.setAttribute('aria-expanded', open ? 'false' : 'true');
+    });
+    els.viewport.addEventListener('click', e => {
+      if (e.target.closest('.bw')) return;
+      if (!els.panel.classList.contains('hidden')) {
+        els.panel.classList.add('hidden');
+        els.menuBtn.setAttribute('aria-expanded', 'false');
+        return;
+      }
+      const r = els.viewport.getBoundingClientRect();
+      const f = (e.clientX - r.left) / r.width;
+      if (f < 0.22) goToPage(pageIndex - 1);
+      else if (f > 0.78) goToPage(pageIndex + 1);
+    });
+    document.addEventListener('keydown', e => {
+      if (!document.body.classList.contains('reading')) return;
+      if (e.target.matches('input, select, textarea')) return;
+      if (typeof sheetOpen !== 'undefined' && sheetOpen) return;
+      if (typeof wordSheetOpen !== 'undefined' && wordSheetOpen) return;
+      if (e.key === 'ArrowRight') goToPage(pageIndex + 1);
+      else if (e.key === 'ArrowLeft') goToPage(pageIndex - 1);
+    });
     els.fontUp.addEventListener('click', () => { const r = pageRatio(); fontScale = Math.min(1.6, fontScale + 0.1); applyFont(); goToPage(Math.round(r * (pageCount - 1))); });
     els.fontDown.addEventListener('click', () => { const r = pageRatio(); fontScale = Math.max(0.8, fontScale - 0.1); applyFont(); goToPage(Math.round(r * (pageCount - 1))); });
     let resizeTimer = null;
@@ -428,7 +466,7 @@
 
   async function showBookTab() {
     initBookTab();
-    if (book) { layoutPages(); return; }
+    if (book) { document.body.classList.add('reading'); layoutPages(); return; }
     let record = null;
     try { record = await loadBookFile(); } catch {}
     if (record && record.buffer) {

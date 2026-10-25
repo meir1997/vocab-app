@@ -122,28 +122,35 @@
           <p id="bookError" class="book-error" role="alert"></p>
         </div>
         <div id="bookLoaded" class="hidden">
-          <div class="book-head">
-            <div class="book-meta">
-              <h2 id="bookTitle"></h2>
-              <p id="bookAuthor" class="book-author"></p>
-            </div>
-            <button class="ghost-btn danger" id="bookRemoveBtn">הסרה</button>
-          </div>
-          <div class="book-toolbar">
-            <select id="bookChapter" aria-label="בחירת קטע"></select>
-            <div class="book-font">
-              <button class="ghost-btn" id="bookFontDown" aria-label="הקטנת גופן">א-</button>
-              <button class="ghost-btn" id="bookFontUp" aria-label="הגדלת גופן">א+</button>
-            </div>
+          <div class="reader-top">
+            <button class="reader-chrome" id="readerClose" aria-label="סגירת הספר"><svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#icon-close"/></svg></button>
+            <span class="reader-title" id="readerTitle" lang="en" dir="ltr"></span>
           </div>
           <div class="book-pager">
-            <button class="ghost-btn book-nav book-prev" id="bookPrev" dir="ltr" aria-label="עמוד קודם">&#8249;</button>
             <div class="book-viewport" id="bookViewport">
               <div id="bookContent" class="book-content" lang="en" dir="ltr"></div>
             </div>
-            <button class="ghost-btn book-nav book-next" id="bookNext" dir="ltr" aria-label="עמוד הבא">&#8250;</button>
           </div>
-          <p id="bookPageInfo" class="book-page-info" aria-live="polite"></p>
+          <div class="reader-bottom">
+            <p id="bookPageInfo" class="book-page-info" aria-live="polite"></p>
+            <button class="reader-chrome" id="readerMenu" aria-label="אפשרויות קריאה" aria-expanded="false"><svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></button>
+          </div>
+          <div id="readerPanel" class="reader-panel hidden">
+            <div class="book-head">
+              <div class="book-meta">
+                <h2 id="bookTitle"></h2>
+                <p id="bookAuthor" class="book-author"></p>
+              </div>
+              <button class="ghost-btn danger" id="bookRemoveBtn">הסרה</button>
+            </div>
+            <div class="book-toolbar">
+              <select id="bookChapter" aria-label="בחירת קטע"></select>
+              <div class="book-font">
+                <button class="ghost-btn" id="bookFontDown" aria-label="הקטנת גופן">א-</button>
+                <button class="ghost-btn" id="bookFontUp" aria-label="הגדלת גופן">א+</button>
+              </div>
+            </div>
+          </div>
         </div>
         <input type="file" id="bookFile" accept=".epub,application/epub+zip" class="hidden" aria-label="בחירת קובץ EPUB">
       </section>
