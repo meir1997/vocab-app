@@ -113,6 +113,34 @@ body {
 .answer.correct { background: #e2f6ec; border-color: var(--good); color: var(--good); }
 .answer.wrong { background: #fde8ea; border-color: var(--bad); color: var(--bad); }
 .answer.reveal { background: #e2f6ec; border-color: var(--good); color: var(--good); }
+/* Flashcards (כרטיסיות): tap flips, swipe right = know, left = don't know. */
+.flashcard-box { perspective: 900px; margin-top: 16px; height: 232px; }
+.flashcard {
+  position: relative; height: 100%; transform-style: preserve-3d;
+  transition: transform .35s ease; cursor: pointer; touch-action: pan-y;
+  user-select: none; -webkit-user-select: none; outline: none;
+}
+.flashcard.flipped { transform: rotateY(180deg); }
+.flashcard.dragging { transition: none; }
+.flashcard.no-anim { transition: none; }
+.flashcard.fly-out { opacity: 0; transition: transform .3s ease-in, opacity .3s ease-in; }
+.fc-face {
+  position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+  background: #f3f5fc; border: 2px solid #e3e7f3; border-radius: 16px; padding: 18px; text-align: center;
+}
+.fc-back { transform: rotateY(180deg); background: var(--accent-soft); border-color: var(--accent); }
+.fc-question { font-size: 54px; font-weight: 800; color: var(--accent); line-height: 1; }
+.fc-meaning { margin: 0; font-size: 26px; font-weight: 800; }
+.fc-example { margin: 0; font-size: 15px; color: var(--muted); line-height: 1.5; }
+.fc-hint { font-size: 12.5px; color: var(--muted); }
+/* In cards mode the footer holds both grade buttons side by side; the first
+   flex item lands on the physical right in RTL, so יודע must lead. */
+.cards-mode .answers { display: none; }
+.cards-mode .quiz-footer { display: flex; flex-direction: row; gap: 10px; min-height: 48px; }
+.cards-mode .quiz-footer > * { flex: 1; margin-top: 0; }
+.cards-mode .quiz-footer .hint { display: none; }
+.cards-mode #knowBtn { order: -1; }
 .typing-box { display: flex; gap: 10px; margin-top: 10px; }
 .typing-box input {
   flex: 1; min-width: 0; width: 0; border: 2px solid #dfe4f2; border-radius: 16px; padding: 14px; font-size: 17px; background: #fff;
@@ -282,7 +310,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   .word { height: 60px; font-size: 52px; }
   .question-context { grid-column: 1; grid-row: 5; align-self: start; margin-top: 16px; }
   .quiz-footer { grid-column: 2; grid-row: 6; }
-  .answers, .typing-box { grid-column: 2; grid-row: 4; align-self: start; margin-top: 0; }
+  .answers, .typing-box, .flashcard-box { grid-column: 2; grid-row: 4; align-self: start; margin-top: 0; }
   .answer-feedback { grid-column: 2; grid-row: 5; }
   #practiceHome { max-width: 800px; margin-inline: auto; }
   .library-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
@@ -333,7 +361,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .prompt-label { grid-area: 3 / 1; }
 .word-row { grid-area: 4 / 1; }
 .question-context { grid-area: 5 / 1; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
-.answers, .typing-box, .answer-feedback { grid-area: 6 / 1; }
+.answers, .typing-box, .answer-feedback, .flashcard-box { grid-area: 6 / 1; }
 .answers { height: 232px; }
 .typing-box { align-self: start; height: 52px; }
 .answer-feedback { margin: 16px 0 0; height: 232px; overflow: hidden; }
@@ -346,6 +374,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   #quizCard { grid-template-rows: 52px 12px 18px 44px 40px 202px 44px; }
   .question-context { height: 40px; padding-block: 2px; }
   .answers { height: 194px; }
+  .flashcard-box { height: 194px; margin-top: 8px; }
   .answer-feedback { height: 194px; margin-top: 8px; }
   .typing-box { height: 44px; margin-top: 8px; }
   .quiz-footer { height: 44px; }
@@ -357,7 +386,8 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   .prompt-label { grid-area: 3 / 1; }
   .word-row { grid-area: 4 / 1; }
   .question-context { grid-area: 5 / 1; }
-  .answers, .typing-box, .answer-feedback { grid-area: 4 / 2; }
+  .answers, .typing-box, .answer-feedback, .flashcard-box { grid-area: 4 / 2; }
+  .flashcard-box { margin-top: 0; }
   .answer-feedback { margin: 0; }
   .quiz-footer { grid-area: 6 / 2; }
 }
