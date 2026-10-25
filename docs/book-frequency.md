@@ -43,6 +43,14 @@
   that keeps reading markup (headings, paragraphs, emphasis, lists) and drops
   scripts, styles, images and embedded content. `require('node:zlib')` is a
   Node-only fallback for tests.
+- Account cloud copy (added after Meir asked us to store the book for him,
+  2026-10-25): when signed in to the existing Firebase sync, the imported
+  EPUB is also written to his own account data as base64 (users/{uid}/books/main,
+  falling back to a fwBook field on users/{uid} when subcollections are
+  denied by rules). The project is on the free Spark plan; the ~334KB payload
+  fits one Firestore document. A device with no local copy restores the book
+  from the account on the Book tab; removal clears both. Signed-out behavior
+  is unchanged (device-local only). The book is never on the public site.
 - Chapter navigation uses the NCX table of contents when present, with a
   generic label fallback.
 - Known limits: images (including covers) are not rendered; fixed-layout or
