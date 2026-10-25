@@ -73,6 +73,7 @@ function onVocabReady() {
   renderBandSelect();
   refreshHome(); renderLibrary();
   loadDetails().catch(() => {}); // Warm local/offline examples and synonym exclusions.
+  loadBookFrequency().catch(() => {}); // Warm per-word book occurrence counts.
 }
 
 /* ---------- Bands ---------- */
@@ -322,7 +323,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v19');
+    const cache = await caches.open('four-words-offline-v20');
     const required = ['index.html', 'app.js', 'quiz-content.js', 'vocab.json', 'details.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
@@ -556,6 +557,11 @@ function loadDetails() {
   if (!detailsPromise) detailsPromise = fetch('details.json').then(r => { if (!r.ok) throw new Error('details'); return r.json(); }).then(data => { wordDetails = data; return data; }).catch(err => { detailsPromise = null; throw err; });
   return detailsPromise;
 }
+let freqPromise = null, bookFrequency = null;
+function loadBookFrequency() {
+  if (!freqPromise) freqPromise = fetch('book-frequency.json').then(r => { if (!r.ok) throw new Error('book-frequency'); return r.json(); }).then(data => { bookFrequency = data; return data; }).catch(err => { freqPromise = null; throw err; });
+  return freqPromise;
+}
 function addDetailSection(parent, title, nodes) {
   const sec = document.createElement('section'); sec.className = 'detail-section';
   const h = document.createElement('h3'); h.textContent = title; sec.append(h, ...nodes); parent.append(sec);
@@ -583,6 +589,25 @@ async function openDetails(item) {
     const q = document.createElement('p'); q.className = 'example-text'; q.lang = 'en'; q.dir = 'ltr'; q.textContent = content.example;
     const b = document.createElement('button'); b.className = 'speak-btn'; b.setAttribute('aria-label', 'השמעת המשפט'); b.innerHTML = iconMarkup('volume'); b.addEventListener('click', () => speak(content.example));
     row.append(q, b); addDetailSection(body, 'משפט לדוגמה', [row]);
+  }
+  let freq = null;
+  try { freq = await loadBookFrequency(); } catch {}
+  if (!sheetOpen || $('detailWord').textContent !== item.w) return;
+  if (freq) {
+    const n = (freq.counts && freq.counts[item.r]) || 0;
+    const line = document.createElement('p');
+    line.className = 'freq-line';
+    line.textContent = n === 1 ? 'מופיע פעם אחת בספר:'
+      : n > 1 ? `מופיע ${n.toLocaleString('he-IL')} פעמים בספר:`
+      : 'לא מופיע בספר:';
+    const bookTitle = document.createElement('span');
+    bookTitle.className = 'freq-book';
+    bookTitle.dir = 'ltr'; bookTitle.lang = 'en';
+    bookTitle.textContent = freq.book;
+    const note = document.createElement('p');
+    note.className = 'freq-note';
+    note.textContent = 'הספירה לפי צורת המילה המדויקת בלבד (ללא הטיות), בכל הספר כולל כותרות רצות ודפי פתיחה.';
+    addDetailSection(body, 'שכיחות בספר', [line, bookTitle, note]);
   }
   const disclosure = (label, node) => {
     const extra = document.createElement('details'); extra.className = 'detail-extra';
@@ -700,6 +725,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click
   $(`tab-${btn.dataset.tab}`).classList.remove('hidden');
   if (btn.dataset.tab === 'stats') renderStats();
   if (btn.dataset.tab === 'library') renderLibrary();
+  if (btn.dataset.tab === 'book' && window.VocabReader) VocabReader.showBookTab();
 }));
 $('startBtn').addEventListener('click', startSession);
 $('againBtn').addEventListener('click', startSession);
