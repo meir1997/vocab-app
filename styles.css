@@ -176,7 +176,7 @@ body {
 .tabbar {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;
   background: rgba(255, 255, 255, .94); backdrop-filter: blur(12px);
-  display: grid; grid-template-columns: repeat(4, minmax(0, 140px)); justify-content: center; padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
+  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 140px); justify-content: center; padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
   border-top: 1px solid #e3e7f3;
 }
 .tab-btn {
@@ -370,3 +370,33 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .top-actions { flex: 1 1 auto; flex-wrap: nowrap; min-width: 0; justify-content: flex-end; }
 .sync-status { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: end; }
 .auth-btn { flex: 0 0 auto; max-width: 58vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- Book tab (local EPUB reader) ---------- */
+.book-empty { text-align: center; padding: 32px 16px; }
+.book-empty p { color: var(--muted, #5b6478); }
+.book-note { font-size: 13px; }
+.book-error { color: var(--bad, #c0392b); font-weight: 600; min-height: 1.2em; }
+.book-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.book-head h2 { margin: 0; }
+.book-author { margin: 2px 0 0; color: var(--muted, #5b6478); font-size: 14px; }
+.book-toolbar { display: flex; gap: 8px; align-items: center; margin: 12px 0; }
+.book-toolbar select { flex: 1; min-width: 0; }
+.book-font { display: flex; gap: 6px; }
+.book-font .ghost-btn { min-width: 44px; min-height: 44px; }
+.book-content {
+  background: var(--card, #fff);
+  border: 1px solid #e4e8f4;
+  border-radius: 16px;
+  padding: 18px 16px;
+  max-height: calc(100dvh - 320px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  line-height: 1.65;
+  font-size: 100%;
+  overflow-wrap: break-word;
+}
+.book-content h1, .book-content h2, .book-content h3, .book-content h4 { line-height: 1.3; margin: 1em 0 .5em; }
+.book-content p { margin: 0 0 .8em; }
+.book-content blockquote { margin: .8em 1em; font-style: italic; }
+.book-loading { color: var(--muted, #5b6478); text-align: center; }
+.freq-line { margin: 0; }
