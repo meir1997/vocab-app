@@ -130,7 +130,7 @@ async function feedbackMatrix(page, device, mode) {
     for (const key of ['word', 'answers', 'typing']) assert.deepEqual(frame[key], before[key], `${device} ${mode} frame ${i}, ${key}: exactly 0px delta`);
   }
   assert.deepEqual(await page.evaluate(() => ({ attempts: stats.attempts, correct: stats.correct, sessionCorrect: session.correct, wrong: session.wrong, record: progress.right })),
-    { attempts: 1, correct: 1, sessionCorrect: 1, wrong: 0, record: { r: 1, w: 0, s: 1, next: await page.evaluate(() => progress.right.next) } }, 'feedback presentation scores the answer once and preserves SRS history');
+    { attempts: 1, correct: 1, sessionCorrect: 1, wrong: 0, record: { r: 1, w: 0, s: 1, next: await page.evaluate(() => progress.right.next), last: await page.evaluate(() => progress.right.last) } }, 'feedback presentation scores the answer once and preserves SRS history');
   manifest.checks.push({ device, mode, before, during, cleared, next, frames, maximumDelta: 0 });
 }
 async function reviewBadges(page, device) {
