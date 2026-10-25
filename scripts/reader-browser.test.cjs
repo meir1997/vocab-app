@@ -45,11 +45,15 @@ async function importFlow() {
   try {
     await page.locator('.tab-btn[data-tab="book"]').click();
     await page.locator('#bookImportBtn').waitFor({ state: 'visible' });
+    // A stale position from a previous book must not steer a fresh import.
+    await page.evaluate(() => localStorage.setItem('vocab-reader-position', JSON.stringify({ chapter: 1, ratio: 0.5, font: 1.6 })));
     await page.locator('#bookFile').setInputFiles(epubPath);
     await page.waitForFunction(() => document.getElementById('bookTitle').textContent === 'Fixture Book');
     assert.equal(await page.locator('#bookAuthor').textContent(), 'Fixture Author');
     const options = await page.locator('#bookChapter option').allTextContents();
     assert.deepEqual(options, ['Beginning', 'Middle'], 'toc labels drive the chapter picker');
+    assert.equal(await page.locator('#bookChapter').inputValue(), '0', 'fresh import starts at the beginning, ignoring stale position');
+    assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById('bookContent')).fontSize), '16px', 'fresh import resets font scale');
     const text = await page.locator('#bookContent').innerText();
     assert.match(text, /The Beginning/);
     assert.match(text, /a link/, 'unwrapped link text survives');
