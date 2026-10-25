@@ -233,6 +233,20 @@
       <p class="detail-credit"><span>משפטי הדוגמה נכתבו לפי המשמעות הנלמדת.</span><span>הגדרות ומילים נרדפות: <bdi dir="ltr" lang="en">Princeton WordNet</bdi>; הן עשויות לתאר משמעויות אחרות.</span></p>
     </div>
   </div>
+  <div id="wordSheet" class="sheet-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="wordSheetWord">
+    <div class="sheet">
+      <div class="sheet-head">
+        <div><h2 id="wordSheetWord" lang="en" dir="ltr"></h2><span class="serial" id="wordSheetSerial"></span></div>
+        <button class="sheet-close" id="wordSheetClose" aria-label="סגירה"><svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#icon-close"/></svg></button>
+      </div>
+      <p class="word-surface hidden" id="wordSheetFormRow"><span>הצורה בספר:</span> <bdi dir="ltr" lang="en" id="wordSheetForm"></bdi></p>
+      <p class="word-state" id="wordSheetState" aria-live="polite"></p>
+      <div class="word-actions">
+        <button class="primary-btn" id="wordCardBtn">פתיחת הכרטיס</button>
+        <button class="ghost-btn" id="wordKnownBtn"></button>
+      </div>
+    </div>
+  </div>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js" defer></script>
