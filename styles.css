@@ -377,7 +377,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .book-note { font-size: 13px; }
 .book-error { color: var(--bad, #c0392b); font-weight: 600; min-height: 1.2em; }
 .book-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.book-head h2 { margin: 0; }
+.book-head h2 { margin: 0; font-size: 20px; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .book-author { margin: 2px 0 0; color: var(--muted, #5b6478); font-size: 14px; }
 .book-toolbar { display: flex; gap: 8px; align-items: center; margin: 12px 0; }
 .book-toolbar select { flex: 1; min-width: 0; }
