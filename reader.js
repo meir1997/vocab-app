@@ -122,11 +122,37 @@
   const KEEP_TAGS = new Set(['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BR', 'HR', 'EM', 'I', 'STRONG', 'B', 'U', 'SMALL', 'SUB', 'SUP', 'BLOCKQUOTE', 'UL', 'OL', 'LI', 'DIV', 'SPAN']);
   const DROP_WITH_CONTENT = new Set(['SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED', 'AUDIO', 'VIDEO', 'IMG', 'SVG', 'LINK', 'META', 'TITLE', 'HEAD', 'NOSCRIPT', 'CANVAS', 'FORM', 'INPUT', 'BUTTON']);
 
-  function sanitizeInto(sourceBody, targetDoc) {
+  // Split visible text into word and non-word tokens so every word in the
+  // book can be tapped for its app card. Word cores keep inner apostrophes
+  // (straight or curly) and hyphens; surrounding punctuation stays plain text.
+  const BOOK_WORD_RE = /[A-Za-z]+(?:[’'\-][A-Za-z]+)*/g;
+  function splitBookTokens(text) {
+    const tokens = [];
+    let last = 0;
+    for (const m of text.matchAll(BOOK_WORD_RE)) {
+      if (m.index > last) tokens.push({ text: text.slice(last, m.index), word: false });
+      tokens.push({ text: m[0], word: true });
+      last = m.index + m[0].length;
+    }
+    if (last < text.length) tokens.push({ text: text.slice(last), word: false });
+    return tokens;
+  }
+
+  function sanitizeInto(sourceBody, targetDoc, wrapWords) {
     const frag = targetDoc.createDocumentFragment();
     const walk = (node, out) => {
       for (const child of node.childNodes) {
-        if (child.nodeType === 3) { out.appendChild(targetDoc.createTextNode(child.nodeValue)); continue; }
+        if (child.nodeType === 3) {
+          if (!wrapWords) { out.appendChild(targetDoc.createTextNode(child.nodeValue)); continue; }
+          for (const token of splitBookTokens(child.nodeValue)) {
+            if (!token.word) { out.appendChild(targetDoc.createTextNode(token.text)); continue; }
+            const span = targetDoc.createElement('span');
+            span.className = 'bw';
+            span.textContent = token.text;
+            out.appendChild(span);
+          }
+          continue;
+        }
         if (child.nodeType !== 1) continue;
         if (DROP_WITH_CONTENT.has(child.tagName)) continue;
         if (KEEP_TAGS.has(child.tagName)) {
@@ -281,7 +307,7 @@
     content.innerHTML = '<p class="book-loading">טוען…</p>';
     const raw = await book.zip.text(book.chapters[index]);
     const doc = new DOMParser().parseFromString(raw, 'text/html');
-    const frag = sanitizeInto(doc.body || doc, document);
+    const frag = sanitizeInto(doc.body || doc, document, true);
     content.replaceChildren(frag);
     if (!content.textContent.trim()) content.innerHTML = '<p class="book-loading">(הקטע ריק או מכיל תמונה בלבד)</p>';
     pageIndex = 0;
@@ -422,7 +448,7 @@
     }
   }
 
-  return { parseZipEntries, inflateRaw, openZip, loadEpub, sanitizeInto, initBookTab, showBookTab,
+  return { parseZipEntries, inflateRaw, openZip, loadEpub, sanitizeInto, splitBookTokens, initBookTab, showBookTab,
     bufferToBase64, base64ToBuffer, cloudSaveBook, cloudLoadBook, cloudClearBook,
     _state: () => ({ book, chapterIndex, fontScale }) };
 });

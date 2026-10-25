@@ -302,6 +302,81 @@ async function paginationFlow() {
   console.log('PASS paged reading: page turns, indicator, persistence, arrows and repagination');
 }
 
+async function wordTapFlow() {
+  const { page, context } = await newPage();
+  try {
+    await page.locator('.tab-btn[data-tab="book"]').click();
+    await page.locator('#bookFile').setInputFiles(epubPath);
+    await page.waitForFunction(() => document.getElementById('bookTitle').textContent === 'Fixture Book');
+
+    // Every word is wrapped as a tappable span; text stays intact.
+    assert.ok(await page.locator('#bookContent .bw').count() > 10, 'book words are wrapped as tappable spans');
+    const text = await page.locator('#bookContent').innerText();
+    assert.match(text, /A small chapter with a link and a possessive like harry’s\./, 'wrapping keeps the text identical');
+
+    // Tap a vocab word: sheet shows its app number and fresh state.
+    const vocabData = JSON.parse(fs.readFileSync(path.join(root, 'vocab.json'), 'utf8'));
+    const rank = vocabData.find(v => v.w === 'chapter').r;
+    await page.locator('#bookContent .bw', { hasText: 'chapter' }).first().click();
+    await page.locator('#wordSheet:not(.hidden)').waitFor();
+    assert.equal(await page.locator('#wordSheetWord').textContent(), 'chapter');
+    assert.match(await page.locator('#wordSheetSerial').textContent(), new RegExp(`#${rank.toLocaleString('he-IL')}`), 'app word number shown');
+    assert.match(await page.locator('#wordSheetState').textContent(), /עוד לא נלמדה/);
+
+    // Mark known: mirrors the quiz clean-answer rule (r=1, s=1), due far out.
+    await page.locator('#wordKnownBtn').click();
+    assert.match(await page.locator('#wordSheetState').textContent(), /מסומנת כידועה/);
+    assert.equal(await page.locator('#wordKnownBtn').textContent(), 'סימון כלא ידועה');
+    let stored = await page.evaluate(() => JSON.parse(localStorage.getItem('fw.progress.v2')).chapter);
+    assert.deepEqual({ r: stored.r, w: stored.w, s: stored.s }, { r: 1, w: 0, s: 1 });
+    assert.ok(stored.next > Date.now() + 25 * 86400000, 'known word scheduled at the longest interval');
+    let stats = await page.evaluate(() => JSON.parse(localStorage.getItem('fw.stats.v2')));
+    assert.equal(stats.attempts, 0, 'book marks are not quiz answers');
+    let bands = await page.evaluate(() => JSON.parse(localStorage.getItem('fw.bands.v1')));
+    assert.deepEqual(bands.recent || [], [], 'book marks do not move band advancement');
+
+    // Mark unknown again: back into learning, due now, like the quiz's "לא יודע".
+    await page.locator('#wordKnownBtn').click();
+    assert.match(await page.locator('#wordSheetState').textContent(), /בתהליך למידה/);
+    stored = await page.evaluate(() => JSON.parse(localStorage.getItem('fw.progress.v2')).chapter);
+    assert.equal(stored.s, 0);
+    assert.equal(stored.w, 1);
+    assert.ok(stored.next <= Date.now(), 'unknown word is due immediately');
+
+    // Open its card from the sheet.
+    await page.locator('#wordCardBtn').click();
+    await page.waitForFunction(() => document.getElementById('wordSheet').classList.contains('hidden'));
+    await page.locator('#detailSheet:not(.hidden)').waitFor();
+    assert.equal(await page.locator('#detailWord').textContent(), 'chapter');
+    await page.locator('#detailClose').click();
+
+    // A word outside the app vocabulary: honest not-found, no actions.
+    await page.locator('#bookContent .bw', { hasText: 'possessive' }).first().click();
+    await page.locator('#wordSheet:not(.hidden)').waitFor();
+    assert.equal(await page.locator('#wordSheetWord').textContent(), 'possessive');
+    assert.match(await page.locator('#wordSheetState').textContent(), /לא נמצאת ברשימת המילים/);
+    assert.ok(await page.locator('#wordCardBtn').isHidden(), 'no card for a word the app does not teach');
+    assert.ok(await page.locator('#wordKnownBtn').isHidden(), 'no known toggle for a word the app does not teach');
+    await page.keyboard.press('Escape');
+    await page.waitForFunction(() => document.getElementById('wordSheet').classList.contains('hidden'));
+
+    // Inflected possessive finds the base-form card and notes the book form.
+    await page.locator('#bookContent .bw', { hasText: 'harry’s' }).first().click();
+    await page.locator('#wordSheet:not(.hidden)').waitFor();
+    assert.equal(await page.locator('#wordSheetWord').textContent(), 'Harry', 'possessive resolves to the base-form card');
+    assert.ok(await page.locator('#wordSheetFormRow').isVisible(), 'book form noted when it differs');
+    assert.equal(await page.locator('#wordSheetForm').textContent(), 'harry’s');
+    await page.locator('#wordSheetClose').click();
+
+    // Inflection lookup: an untaught plural finds the base card, case-insensitively.
+    const hit = await page.evaluate(() => lookupBookWord('SMALLS')?.w || null);
+    assert.equal(hit, 'small', 'plural/case-insensitive lookup finds the base form');
+  } finally {
+    await context.close();
+  }
+  console.log('PASS book word tap: app number, card, known/unknown toggle, not-found and inflections');
+}
+
 (async () => {
   epubPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'epub-')), 'fixture.epub');
   fs.writeFileSync(epubPath, buildTestEpub());
@@ -315,6 +390,7 @@ async function paginationFlow() {
     await cloudSyncFlow();
     await coverOpeningFlow();
     await paginationFlow();
+    await wordTapFlow();
   } finally {
     await browser.close();
     server.close();
