@@ -155,4 +155,39 @@ function buildTestEpubWithCover() {
   ]);
 }
 
-module.exports = { buildZip, buildTestEpub, buildTestEpubWithCover, crc32 };
+
+// A single long chapter that spans many reader pages, for pagination tests.
+function buildLongEpub() {
+  const para = '<p>Chapter text that repeats to fill several pages of the paginated reader layout used in the tests.</p>';
+  return buildZip([
+    { name: 'mimetype', content: 'application/epub+zip' },
+    { name: 'META-INF/container.xml', content: `<?xml version="1.0"?>
+<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
+  <rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles>
+</container>` },
+    { name: 'OEBPS/content.opf', content: `<?xml version="1.0"?>
+<package xmlns="http://www.idpf.org/2007/opf" version="2.0">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <dc:title>Long Book</dc:title>
+    <dc:creator>Fixture Author</dc:creator>
+    <dc:language>en</dc:language>
+  </metadata>
+  <manifest>
+    <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
+    <item id="ch1" href="ch1.xhtml" media-type="application/xhtml+xml"/>
+  </manifest>
+  <spine toc="ncx"><itemref idref="ch1"/></spine>
+</package>` },
+    { name: 'OEBPS/toc.ncx', content: `<?xml version="1.0"?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/">
+  <navMap>
+    <navPoint id="n1"><navLabel><text>Long</text></navLabel><content src="ch1.xhtml"/></navPoint>
+  </navMap>
+</ncx>` },
+    { name: 'OEBPS/ch1.xhtml', compress: true, content: `<?xml version="1.0"?>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Long</title></head>
+<body><h2>Long Chapter</h2>${para.repeat(160)}</body></html>` }
+  ]);
+}
+
+module.exports = { buildZip, buildTestEpub, buildTestEpubWithCover, buildLongEpub, crc32 };

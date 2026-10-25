@@ -136,7 +136,14 @@
               <button class="ghost-btn" id="bookFontUp" aria-label="הגדלת גופן">א+</button>
             </div>
           </div>
-          <div id="bookContent" class="book-content" lang="en" dir="ltr"></div>
+          <div class="book-pager">
+            <button class="ghost-btn book-nav book-prev" id="bookPrev" aria-label="עמוד קודם">&#8249;</button>
+            <div class="book-viewport" id="bookViewport">
+              <div id="bookContent" class="book-content" lang="en" dir="ltr"></div>
+            </div>
+            <button class="ghost-btn book-nav book-next" id="bookNext" aria-label="עמוד הבא">&#8250;</button>
+          </div>
+          <p id="bookPageInfo" class="book-page-info" aria-live="polite"></p>
         </div>
         <input type="file" id="bookFile" accept=".epub,application/epub+zip" class="hidden" aria-label="בחירת קובץ EPUB">
       </section>
