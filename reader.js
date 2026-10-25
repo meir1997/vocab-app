@@ -203,10 +203,7 @@
     const data = { name, title: title || '', b64: bufferToBase64(buffer), addedAt: Date.now() };
     const userDoc = f.db.collection('users').doc(f.user.uid);
     try { await userDoc.collection('books').doc('main').set(data); return true; }
-    catch {
-      try { await userDoc.set({ fwBook: data }, { merge: true }); return true; } // rules that allow only the user doc itself
-      catch { return false; }
-    }
+    catch { return false; }
   }
 
   async function cloudLoadBook() {
@@ -217,11 +214,6 @@
       const snap = await userDoc.collection('books').doc('main').get();
       if (snap.exists && snap.data().b64) return snap.data();
     } catch {}
-    try {
-      const snap = await userDoc.get();
-      const data = snap.data() || {};
-      if (data.fwBook && data.fwBook.b64) return data.fwBook;
-    } catch {}
     return null;
   }
 
@@ -230,7 +222,6 @@
     const f = getFb();
     const userDoc = f.db.collection('users').doc(f.user.uid);
     try { await userDoc.collection('books').doc('main').delete(); } catch {}
-    try { await userDoc.set({ fwBook: firebase.firestore.FieldValue.delete() }, { merge: true }); } catch {}
   }
 
   async function waitForSyncAuth(ms) {
