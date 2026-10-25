@@ -154,7 +154,7 @@ body {
 
 /* Stats */
 .week-bars { display: flex; gap: 8px; align-items: flex-end; height: 120px; margin: 14px 0 18px; }
-.week-bars .bar { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.week-bars .bar { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; }
 .week-bars .bar i {
   width: 100%; background: var(--accent); border-radius: 8px 8px 4px 4px; min-height: 3px; display: block;
 }
