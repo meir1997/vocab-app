@@ -318,7 +318,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v30');
+    const cache = await caches.open('four-words-offline-v31');
     const required = ['index.html', 'app.js', 'quiz-content.js', 'vocab.json', 'details.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
@@ -326,6 +326,7 @@ async function updateOfflineStatus() {
   } catch { label.textContent = 'שמירה אופליין לא זמינה בדפדפן זה'; }
 }
 /* ---------- Quiz ---------- */
+const MODE_LABELS = { choice: 'בחירה אנגלית ← עברית', reverse: 'בחירה הפוכה', typing: 'הקלדה', cards: 'כרטיסיות' };
 let startingSession = false;
 async function startSession() {
   if (!vocab.length || startingSession) return;
@@ -351,6 +352,59 @@ function fitWord() {
   while (size > 14 && el.scrollWidth > el.clientWidth) { size -= 2; el.style.fontSize = size + 'px'; }
   // Keep the fitted line intact: re-enabling wrapping can add a line because
   // fractional glyph widths round differently from scrollWidth.
+}
+let cardFlipped = false, cardDrag = null;
+function resetFlashcard() {
+  const card = $('flashcard');
+  cardFlipped = false; cardDrag = null;
+  // Skip the fly-back transition so the next card is grabbable immediately.
+  card.classList.add('no-anim');
+  card.classList.remove('flipped', 'dragging', 'fly-out');
+  card.style.transform = '';
+  void card.offsetHeight;
+  card.classList.remove('no-anim');
+}
+function flipFlashcard() {
+  if (!session.active || settings.mode !== 'cards' || locked) return;
+  cardFlipped = !cardFlipped;
+  $('flashcard').classList.toggle('flipped', cardFlipped);
+}
+function gradeCard(ok) {
+  if (locked || !session.active || settings.mode !== 'cards') return;
+  locked = true;
+  const item = session.queue[session.index];
+  markWord(item.w, ok); markAnswer(ok);
+  if (ok) session.correct++; else session.wrong++;
+  persist(); refreshHome();
+  const card = $('flashcard');
+  card.classList.add('fly-out');
+  card.style.transform = (cardFlipped ? 'rotateY(180deg) ' : '') + `translateX(${ok ? 140 : -140}%) rotate(${ok ? 12 : -12}deg)`;
+  advanceWhenReady(nextQuestion, 320);
+}
+function cardPointerDown(e) {
+  if (locked || !session.active || settings.mode !== 'cards') return;
+  cardDrag = { x: e.clientX, dx: 0, moved: false };
+  try { $('flashcard').setPointerCapture(e.pointerId); } catch {}
+}
+function cardPointerMove(e) {
+  if (!cardDrag) return;
+  const dx = e.clientX - cardDrag.x;
+  if (Math.abs(dx) > 8) cardDrag.moved = true;
+  if (!cardDrag.moved) return;
+  cardDrag.dx = dx;
+  const card = $('flashcard');
+  card.classList.add('dragging');
+  card.style.transform = (cardFlipped ? 'rotateY(180deg) ' : '') + `translateX(${dx}px) rotate(${dx / 25}deg)`;
+}
+function cardPointerUp() {
+  if (!cardDrag) return;
+  const { dx, moved } = cardDrag; cardDrag = null;
+  const card = $('flashcard');
+  card.classList.remove('dragging');
+  if (moved && dx > 90) return gradeCard(true);
+  if (moved && dx < -90) return gradeCard(false);
+  card.style.transform = '';
+  if (!moved) flipFlashcard();
 }
 function renderReviewBadge(item) {
   const badge = $('reviewBadge');
@@ -390,13 +444,27 @@ function showQuestion() {
     $('word').textContent = reverse ? content.meaning : item.w;
     $('word').setAttribute('lang', reverse ? 'he' : 'en'); $('word').dir = reverse ? 'rtl' : 'ltr';
     $('typingBox').classList.add('hidden');
-    VocabQuiz.buildChoices(item, vocab, mode, wordDetails).forEach(choice => {
-      const b = document.createElement('button');
-      b.className = 'answer'; b.textContent = choice.label; b.dir = reverse ? 'ltr' : 'rtl';
-      b.dataset.correct = String(choice.correct);
-      b.addEventListener('click', () => answerChoice(choice.correct, b));
-      answers.append(b);
-    });
+    if (mode !== 'cards') {
+      VocabQuiz.buildChoices(item, vocab, mode, wordDetails).forEach(choice => {
+        const b = document.createElement('button');
+        b.className = 'answer'; b.textContent = choice.label; b.dir = reverse ? 'ltr' : 'rtl';
+        b.dataset.correct = String(choice.correct);
+        b.addEventListener('click', () => answerChoice(choice.correct, b));
+        answers.append(b);
+      });
+    }
+  }
+  // Flashcards: the answer lives behind the card; grading is self-declared,
+  // right = know (a correct answer), left = don't know (same as "לא יודע").
+  const cards = mode === 'cards';
+  $('quizCard').classList.toggle('cards-mode', cards);
+  $('flashcardBox').classList.toggle('hidden', !cards);
+  $('knowBtn').classList.toggle('hidden', !cards);
+  if (cards) {
+    $('questionContext').textContent = ''; $('questionContext').classList.add('empty');
+    resetFlashcard();
+    $('fcMeaning').textContent = content.meaning;
+    $('fcExample').textContent = content.example || '';
   }
   fitWord();
 }
@@ -480,7 +548,7 @@ function refreshHome() {
   $('learnedStat').textContent = learnedCount().toLocaleString('he-IL');
   $('accuracyStat').textContent = pct(stats.correct, stats.attempts);
   $('sessionBtn').textContent = settings.length === 'all' ? 'כל הדחופות' : `${settings.length} מילים`;
-  $('modeBtn').textContent = { choice: 'בחירה אנגלית ← עברית', reverse: 'בחירה הפוכה', typing: 'הקלדה' }[settings.mode];
+  $('modeBtn').textContent = MODE_LABELS[settings.mode];
   if (vocab.length) {
     $('bandBtn').textContent = bandLabel();
     $('bandNote').textContent = bandAccuracyNote();
@@ -803,8 +871,23 @@ $('startBtn').addEventListener('click', startSession);
 $('againBtn').addEventListener('click', startSession);
 $('homeBtn').addEventListener('click', () => { $('summary').classList.add('hidden'); $('practiceHome').classList.remove('hidden'); });
 $('dontKnowBtn').addEventListener('click', () => {
-  if (settings.mode === 'typing') { locked || checkTypingDontKnow(); }
+  if (settings.mode === 'cards') gradeCard(false);
+  else if (settings.mode === 'typing') { locked || checkTypingDontKnow(); }
   else answerChoice(false, null);
+});
+$('knowBtn').addEventListener('click', () => gradeCard(true));
+$('flashcard').addEventListener('pointerdown', cardPointerDown);
+// Move/up live on the document so a fast swipe off the card still grades.
+document.addEventListener('pointermove', cardPointerMove);
+document.addEventListener('pointerup', cardPointerUp);
+document.addEventListener('pointercancel', () => { if (!cardDrag) return; cardDrag = null; $('flashcard').classList.remove('dragging'); $('flashcard').style.transform = ''; });
+$('flashcard').addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flipFlashcard(); }
+});
+document.addEventListener('keydown', e => {
+  if (!session.active || settings.mode !== 'cards') return;
+  if (e.key === 'ArrowRight') gradeCard(true);
+  else if (e.key === 'ArrowLeft') gradeCard(false);
 });
 function checkTypingDontKnow() {
   locked = true;
