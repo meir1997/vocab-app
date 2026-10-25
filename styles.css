@@ -416,9 +416,12 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .book-content .bw { cursor: pointer; border-radius: 3px; }
 .book-content.sliding .bw { pointer-events: none; }
 .book-content .bw:active { background: var(--accent-soft); }
+/* Highlighted words: a warm marker that survives reloads; pure reader mark. */
+.book-content .bw.hl { background: #ffe08a; box-shadow: 0 0 0 1.5px #f0c94e; }
+.book-content .bw.hl:active { background: #ffd54f; }
 .word-surface { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
 .word-state { margin: 10px 0 14px; font-weight: 600; }
-.word-actions { display: flex; gap: 10px; }
+.word-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .word-actions .primary-btn, .word-actions .ghost-btn { flex: 1; }
 
 /* Immersive reading: a loaded book fills the whole screen, like a reader app. */

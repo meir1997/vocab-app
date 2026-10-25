@@ -205,6 +205,38 @@
   function savePosition(pos) { try { localStorage.setItem(POS_KEY, JSON.stringify(pos)); } catch {} }
   function loadPosition() { try { return JSON.parse(localStorage.getItem(POS_KEY)) || null; } catch { return null; } }
 
+  /* ---------- Word highlights: device-local marks, never learning data ---------- */
+  // A highlight id is chapter index + the word's ordinal among the chapter's
+  // word spans. Rendering is deterministic, so ids survive reloads, font and
+  // page changes. Like the reading position, highlights stay on this device.
+  const HIL_KEY = 'vocab-reader-highlights';
+  let highlights = new Set(), highlightsLoaded = false;
+  function loadHighlights() {
+    highlightsLoaded = true;
+    try { highlights = new Set(JSON.parse(localStorage.getItem(HIL_KEY)) || []); } catch { highlights = new Set(); }
+  }
+  function saveHighlights() { try { localStorage.setItem(HIL_KEY, JSON.stringify([...highlights])); } catch {} }
+  function clearHighlights() { highlights = new Set(); try { localStorage.removeItem(HIL_KEY); } catch {} }
+  function highlightId(index) { return `${chapterIndex}:${index}`; }
+  function applyHighlights() {
+    if (!els || !els.content) return;
+    if (!highlightsLoaded) loadHighlights();
+    els.content.querySelectorAll('.bw').forEach((span, i) => span.classList.toggle('hl', highlights.has(highlightId(i))));
+  }
+  function toggleWordHighlight(span) {
+    if (!span || !els || !els.content) return false;
+    if (!highlightsLoaded) loadHighlights();
+    const index = [...els.content.querySelectorAll('.bw')].indexOf(span);
+    if (index < 0) return false;
+    const id = highlightId(index);
+    const on = !highlights.has(id);
+    if (on) highlights.add(id); else highlights.delete(id);
+    span.classList.toggle('hl', on);
+    saveHighlights();
+    return on;
+  }
+  function isWordHighlighted(span) { return !!(span && span.classList && span.classList.contains('hl')); }
+
   /* ---------- Optional account cloud copy (signed-in users only) ---------- */
   // The book lives in the user's own Firebase account data (users/{uid}),
   // never on the public site. Everything here is a no-op when signed out.
@@ -314,6 +346,7 @@
     const frag = sanitizeInto(doc.body || doc, document, true);
     content.replaceChildren(frag);
     if (!content.textContent.trim()) content.innerHTML = '<p class="book-loading">(הקטע ריק או מכיל תמונה בלבד)</p>';
+    applyHighlights();
     pageIndex = 0;
     layoutPages();
     if (Number.isInteger(startPage) && startPage > 0) pageIndex = Math.min(startPage, pageCount - 1);
@@ -385,6 +418,7 @@
     try {
       const buffer = await file.arrayBuffer();
       localStorage.removeItem(POS_KEY); // a fresh import starts at its own beginning
+      clearHighlights();
       await openBook(buffer); // validate before persisting
       await saveBookFile({ name: file.name, buffer });
       cloudSaveBook(file.name, buffer, book && book.title).catch(() => {});
@@ -398,6 +432,7 @@
     await clearBookFile();
     cloudClearBook().catch(() => {});
     localStorage.removeItem(POS_KEY);
+    clearHighlights();
     book = null;
     document.body.classList.remove('reading');
     els.loaded.classList.add('hidden');
@@ -433,6 +468,24 @@
       const open = els.panel.classList.toggle('hidden');
       els.menuBtn.setAttribute('aria-expanded', open ? 'false' : 'true');
     });
+    // Long-press (hold ~550ms) on a word toggles its highlight without
+    // opening the word sheet; a plain tap still opens the sheet (app.js).
+    let pressTimer = null, pressX = 0, pressY = 0;
+    els.content.addEventListener('pointerdown', e => {
+      const span = e.target.closest('.bw');
+      if (!span) return;
+      pressX = e.clientX; pressY = e.clientY;
+      clearTimeout(pressTimer);
+      pressTimer = setTimeout(() => {
+        pressTimer = null;
+        toggleWordHighlight(span);
+        window.bookSuppressWordTapUntil = Date.now() + 700;
+      }, 550);
+    });
+    els.content.addEventListener('pointermove', e => {
+      if (pressTimer && Math.hypot(e.clientX - pressX, e.clientY - pressY) > 10) { clearTimeout(pressTimer); pressTimer = null; }
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(type => els.content.addEventListener(type, () => { clearTimeout(pressTimer); pressTimer = null; }));
     els.viewport.addEventListener('click', e => {
       if (e.target.closest('.bw')) return;
       if (!els.panel.classList.contains('hidden')) {
@@ -488,5 +541,6 @@
 
   return { parseZipEntries, inflateRaw, openZip, loadEpub, sanitizeInto, splitBookTokens, initBookTab, showBookTab,
     bufferToBase64, base64ToBuffer, cloudSaveBook, cloudLoadBook, cloudClearBook,
-    _state: () => ({ book, chapterIndex, fontScale }) };
+    toggleWordHighlight, isWordHighlighted, applyHighlights, clearHighlights,
+    _state: () => ({ book, chapterIndex, fontScale, highlights: [...highlights] }) };
 });
