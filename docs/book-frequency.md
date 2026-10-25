@@ -54,6 +54,12 @@
   Spark plan; the ~334KB payload fits one Firestore document. A device with no local copy restores the book
   from the account on the Book tab; removal clears both. Signed-out behavior
   is unchanged (device-local only). The book is never on the public site.
+- A fresh open (import, or restore on a new device) skips image-only or
+  near-empty front matter such as a cover segment (under 50 characters of
+  sanitized text, scanning up to 10 sections) and starts at the first
+  readable section; short but real opening text is kept. A saved reading
+  position always wins, even on the cover, and every section stays
+  reachable in the chapter selector.
 - Chapter navigation uses the NCX table of contents when present, with a
   generic label fallback.
 - Known limits: images (including covers) are not rendered; fixed-layout or
