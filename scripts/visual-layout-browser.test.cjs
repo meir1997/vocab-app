@@ -64,7 +64,7 @@ async function newPage(viewport) {
   assert.equal(await page.evaluate(() => !!fb.initialized), false, 'Firebase stays disconnected');
   assert.equal(await page.evaluate(() => localStorage.getItem(K.progress)), null, 'context starts without real progress');
   if (!baseline) {
-    assert.equal(await page.locator('.tabbar .tab-btn').count(), 4);
+    assert.equal(await page.locator('.tabbar .tab-btn').count(), 5);
     await assertIcons(page, '.tabbar .tab-btn, #speakBtn, #detailBtn, .word-item:first-child .speak');
   }
   return { page, context, pageErrors };
