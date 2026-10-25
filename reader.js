@@ -243,8 +243,40 @@
     return (hit && hit.label) || `קטע ${i + 1}`;
   }
 
-  async function renderChapter(index, keepScroll) {
+  /* ---------- Paged layout: one screen per page, turned with arrows ---------- */
+  const PAGE_GAP = 32;
+  let pageIndex = 0, pageCount = 1, pageAdvance = 0;
+
+  function layoutPages() {
+    const content = els.content;
+    const width = content.clientWidth;
+    if (width <= 0) return; // hidden tab; relaid out when the tab shows
+    content.style.columnWidth = width + 'px';
+    content.style.columnGap = PAGE_GAP + 'px';
+    pageAdvance = width + PAGE_GAP;
+    pageCount = Math.max(1, Math.ceil(content.scrollWidth / pageAdvance));
+    pageIndex = Math.min(Math.max(0, pageIndex), pageCount - 1);
+    showPage();
+  }
+
+  function showPage() {
+    els.content.style.transform = `translateX(${-pageIndex * pageAdvance}px)`;
+    els.pageInfo.textContent = `עמוד ${pageIndex + 1} מתוך ${pageCount}`;
+    els.prev.disabled = pageIndex <= 0;
+    els.next.disabled = pageIndex >= pageCount - 1;
+  }
+
+  function goToPage(i) {
+    pageIndex = Math.min(Math.max(0, i), pageCount - 1);
+    showPage();
+    persistPosition();
+  }
+
+  function pageRatio() { return pageCount > 1 ? pageIndex / (pageCount - 1) : 0; }
+
+  async function renderChapter(index, startPage) {
     chapterIndex = index;
+    els.chapter.value = String(index);
     const content = els.content;
     content.innerHTML = '<p class="book-loading">טוען…</p>';
     const raw = await book.zip.text(book.chapters[index]);
@@ -252,18 +284,21 @@
     const frag = sanitizeInto(doc.body || doc, document);
     content.replaceChildren(frag);
     if (!content.textContent.trim()) content.innerHTML = '<p class="book-loading">(הקטע ריק או מכיל תמונה בלבד)</p>';
-    els.chapter.value = String(index);
-    if (!keepScroll) content.scrollTop = 0;
+    pageIndex = 0;
+    layoutPages();
+    if (Number.isInteger(startPage) && startPage > 0) pageIndex = Math.min(startPage, pageCount - 1);
+    showPage();
     persistPosition();
   }
 
   function persistPosition() {
     if (!book) return;
-    savePosition({ chapter: chapterIndex, ratio: els.content.scrollHeight > 0 ? els.content.scrollTop / els.content.scrollHeight : 0, font: fontScale });
+    savePosition({ chapter: chapterIndex, page: pageIndex, font: fontScale });
   }
 
   function applyFont() {
     els.content.style.fontSize = `${Math.round(fontScale * 100)}%`;
+    layoutPages();
   }
 
   function showLoaded() {
@@ -301,14 +336,15 @@
 
   async function openBook(buffer) {
     book = await loadEpub(buffer, new DOMParser());
-    showLoaded();
     const pos = loadPosition();
     fontScale = pos && typeof pos.font === 'number' ? Math.min(1.6, Math.max(0.8, pos.font)) : 1;
-    applyFont();
     const start = pos && Number.isInteger(pos.chapter) && pos.chapter >= 0 && pos.chapter < book.chapters.length ? pos.chapter : await firstReadableChapter();
+    showLoaded();
+    applyFont();
     await renderChapter(start);
-    if (pos && start === pos.chapter && pos.ratio > 0) {
-      els.content.scrollTop = Math.round(pos.ratio * els.content.scrollHeight);
+    if (pos && start === pos.chapter) {
+      if (Number.isInteger(pos.page) && pos.page > 0) goToPage(pos.page);
+      else if (pos.ratio > 0) goToPage(Math.round(pos.ratio * (pageCount - 1))); // scroll-era saves
     }
   }
 
@@ -333,6 +369,7 @@
     book = null;
     els.loaded.classList.add('hidden');
     els.empty.classList.remove('hidden');
+    els.pageInfo.textContent = '';
     els.file.value = '';
   }
 
@@ -343,24 +380,29 @@
       empty: $('bookEmpty'), loaded: $('bookLoaded'), title: $('bookTitle'), author: $('bookAuthor'),
       chapter: $('bookChapter'), content: $('bookContent'), error: $('bookError'),
       importBtn: $('bookImportBtn'), removeBtn: $('bookRemoveBtn'), file: $('bookFile'),
-      fontUp: $('bookFontUp'), fontDown: $('bookFontDown')
+      fontUp: $('bookFontUp'), fontDown: $('bookFontDown'),
+      prev: $('bookPrev'), next: $('bookNext'), pageInfo: $('bookPageInfo')
     };
     els.importBtn.addEventListener('click', () => els.file.click());
     els.file.addEventListener('change', e => { if (e.target.files[0]) importFile(e.target.files[0]); });
     els.removeBtn.addEventListener('click', () => { if (confirm('להסיר את הספר מהמכשיר?')) removeBook(); });
     els.chapter.addEventListener('change', e => renderChapter(Number(e.target.value)));
-    els.fontUp.addEventListener('click', () => { fontScale = Math.min(1.6, fontScale + 0.1); applyFont(); persistPosition(); });
-    els.fontDown.addEventListener('click', () => { fontScale = Math.max(0.8, fontScale - 0.1); applyFont(); persistPosition(); });
-    let scrollTimer = null;
-    els.content.addEventListener('scroll', () => {
-      clearTimeout(scrollTimer);
-      scrollTimer = setTimeout(persistPosition, 400);
+    els.prev.addEventListener('click', () => goToPage(pageIndex - 1));
+    els.next.addEventListener('click', () => goToPage(pageIndex + 1));
+    els.fontUp.addEventListener('click', () => { const r = pageRatio(); fontScale = Math.min(1.6, fontScale + 0.1); applyFont(); goToPage(Math.round(r * (pageCount - 1))); });
+    els.fontDown.addEventListener('click', () => { const r = pageRatio(); fontScale = Math.max(0.8, fontScale - 0.1); applyFont(); goToPage(Math.round(r * (pageCount - 1))); });
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+      if (!book || els.loaded.classList.contains('hidden')) return;
+      const r = pageRatio();
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => { layoutPages(); goToPage(Math.round(r * (pageCount - 1))); }, 150);
     });
   }
 
   async function showBookTab() {
     initBookTab();
-    if (book) return;
+    if (book) { layoutPages(); return; }
     let record = null;
     try { record = await loadBookFile(); } catch {}
     if (record && record.buffer) {
