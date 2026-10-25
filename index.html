@@ -82,6 +82,19 @@
           </div>
           <p id="questionContext" class="question-context hidden" lang="en" dir="ltr"></p>
           <div class="answers" id="answers"></div>
+          <div id="flashcardBox" class="flashcard-box hidden">
+            <div class="flashcard" id="flashcard" role="button" tabindex="0" aria-label="כרטיסיה, הקישו לחשיפת התרגום">
+              <div class="fc-face fc-front">
+                <span class="fc-question" aria-hidden="true">?</span>
+                <span class="fc-hint">הקישו לחשיפת התרגום</span>
+              </div>
+              <div class="fc-face fc-back">
+                <p class="fc-meaning" id="fcMeaning" dir="rtl"></p>
+                <p class="fc-example" id="fcExample" lang="en" dir="ltr"></p>
+                <span class="fc-hint">גרירה ימינה יודע · שמאלה לא יודע</span>
+              </div>
+            </div>
+          </div>
           <div id="typingBox" class="typing-box hidden">
             <input id="typingInput" type="text" lang="en" dir="ltr" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="כתבו את המילה באנגלית" aria-label="כתבו את המילה באנגלית">
             <button class="primary-btn" id="typingCheck">בדיקה</button>
@@ -89,6 +102,7 @@
           <section id="answerFeedback" class="answer-feedback hidden" role="status" aria-live="polite" aria-atomic="true"></section>
           <div class="quiz-footer">
             <button class="ghost-btn" id="dontKnowBtn">לא יודע</button>
+            <button class="primary-btn hidden" id="knowBtn">יודע</button>
             <button class="primary-btn hidden" id="nextBtn">המשך</button>
             <p class="hint" id="hint" aria-live="polite" aria-atomic="true"></p>
           </div>
@@ -196,6 +210,7 @@
             <option value="choice">בחירה — אנגלית ← עברית</option>
             <option value="reverse">בחירה הפוכה — עברית ← אנגלית</option>
             <option value="typing">הקלדה — כתיבת המילה באנגלית</option>
+            <option value="cards">כרטיסיות — חשיפה וגרירה</option>
           </select>
         </div>
         <div class="settings-group">
