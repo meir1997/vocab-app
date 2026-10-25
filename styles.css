@@ -400,3 +400,5 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .book-content blockquote { margin: .8em 1em; font-style: italic; }
 .book-loading { color: var(--muted, #5b6478); text-align: center; }
 .freq-line { margin: 0; }
+.freq-book { display: block; direction: ltr; text-align: start; margin-top: 2px; }
+.freq-note { margin: 6px 0 0; font-size: 12px; color: var(--muted, #5b6478); }
