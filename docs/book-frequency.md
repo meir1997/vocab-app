@@ -54,6 +54,14 @@
   Spark plan; the ~334KB payload fits one Firestore document. A device with no local copy restores the book
   from the account on the Book tab; removal clears both. Signed-out behavior
   is unchanged (device-local only). The book is never on the public site.
+- Paged reading (added after Meir asked for designed pages instead of one
+  continuous flow, 2026-10-25): each chapter renders as fixed pages sized
+  to the reading pane (CSS multi-column strip moved with a transform), with
+  previous/next arrows and an "עמוד X מתוך Y" indicator. The saved position
+  is {chapter, page, font}; scroll-era saves with a scroll ratio map to the
+  nearest page. Font changes, resizes and tab switches repaginate while
+  keeping the relative position. Page turns are button-based; every section
+  stays reachable in the chapter selector.
 - A fresh open (import, or restore on a new device) skips image-only or
   near-empty front matter such as a cover segment (under 50 characters of
   sanitized text, scanning up to 10 sections) and starts at the first
