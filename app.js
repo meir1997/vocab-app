@@ -23,6 +23,7 @@ const LEARNING_LIMIT = 200;    // max words in the learning state at once
 const BAND_ADVANCE = 0.7;      // at least 70% (7 of 10) advances
 let bands = Object.assign({ current: 1, recent: [] }, readJSON(K.bands, {}));
 let rankOf = new Map();        // word -> rank, built when vocab loads
+let wordByLower = new Map();     // lowercase word -> vocab item, built when vocab loads
 let session = { queue: [], index: 0, correct: 0, wrong: 0, active: false };
 let dirty = readJSON('fw.pending', true);
 let localRevision = readJSON('fw.revision', 0);
@@ -69,6 +70,7 @@ function parseCSV(text) {
 }
 function onVocabReady() {
   rankOf = new Map(vocab.map(v => [v.w, v.r]));
+  wordByLower = new Map(vocab.map(v => [v.w.toLowerCase(), v]));
   $('vocabCount').textContent = vocab.length.toLocaleString('he-IL');
   renderBandSelect();
   refreshHome(); renderLibrary();
@@ -323,7 +325,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v25');
+    const cache = await caches.open('four-words-offline-v26');
     const required = ['index.html', 'app.js', 'quiz-content.js', 'vocab.json', 'details.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
@@ -550,6 +552,74 @@ function renderLibrary(reset = true) {
   });
   $('moreBtn').classList.toggle('hidden', libShown >= items.length);
 }
+/* ---------- Book word info (tap any word in the reader) ---------- */
+let wordSheetOpen = false, wordSheetItem = null, wordSheetTrigger = null;
+function normalizeBookWord(raw) { return (raw || '').toLowerCase().replace(/[’‘]/g, "'").trim(); }
+// Exact form first, then common English inflections, so a clicked plural or
+// past tense still finds its app card. Never creates or alters progress here.
+function lookupBookWord(raw) {
+  const base = normalizeBookWord(raw);
+  if (!base) return null;
+  const cands = [base];
+  if (base.endsWith("'s") && base.length > 3) cands.push(base.slice(0, -2));
+  if (base.endsWith('ies') && base.length > 4) cands.push(base.slice(0, -3) + 'y');
+  if (base.endsWith('ied') && base.length > 4) cands.push(base.slice(0, -3) + 'y');
+  if (base.endsWith('ing') && base.length > 5) cands.push(base.slice(0, -3));
+  if (base.endsWith('es') && base.length > 4) cands.push(base.slice(0, -2));
+  if (base.endsWith('ed') && base.length > 4) cands.push(base.slice(0, -2));
+  if (base.endsWith('s') && base.length > 3) cands.push(base.slice(0, -1));
+  for (const c of cands) { const hit = wordByLower.get(c); if (hit) return hit; }
+  return null;
+}
+function renderWordSheetState() {
+  const state = $('wordSheetState'), knownBtn = $('wordKnownBtn');
+  if (!wordSheetItem) {
+    state.textContent = 'המילה הזו לא נמצאת ברשימת המילים של האפליקציה.';
+    return;
+  }
+  const known = isLearned(rec(wordSheetItem.w));
+  state.textContent = known ? 'מסומנת כידועה' : isAttempted(rec(wordSheetItem.w)) ? 'בתהליך למידה' : 'עוד לא נלמדה';
+  knownBtn.textContent = known ? 'סימון כלא ידועה' : 'סימון כידועה';
+  knownBtn.setAttribute('aria-pressed', known ? 'true' : 'false');
+}
+function openWordSheet(surface) {
+  const item = lookupBookWord(surface);
+  if (!wordSheetOpen) wordSheetTrigger = document.activeElement;
+  wordSheetOpen = true; wordSheetItem = item;
+  $('wordSheetWord').textContent = item ? item.w : surface;
+  $('wordSheetSerial').textContent = item ? `#${item.r.toLocaleString('he-IL')}` : '';
+  const inflected = item && normalizeBookWord(surface) !== item.w.toLowerCase();
+  $('wordSheetFormRow').classList.toggle('hidden', !inflected);
+  if (inflected) $('wordSheetForm').textContent = surface;
+  $('wordCardBtn').classList.toggle('hidden', !item);
+  $('wordKnownBtn').classList.toggle('hidden', !item);
+  renderWordSheetState();
+  $('wordSheet').classList.remove('hidden');
+  $('wordSheetClose').focus({ preventScroll: true });
+}
+function closeWordSheet() {
+  $('wordSheet').classList.add('hidden');
+  wordSheetOpen = false; wordSheetItem = null;
+  if (wordSheetTrigger?.isConnected) wordSheetTrigger.focus({ preventScroll: true });
+}
+// Book marks update learning progress only: they are not quiz answers, so
+// band advancement (recordBandAnswer) and quiz stats (markAnswer) stay clean.
+// Known mirrors the quiz's learned rule (clean word: streak 1; after a miss:
+// 2 in a row) and schedules the review at the longest interval. Unknown puts
+// the word back into learning, due now, like the quiz's "לא יודע" button.
+function setBookWordKnown(known) {
+  const item = wordSheetItem; if (!item) return;
+  const p = rec(item.w); const now = Date.now();
+  if (known) {
+    const need = p.w === 0 ? 1 : 2;
+    if (p.s < need) { p.r += need - p.s; p.s = need; }
+    p.next = now + INTERVALS[INTERVALS.length - 1] * DAY;
+  } else { p.w++; p.s = 0; p.next = now; }
+  progress[item.w] = p;
+  persist(); refreshHome();
+  renderWordSheetState();
+}
+
 /* ---------- Word details card (synonyms, meanings, example) ---------- */
 let detailsPromise = null, wordDetails = {}, sheetOpen = false, pendingAdvance = null, sheetTrigger = null;
 const POS_HE = { n: 'שם עצם', v: 'פועל', a: 'תואר', r: 'תואר הפועל' };
@@ -747,6 +817,15 @@ $('typingInput').addEventListener('keydown', e => { if (e.key === 'Enter') check
 $('detailBtn').addEventListener('click', () => { const item = session.queue[session.index]; if (item) openDetails(item); });
 $('detailClose').addEventListener('click', closeDetails);
 $('detailSheet').addEventListener('click', e => { if (e.target === $('detailSheet')) closeDetails(); });
+$('bookContent').addEventListener('click', e => {
+  const span = e.target.closest('.bw');
+  if (span) openWordSheet(span.textContent);
+});
+$('wordSheetClose').addEventListener('click', closeWordSheet);
+$('wordSheet').addEventListener('click', e => { if (e.target === $('wordSheet')) closeWordSheet(); });
+$('wordCardBtn').addEventListener('click', () => { const item = wordSheetItem; if (!item) return; closeWordSheet(); openDetails(item); });
+$('wordKnownBtn').addEventListener('click', () => { if (wordSheetItem) setBookWordKnown(!isLearned(rec(wordSheetItem.w))); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && wordSheetOpen) closeWordSheet(); });
 document.addEventListener('keydown', e => {
   if (!sheetOpen) return;
   if (e.key === 'Escape') closeDetails();
