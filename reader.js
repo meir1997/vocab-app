@@ -244,7 +244,7 @@
   }
 
   /* ---------- Paged layout: one screen per page, turned with arrows ---------- */
-  const PAGE_GAP = 32;
+  const PAGE_GAP = 48; // wider than the viewport side padding, so the next page never peeks into the gutter
   let pageIndex = 0, pageCount = 1, pageAdvance = 0;
 
   function layoutPages() {
