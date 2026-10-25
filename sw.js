@@ -1,4 +1,4 @@
-const CACHE = 'four-words-offline-v29';
+const CACHE = 'four-words-offline-v30';
 const SDK = ['firebase-app-compat.js', 'firebase-auth-compat.js', 'firebase-firestore-compat.js'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/' + name);
 const ASSETS = ['./', 'index.html', 'styles.css', 'app.js', 'quiz-content.js', 'firebase-config.js', 'vocab.json', 'details.json', 'book-frequency.json', 'reader.js', 'manifest.webmanifest', 'icon.svg', ...SDK];
 self.addEventListener('install', event => event.waitUntil(
