@@ -126,6 +126,7 @@ function markWord(word, ok) {
   const p = rec(word); const now = Date.now();
   if (ok) { p.r++; p.s++; p.next = now + INTERVALS[Math.min(p.s - 1, INTERVALS.length - 1)] * DAY; }
   else { p.w++; p.s = 0; p.next = now; }
+  p.last = now; // cycle order: the word answered longest ago returns first
   progress[word] = p;
   const r = rankOf.get(word);
   if (r) recordBandAnswer(ok, r);
@@ -143,28 +144,20 @@ const isLearned = p => isAttempted(p) && p.s >= (p.w === 0 ? 1 : 2);
 const isLearning = p => isAttempted(p) && !isLearned(p);
 const learningCount = () => Object.values(progress).filter(isLearning).length;
 function buildQueue() {
-  const now = Date.now();
-  const attempted = v => isAttempted(progress[v.w]);
-  // Never-attempted words may enter learning only while fewer than
-  // LEARNING_LIMIT words are in learning. Existing words are never removed.
-  // Queuing a word does not reserve a learning slot. Check the real count again
-  // before showing each question, because an earlier miss can fill the cap.
-  const canIntroduce = learningCount() < LEARNING_LIMIT;
-  const admit = v => attempted(v) || canIntroduce;
-  // Current band plus due reviews of words already attempted anywhere;
-  // words outside the band that were never attempted are not introduced.
-  const due = vocab.filter(v => (progress[v.w] ? progress[v.w].next : 0) <= now && (inCurrentBand(v) || attempted(v)));
-  due.sort((a, b) => priorityOf(a.w) - priorityOf(b.w) ||
-    ((rec(a.w).r + rec(a.w).w) - (rec(b.w).r + rec(b.w).w)) || a.r - b.r);
-  const want = settings.length === 'all' ? due.length : settings.length;
-  const floor = Math.max(want, Math.min(10, due.length));
-  let picked = [];
-  for (const v of due) { if (picked.length >= floor) break; if (admit(v)) picked.push(v); }
-  if (picked.length < want && settings.length !== 'all') {
-    const ids = new Set(picked.map(v => v.w));
-    for (const v of vocab) { if (picked.length >= want) break; if (!ids.has(v.w) && inCurrentBand(v) && admit(v)) { ids.add(v.w); picked.push(v); } }
+  // Learned words are never queued again; their records stay, they simply
+  // leave the rotation. Before the learning pool fills, sessions introduce
+  // new words only - nothing repeats. Once the pool reaches LEARNING_LIMIT,
+  // it cycles in order: the word answered longest ago returns first, and
+  // every answer moves a word to the back of the cycle.
+  const pool = vocab.filter(v => isLearning(progress[v.w]));
+  if (pool.length >= LEARNING_LIMIT) {
+    pool.sort((a, b) => ((progress[a.w].last || 0) - (progress[b.w].last || 0)) || a.r - b.r);
+    const want = settings.length === 'all' ? pool.length : settings.length;
+    return pool.slice(0, want);
   }
-  return shuffle(picked);
+  const fresh = vocab.filter(v => !isAttempted(progress[v.w]) && inCurrentBand(v));
+  const want = settings.length === 'all' ? fresh.length : settings.length;
+  return shuffle(fresh.slice(0, want));
 }
 function skipUnadmittedQuestions() {
   let removed = false;
@@ -194,7 +187,7 @@ function dayStreak() {
   return n;
 }
 const learnedCount = () => Object.values(progress).filter(isLearned).length;
-const dueCount = () => { const now = Date.now(); return vocab.filter(v => progress[v.w] && progress[v.w].next <= now && (progress[v.w].r + progress[v.w].w) > 0).length; };
+const dueCount = () => { const n = learningCount(); return n >= LEARNING_LIMIT ? n : 0; };
 const pct = (a, b) => b ? `${Math.round(a / b * 100)}%` : '—';
 
 /* ---------- Persistence + sync ---------- */
@@ -325,7 +318,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v28');
+    const cache = await caches.open('four-words-offline-v29');
     const required = ['index.html', 'app.js', 'quiz-content.js', 'vocab.json', 'details.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
@@ -731,6 +724,7 @@ function renderStats() {
   $('totalAttempts').textContent = stats.attempts.toLocaleString('he-IL');
   $('totalAccuracy').textContent = pct(stats.correct, stats.attempts);
   $('statsLearned').textContent = learnedCount().toLocaleString('he-IL');
+  $('statsLearning').textContent = learningCount().toLocaleString('he-IL');
   $('statsDue').textContent = dueCount().toLocaleString('he-IL');
   const bars = $('weekBars'); bars.replaceChildren();
   const names = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
