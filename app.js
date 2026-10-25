@@ -325,7 +325,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v27');
+    const cache = await caches.open('four-words-offline-v28');
     const required = ['index.html', 'app.js', 'quiz-content.js', 'vocab.json', 'details.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
@@ -553,7 +553,7 @@ function renderLibrary(reset = true) {
   $('moreBtn').classList.toggle('hidden', libShown >= items.length);
 }
 /* ---------- Book word info (tap any word in the reader) ---------- */
-let wordSheetOpen = false, wordSheetItem = null, wordSheetTrigger = null;
+let wordSheetOpen = false, wordSheetItem = null, wordSheetTrigger = null, wordSheetSpan = null;
 function normalizeBookWord(raw) { return (raw || '').toLowerCase().replace(/[’‘]/g, "'").trim(); }
 // Exact form first, then common English inflections, so a clicked plural or
 // past tense still finds its app card. Never creates or alters progress here.
@@ -564,7 +564,11 @@ function lookupBookWord(raw) {
   if (base.endsWith("'s") && base.length > 3) cands.push(base.slice(0, -2));
   if (base.endsWith('ies') && base.length > 4) cands.push(base.slice(0, -3) + 'y');
   if (base.endsWith('ied') && base.length > 4) cands.push(base.slice(0, -3) + 'y');
-  if (base.endsWith('ing') && base.length > 5) cands.push(base.slice(0, -3));
+  if (base.endsWith('ing') && base.length > 5) {
+    const stem = base.slice(0, -3);
+    cands.push(stem, stem + 'e'); // craning -> crane, circling -> circle
+    if (stem.length > 2 && stem[stem.length - 1] === stem[stem.length - 2] && /[bcdfghjklmnpqrstvwxz]/.test(stem[stem.length - 1])) cands.push(stem.slice(0, -1)); // cropping -> crop
+  }
   if (base.endsWith('es') && base.length > 4) cands.push(base.slice(0, -2));
   if (base.endsWith('ed') && base.length > 4) cands.push(base.slice(0, -2));
   if (base.endsWith('s') && base.length > 3) cands.push(base.slice(0, -1));
@@ -572,7 +576,10 @@ function lookupBookWord(raw) {
   return null;
 }
 function renderWordSheetState() {
-  const state = $('wordSheetState'), knownBtn = $('wordKnownBtn');
+  const state = $('wordSheetState'), knownBtn = $('wordKnownBtn'), hlBtn = $('wordHighlightBtn');
+  const hl = wordSheetSpan && wordSheetSpan.classList.contains('hl');
+  hlBtn.textContent = hl ? 'הסרת הדגשה' : 'הדגשת המילה';
+  hlBtn.classList.toggle('hidden', !wordSheetSpan);
   if (!wordSheetItem) {
     state.textContent = 'המילה הזו לא נמצאת ברשימת המילים של האפליקציה.';
     return;
@@ -582,10 +589,10 @@ function renderWordSheetState() {
   knownBtn.textContent = known ? 'סימון כלא ידועה' : 'סימון כידועה';
   knownBtn.setAttribute('aria-pressed', known ? 'true' : 'false');
 }
-function openWordSheet(surface) {
+function openWordSheet(surface, span) {
   const item = lookupBookWord(surface);
   if (!wordSheetOpen) wordSheetTrigger = document.activeElement;
-  wordSheetOpen = true; wordSheetItem = item;
+  wordSheetOpen = true; wordSheetItem = item; wordSheetSpan = span || null;
   $('wordSheetWord').textContent = item ? item.w : surface;
   $('wordSheetSerial').textContent = item ? `#${item.r.toLocaleString('he-IL')}` : '';
   const inflected = item && normalizeBookWord(surface) !== item.w.toLowerCase();
@@ -599,7 +606,7 @@ function openWordSheet(surface) {
 }
 function closeWordSheet() {
   $('wordSheet').classList.add('hidden');
-  wordSheetOpen = false; wordSheetItem = null;
+  wordSheetOpen = false; wordSheetItem = null; wordSheetSpan = null;
   if (wordSheetTrigger?.isConnected) wordSheetTrigger.focus({ preventScroll: true });
 }
 // Book marks update learning progress only: they are not quiz answers, so
@@ -820,12 +827,20 @@ $('detailClose').addEventListener('click', closeDetails);
 $('detailSheet').addEventListener('click', e => { if (e.target === $('detailSheet')) closeDetails(); });
 $('bookContent').addEventListener('click', e => {
   const span = e.target.closest('.bw');
-  if (span) openWordSheet(span.textContent);
+  if (!span) return;
+  if (Date.now() < (window.bookSuppressWordTapUntil || 0)) return; // the long-press just highlighted it
+  openWordSheet(span.textContent, span);
 });
 $('wordSheetClose').addEventListener('click', closeWordSheet);
 $('wordSheet').addEventListener('click', e => { if (e.target === $('wordSheet')) closeWordSheet(); });
 $('wordCardBtn').addEventListener('click', () => { const item = wordSheetItem; if (!item) return; closeWordSheet(); openDetails(item); });
 $('wordKnownBtn').addEventListener('click', () => { if (wordSheetItem) setBookWordKnown(!isLearned(rec(wordSheetItem.w))); });
+// Highlighting is a pure reader mark: it never touches learning progress.
+$('wordHighlightBtn').addEventListener('click', () => {
+  if (!wordSheetSpan || typeof VocabReader === 'undefined') return;
+  VocabReader.toggleWordHighlight(wordSheetSpan);
+  closeWordSheet(); // let the reader see the mark right away
+});
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && wordSheetOpen) closeWordSheet(); });
 document.addEventListener('keydown', e => {
   if (!sheetOpen) return;
