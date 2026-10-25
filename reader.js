@@ -209,13 +209,19 @@
   // A highlight id is chapter index + the word's ordinal among the chapter's
   // word spans. Rendering is deterministic, so ids survive reloads, font and
   // page changes. Like the reading position, highlights stay on this device.
-  const HIL_KEY = 'vocab-reader-highlights';
+  const HIL_KEY = 'vocab-reader-highlights', HIL_STAMP_KEY = 'vocab-reader-highlights-at';
   let highlights = new Set(), highlightsLoaded = false;
+  function localHighlightsStamp() { try { return Number(localStorage.getItem(HIL_STAMP_KEY)) || 0; } catch { return 0; } }
   function loadHighlights() {
     highlightsLoaded = true;
     try { highlights = new Set(JSON.parse(localStorage.getItem(HIL_KEY)) || []); } catch { highlights = new Set(); }
   }
-  function saveHighlights() { try { localStorage.setItem(HIL_KEY, JSON.stringify([...highlights])); } catch {} }
+  function saveHighlights(stamp) {
+    try {
+      localStorage.setItem(HIL_KEY, JSON.stringify([...highlights]));
+      localStorage.setItem(HIL_STAMP_KEY, String(stamp || Date.now()));
+    } catch {}
+  }
   function clearHighlights() { highlights = new Set(); try { localStorage.removeItem(HIL_KEY); } catch {} }
   function highlightId(index) { return `${chapterIndex}:${index}`; }
   function applyHighlights() {
@@ -233,6 +239,7 @@
     if (on) highlights.add(id); else highlights.delete(id);
     span.classList.toggle('hl', on);
     saveHighlights();
+    cloudSaveHighlightsList([...highlights]).catch(() => {});
     return on;
   }
   function isWordHighlighted(span) { return !!(span && span.classList && span.classList.contains('hl')); }
@@ -280,6 +287,53 @@
     const f = getFb();
     const userDoc = f.db.collection('users').doc(f.user.uid);
     try { await userDoc.collection('books').doc('main').delete(); } catch {}
+  }
+
+  // Highlights ride the account too, as a small separate doc so a toggle
+  // never rewrites the book blob.
+  async function cloudSaveHighlightsList(list) {
+    if (!fbReady()) return false;
+    const f = getFb();
+    const userDoc = f.db.collection('users').doc(f.user.uid);
+    try { await userDoc.collection('books').doc('highlights').set({ list, updatedAt: Date.now() }); return true; }
+    catch { return false; }
+  }
+  async function cloudLoadHighlightsDoc() {
+    if (!fbReady()) return null;
+    const f = getFb();
+    const userDoc = f.db.collection('users').doc(f.user.uid);
+    try {
+      const snap = await userDoc.collection('books').doc('highlights').get();
+      if (snap.exists) return snap.data();
+    } catch {}
+    return null;
+  }
+  async function cloudClearHighlights() {
+    if (!fbReady()) return;
+    const f = getFb();
+    const userDoc = f.db.collection('users').doc(f.user.uid);
+    try { await userDoc.collection('books').doc('highlights').delete(); } catch {}
+  }
+  // Last write wins on the whole list, so a mark removed on one device stays
+  // removed everywhere; an empty cloud copy is seeded from this device (that
+  // is also how marks made before sync existed migrate up).
+  async function syncHighlightsFromCloud() {
+    if (!highlightsLoaded) loadHighlights();
+    if (await waitForSyncAuth(3000) === false) return;
+    const remote = await cloudLoadHighlightsDoc();
+    if (remote === null) {
+      if (highlights.size) cloudSaveHighlightsList([...highlights]).catch(() => {});
+      return;
+    }
+    const remoteStamp = remote.updatedAt || 0;
+    const remoteList = Array.isArray(remote.list) ? remote.list : [];
+    if (remoteStamp > localHighlightsStamp()) {
+      highlights = new Set(remoteList);
+      saveHighlights(remoteStamp);
+      applyHighlights();
+    } else if (JSON.stringify([...highlights]) !== JSON.stringify(remoteList)) {
+      cloudSaveHighlightsList([...highlights]).catch(() => {});
+    }
   }
 
   async function waitForSyncAuth(ms) {
@@ -419,6 +473,7 @@
       const buffer = await file.arrayBuffer();
       localStorage.removeItem(POS_KEY); // a fresh import starts at its own beginning
       clearHighlights();
+      cloudSaveHighlightsList([]).catch(() => {});
       await openBook(buffer); // validate before persisting
       await saveBookFile({ name: file.name, buffer });
       cloudSaveBook(file.name, buffer, book && book.title).catch(() => {});
@@ -431,6 +486,7 @@
   async function removeBook() {
     await clearBookFile();
     cloudClearBook().catch(() => {});
+    cloudClearHighlights().catch(() => {});
     localStorage.removeItem(POS_KEY);
     clearHighlights();
     book = null;
@@ -519,11 +575,11 @@
 
   async function showBookTab() {
     initBookTab();
-    if (book) { document.body.classList.add('reading'); layoutPages(); return; }
+    if (book) { document.body.classList.add('reading'); layoutPages(); syncHighlightsFromCloud().catch(() => {}); return; }
     let record = null;
     try { record = await loadBookFile(); } catch {}
     if (record && record.buffer) {
-      try { await openBook(record.buffer); return; }
+      try { await openBook(record.buffer); syncHighlightsFromCloud().catch(() => {}); return; }
       catch { els.loaded.classList.add('hidden'); els.empty.classList.remove('hidden'); els.error.textContent = 'הספר השמור לא נפתח. ייבאו אותו שוב.'; return; }
     }
     // No local copy: restore from the signed-in account's cloud copy.
@@ -534,6 +590,7 @@
           const buffer = base64ToBuffer(data.b64);
           await openBook(buffer);
           saveBookFile({ name: data.name || 'book.epub', buffer }).catch(() => {});
+          syncHighlightsFromCloud().catch(() => {});
         }
       } catch {}
     }
@@ -542,5 +599,6 @@
   return { parseZipEntries, inflateRaw, openZip, loadEpub, sanitizeInto, splitBookTokens, initBookTab, showBookTab,
     bufferToBase64, base64ToBuffer, cloudSaveBook, cloudLoadBook, cloudClearBook,
     toggleWordHighlight, isWordHighlighted, applyHighlights, clearHighlights,
+    cloudSaveHighlightsList, cloudLoadHighlightsDoc, cloudClearHighlights, syncHighlightsFromCloud,
     _state: () => ({ book, chapterIndex, fontScale, highlights: [...highlights] }) };
 });
