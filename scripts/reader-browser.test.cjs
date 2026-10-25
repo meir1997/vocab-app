@@ -13,6 +13,14 @@ const path = require('node:path');
 const { buildTestEpub, buildTestEpubWithCover, buildLongEpub } = require('./epub-fixture.cjs');
 
 const root = path.resolve(__dirname, '..');
+async function openReaderPanel(page) {
+  if (await page.locator('#readerPanel.hidden').count()) await page.locator('#readerMenu').click();
+  await page.locator('#readerPanel:not(.hidden)').waitFor();
+}
+async function tapPageEdge(page, side) {
+  const b = await page.locator('#bookViewport').boundingBox();
+  await page.mouse.click(side === 'next' ? b.x + b.width - 6 : b.x + 6, b.y + b.height / 2);
+}
 const server = http.createServer((request, response) => {
   const requested = decodeURIComponent(new URL(request.url, 'http://localhost').pathname)
     .replace(/^\/vocab-app(?:\/|$)/, '/');
@@ -53,7 +61,13 @@ async function importFlow() {
     const options = await page.locator('#bookChapter option').allTextContents();
     assert.deepEqual(options, ['Beginning', 'Middle'], 'toc labels drive the chapter picker');
     assert.equal(await page.locator('#bookChapter').inputValue(), '0', 'fresh import starts at the beginning, ignoring stale position');
-    assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById('bookContent')).fontSize), '16px', 'fresh import resets font scale');
+    assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById('bookContent')).fontSize), '18px', 'fresh import resets font scale');
+    // Immersive reading: the book fills the screen over the app chrome.
+    assert.ok(await page.evaluate(() => document.body.classList.contains('reading')), 'reading mode active with a loaded book');
+    const overlay = await page.locator('#bookLoaded').boundingBox();
+    assert.ok(overlay && overlay.x <= 0 && overlay.y <= 0 && overlay.width >= 390, 'reader overlay covers the screen');
+    assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById('bookLoaded')).position), 'fixed', 'reader overlay is fixed');
+    assert.match(await page.locator('#readerTitle').textContent(), /Fixture Book/, 'minimal top chrome shows the title');
     const text = await page.locator('#bookContent').innerText();
     assert.match(text, /The Beginning/);
     assert.match(text, /a link/, 'unwrapped link text survives');
@@ -61,7 +75,8 @@ async function importFlow() {
     assert.doesNotMatch(text, /must not survive/, 'script content is dropped');
     assert.equal(await page.locator('#bookContent script, #bookContent img, #bookContent iframe').count(), 0, 'active/embedded markup is removed');
 
-    // Chapter switch
+    // Chapter switch (controls live in the reader menu panel)
+    await openReaderPanel(page);
     await page.locator('#bookChapter').selectOption('1');
     await page.waitForFunction(() => document.getElementById('bookContent').innerText.includes('The Middle'));
     assert.match(await page.locator('#bookContent').innerText(), /After the iframe\./);
@@ -74,16 +89,26 @@ async function importFlow() {
     await page.waitForFunction(() => document.getElementById('bookContent').innerText.includes('The Middle'));
     assert.equal(await page.locator('#bookChapter').inputValue(), '1', 'last read chapter restored from IndexedDB+localStorage');
 
-    // Font size control persists.
+    // Font size control persists (via the reader menu panel).
+    await openReaderPanel(page);
     const before = await page.evaluate(() => getComputedStyle(document.getElementById('bookContent')).fontSize);
     await page.locator('#bookFontUp').click();
     const after = await page.evaluate(() => getComputedStyle(document.getElementById('bookContent')).fontSize);
     assert.ok(parseFloat(after) > parseFloat(before), 'font grows');
 
+    // X exits immersive reading back to the app; the book tab re-enters it.
+    await page.locator('#readerClose').click();
+    await page.waitForFunction(() => !document.body.classList.contains('reading'));
+    assert.ok(await page.locator('#tab-practice').isVisible(), 'closing the book returns to practice');
+    await page.locator('.tab-btn[data-tab="book"]').click();
+    await page.waitForFunction(() => document.body.classList.contains('reading'));
+
     // Removal returns to the empty state.
     page.on('dialog', d => d.accept());
+    await openReaderPanel(page);
     await page.locator('#bookRemoveBtn').click();
     await page.locator('#bookImportBtn').waitFor({ state: 'visible' });
+    await page.waitForFunction(() => !document.body.classList.contains('reading'));
   } finally {
     await context.close();
   }
@@ -187,6 +212,7 @@ async function cloudSyncFlow() {
     })), 'cloud-restored book is cached locally again');
     // 3. Removal clears the cloud copy as well.
     page.on('dialog', d => d.accept());
+    await openReaderPanel(page);
     await page.locator('#bookRemoveBtn').click();
     await page.locator('#bookImportBtn').waitFor({ state: 'visible' });
     await page.waitForFunction(() => window.__fbMock.deleted === true, { timeout: 5000 });
@@ -211,6 +237,7 @@ async function coverOpeningFlow() {
     const options = await page.locator('#bookChapter option').allTextContents();
     assert.deepEqual(options, ['קטע 1', 'Beginning', 'Middle'], 'cover falls back to a generic label, toc labels drive real chapters');
     // 2. Deliberately opening the cover is a saved position and must be respected on reopen.
+    await openReaderPanel(page);
     await page.locator('#bookChapter').selectOption('0');
     await page.waitForFunction(() => JSON.parse(localStorage.getItem('vocab-reader-position') || '{}').chapter === 0);
     await page.reload();
@@ -263,15 +290,20 @@ async function paginationFlow() {
     });
     const transformOf = () => page.evaluate(() => document.getElementById('bookContent').style.transform);
     const first = await transformOf();
-    // Turning forward and back.
-    await page.locator('#bookNext').click();
+    // Turning forward and back by tapping the page edges.
+    await tapPageEdge(page, 'next');
     await page.waitForFunction(() => document.getElementById('bookPageInfo').textContent.startsWith('עמוד 2 '));
     assert.notEqual(await transformOf(), first, 'page turn moves the page strip');
-    await page.locator('#bookPrev').click();
+    await tapPageEdge(page, 'prev');
     await page.waitForFunction(() => document.getElementById('bookPageInfo').textContent.startsWith('עמוד 1 '));
     assert.equal(await transformOf(), first, 'back returns to the first page');
+    // Arrow keys turn pages too.
+    await page.keyboard.press('ArrowRight');
+    await page.waitForFunction(() => document.getElementById('bookPageInfo').textContent.startsWith('עמוד 2 '));
+    await page.keyboard.press('ArrowLeft');
+    await page.waitForFunction(() => document.getElementById('bookPageInfo').textContent.startsWith('עמוד 1 '));
     // Page position survives a reload.
-    await page.locator('#bookNext').click();
+    await tapPageEdge(page, 'next');
     await page.waitForFunction(() => document.getElementById('bookPageInfo').textContent.startsWith('עמוד 2 '));
     const pagesBefore = await page.evaluate(() => document.getElementById('bookPageInfo').textContent);
     await page.reload({ waitUntil: 'domcontentloaded' });
@@ -280,16 +312,19 @@ async function paginationFlow() {
     await page.waitForFunction(() => document.getElementById('bookTitle').textContent === 'Long Book');
     await page.waitForFunction(() => document.getElementById('bookPageInfo').textContent.startsWith('עמוד 2 '));
     assert.equal(await page.evaluate(() => document.getElementById('bookPageInfo').textContent), pagesBefore, 'page position restored after reload');
-    // Last page disables the forward arrow.
-    await page.evaluate(() => new Promise(resolve => {
-      const btn = document.getElementById('bookNext');
-      const click = () => { if (btn.disabled) return resolve(); btn.click(); setTimeout(click, 60); };
-      click();
-    }));
-    const lastInfo = await page.evaluate(() => document.getElementById('bookPageInfo').textContent);
-    assert.ok(await page.locator('#bookNext').isDisabled(), 'forward arrow disabled on the last page');
-    assert.ok(!(await page.locator('#bookPrev').isDisabled()), 'back arrow enabled past the first page');
+    // Edge taps clamp at the ends: no wrapping past the last or first page.
+    let lastInfo = await page.evaluate(() => document.getElementById('bookPageInfo').textContent);
+    for (let i = 0; i < 40; i++) {
+      await tapPageEdge(page, 'next');
+      await page.waitForTimeout(120);
+      const now = await page.evaluate(() => document.getElementById('bookPageInfo').textContent);
+      if (now === lastInfo) break;
+      lastInfo = now;
+    }
+    await tapPageEdge(page, 'next');
+    assert.equal(await page.evaluate(() => document.getElementById('bookPageInfo').textContent), lastInfo, 'past the last page stays put');
     // Bigger font repaginates to at least as many pages and stays near the end.
+    await openReaderPanel(page);
     await page.locator('#bookFontUp').click();
     await page.waitForFunction(info => document.getElementById('bookPageInfo').textContent !== info, lastInfo);
     const m = (await page.evaluate(() => document.getElementById('bookPageInfo').textContent)).match(/עמוד (\d+) מתוך (\d+)/);
@@ -299,7 +334,7 @@ async function paginationFlow() {
   } finally {
     await context.close();
   }
-  console.log('PASS paged reading: page turns, indicator, persistence, arrows and repagination');
+  console.log('PASS paged reading: edge-tap and keyboard page turns, indicator, persistence, end clamping and repagination');
 }
 
 async function wordTapFlow() {
