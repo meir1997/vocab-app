@@ -406,10 +406,86 @@ async function wordTapFlow() {
     // Inflection lookup: an untaught plural finds the base card, case-insensitively.
     const hit = await page.evaluate(() => lookupBookWord('SMALLS')?.w || null);
     assert.equal(hit, 'small', 'plural/case-insensitive lookup finds the base form');
+
+    // -ing forms: silent-e restoration and consonant dedoubling find listed bases;
+    // a word family outside the app list (crane) still reports not-found honestly.
+    assert.equal(await page.evaluate(() => lookupBookWord('circling')?.w || null), 'circle', 'silent-e -ing finds the base');
+    assert.equal(await page.evaluate(() => lookupBookWord('cropping')?.w || null), 'crop', 'consonant-doubling -ing finds the base');
+    assert.equal(await page.evaluate(() => lookupBookWord('craning')?.w || null), null, 'crane family is not in the app list');
   } finally {
     await context.close();
   }
   console.log('PASS book word tap: app number, card, known/unknown toggle, not-found and inflections');
+}
+
+
+async function longPress(page, locator) {
+  const box = await locator.boundingBox();
+  await page.mouse.move(box.x + 3, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.waitForTimeout(700);
+  await page.mouse.up();
+  await page.waitForTimeout(120);
+}
+
+async function highlightFlow() {
+  const { page, context } = await newPage();
+  try {
+    await page.locator('.tab-btn[data-tab="book"]').click();
+    await page.locator('#bookFile').setInputFiles(epubPath);
+    await page.waitForFunction(() => document.getElementById('bookTitle').textContent === 'Fixture Book');
+
+    // Sheet button highlights the tapped word and closes the sheet.
+    await page.locator('#bookContent .bw').first().click();
+    await page.locator('#wordSheet:not(.hidden)').waitFor();
+    assert.equal(await page.locator('#wordHighlightBtn').textContent(), 'הדגשת המילה');
+    await page.locator('#wordHighlightBtn').click();
+    await page.waitForFunction(() => document.getElementById('wordSheet').classList.contains('hidden'));
+    assert.equal(await page.locator('#bookContent .bw.hl').count(), 1, 'sheet button highlights the word');
+
+    // The button label flips on an already-highlighted word.
+    await page.locator('#bookContent .bw.hl').first().click();
+    await page.locator('#wordSheet:not(.hidden)').waitFor();
+    assert.equal(await page.locator('#wordHighlightBtn').textContent(), 'הסרת הדגשה');
+    await page.locator('#wordSheetClose').click();
+
+    // Long-press highlights directly and never opens the word sheet.
+    await longPress(page, page.locator('#bookContent .bw').nth(2));
+    assert.equal(await page.locator('#bookContent .bw.hl').count(), 2, 'long-press highlights another word');
+    assert.equal(await page.locator('#wordSheet.hidden').count(), 1, 'long-press leaves the sheet closed');
+    // A second long-press on the same word removes its highlight.
+    await longPress(page, page.locator('#bookContent .bw').nth(2));
+    assert.equal(await page.locator('#bookContent .bw.hl').count(), 1, 'long-press again removes the highlight');
+
+    // Highlighting is a pure reader mark: learning progress stays untouched.
+    const stored = await page.evaluate(() => localStorage.getItem('fw.progress.v2'));
+    await longPress(page, page.locator('#bookContent .bw').nth(4));
+    await longPress(page, page.locator('#bookContent .bw').nth(4));
+    assert.equal(await page.evaluate(() => localStorage.getItem('fw.progress.v2')), stored, 'no progress written by highlighting');
+
+    // Highlights survive a chapter switch and a reload.
+    await openReaderPanel(page);
+    await page.locator('#bookChapter').selectOption('1');
+    await page.waitForFunction(() => document.getElementById('bookContent').innerText.includes('The Middle'));
+    await page.locator('#bookChapter').selectOption('0');
+    await page.waitForFunction(() => document.getElementById('bookContent').innerText.includes('The Beginning'));
+    assert.equal(await page.locator('#bookContent .bw.hl').count(), 1, 'highlight survives chapter switch');
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => vocab.length > 9000 && typeof VocabReader !== 'undefined');
+    await page.locator('.tab-btn[data-tab="book"]').click();
+    await page.waitForFunction(() => document.getElementById('bookTitle').textContent === 'Fixture Book');
+    await page.waitForFunction(() => document.querySelectorAll('#bookContent .bw.hl').length === 1);
+    assert.ok(await page.evaluate(() => (JSON.parse(localStorage.getItem('vocab-reader-highlights')) || []).length === 1), 'highlight persisted in localStorage');
+
+    // Removing the book clears its highlights.
+    page.on('dialog', d => d.accept());
+    await openReaderPanel(page);
+    await page.locator('#bookRemoveBtn').click();
+    await page.waitForFunction(() => localStorage.getItem('vocab-reader-highlights') === null);
+  } finally {
+    await context.close();
+  }
+  console.log('PASS word highlight: sheet button, long-press toggle, persistence, removal cleanup');
 }
 
 (async () => {
@@ -426,6 +502,7 @@ async function wordTapFlow() {
     await coverOpeningFlow();
     await paginationFlow();
     await wordTapFlow();
+    await highlightFlow();
   } finally {
     await browser.close();
     server.close();
