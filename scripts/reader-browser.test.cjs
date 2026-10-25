@@ -10,7 +10,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const http = require('node:http');
 const path = require('node:path');
-const { buildTestEpub } = require('./epub-fixture.cjs');
+const { buildTestEpub, buildTestEpubWithCover } = require('./epub-fixture.cjs');
 
 const root = path.resolve(__dirname, '..');
 const server = http.createServer((request, response) => {
@@ -196,6 +196,57 @@ async function cloudSyncFlow() {
   console.log('PASS signed-in import writes account cloud copy, fresh device restores it, removal clears it');
 }
 
+
+async function coverOpeningFlow() {
+  const coverPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'epub-cover-')), 'covered.epub');
+  fs.writeFileSync(coverPath, buildTestEpubWithCover());
+  // 1. A fresh import skips the image-only cover and lands on the first readable chapter.
+  let { page, context } = await newPage();
+  try {
+    await page.locator('.tab-btn[data-tab="book"]').click();
+    await page.locator('#bookFile').setInputFiles(coverPath);
+    await page.waitForFunction(() => document.getElementById('bookTitle').textContent === 'Covered Book');
+    assert.equal(await page.locator('#bookChapter').inputValue(), '1', 'fresh import skips the image-only cover');
+    assert.match(await page.locator('#bookContent').innerText(), /The Beginning/);
+    const options = await page.locator('#bookChapter option').allTextContents();
+    assert.deepEqual(options, ['קטע 1', 'Beginning', 'Middle'], 'cover falls back to a generic label, toc labels drive real chapters');
+    // 2. Deliberately opening the cover is a saved position and must be respected on reopen.
+    await page.locator('#bookChapter').selectOption('0');
+    await page.waitForFunction(() => JSON.parse(localStorage.getItem('vocab-reader-position') || '{}').chapter === 0);
+    await page.reload();
+    await page.waitForFunction(() => vocab.length > 9000);
+    await page.locator('.tab-btn[data-tab="book"]').click();
+    await page.waitForFunction(() => document.getElementById('bookTitle').textContent === 'Covered Book');
+    assert.equal(await page.locator('#bookChapter').inputValue(), '0', 'saved cover position is respected on reopen');
+  } finally {
+    await context.close();
+  }
+  // 3. A fresh device restoring from the account cloud copy also skips the cover.
+  let saved;
+  ({ page, context } = await newPage());
+  try {
+    await page.evaluate(mockFbScript());
+    await page.locator('.tab-btn[data-tab="book"]').click();
+    await page.locator('#bookFile').setInputFiles(coverPath);
+    await page.waitForFunction(() => document.getElementById('bookTitle').textContent === 'Covered Book');
+    await page.waitForFunction(() => !!window.__fbMock.saved, { timeout: 5000 });
+    saved = await page.evaluate(() => window.__fbMock.saved);
+  } finally {
+    await context.close();
+  }
+  ({ page, context } = await newPage());
+  try {
+    await page.evaluate(mockFbScript(JSON.stringify(saved)));
+    await page.locator('.tab-btn[data-tab="book"]').click();
+    await page.waitForFunction(() => document.getElementById('bookTitle').textContent === 'Covered Book', { timeout: 8000 });
+    assert.equal(await page.locator('#bookChapter').inputValue(), '1', 'cloud restore skips the image-only cover');
+    assert.match(await page.locator('#bookContent').innerText(), /The Beginning/);
+  } finally {
+    await context.close();
+  }
+  console.log('PASS fresh open and cloud restore skip an image-only cover, saved cover position respected');
+}
+
 (async () => {
   epubPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'epub-')), 'fixture.epub');
   fs.writeFileSync(epubPath, buildTestEpub());
@@ -207,6 +258,7 @@ async function cloudSyncFlow() {
     await frequencyInDetails();
     await missingBookKeepsAppUsable();
     await cloudSyncFlow();
+    await coverOpeningFlow();
   } finally {
     await browser.close();
     server.close();
