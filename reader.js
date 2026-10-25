@@ -179,6 +179,60 @@
   function savePosition(pos) { try { localStorage.setItem(POS_KEY, JSON.stringify(pos)); } catch {} }
   function loadPosition() { try { return JSON.parse(localStorage.getItem(POS_KEY)) || null; } catch { return null; } }
 
+  /* ---------- Optional account cloud copy (signed-in users only) ---------- */
+  // The book lives in the user's own Firebase account data (users/{uid}),
+  // never on the public site. Everything here is a no-op when signed out.
+  function bufferToBase64(buffer) {
+    const bytes = new Uint8Array(buffer);
+    let out = '';
+    for (let i = 0; i < bytes.length; i += 8192) out += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192));
+    return btoa(out);
+  }
+  function base64ToBuffer(b64) {
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return bytes.buffer;
+  }
+  function getFb() { try { return typeof fb !== 'undefined' ? fb : null; } catch { return null; } }
+  function fbReady() { const f = getFb(); return f && f.ready && f.user && f.db; }
+
+  async function cloudSaveBook(name, buffer, title) {
+    if (!fbReady()) return false;
+    const f = getFb();
+    const data = { name, title: title || '', b64: bufferToBase64(buffer), addedAt: Date.now() };
+    const userDoc = f.db.collection('users').doc(f.user.uid);
+    try { await userDoc.collection('books').doc('main').set(data); return true; }
+    catch { return false; }
+  }
+
+  async function cloudLoadBook() {
+    if (!fbReady()) return null;
+    const f = getFb();
+    const userDoc = f.db.collection('users').doc(f.user.uid);
+    try {
+      const snap = await userDoc.collection('books').doc('main').get();
+      if (snap.exists && snap.data().b64) return snap.data();
+    } catch {}
+    return null;
+  }
+
+  async function cloudClearBook() {
+    if (!fbReady()) return;
+    const f = getFb();
+    const userDoc = f.db.collection('users').doc(f.user.uid);
+    try { await userDoc.collection('books').doc('main').delete(); } catch {}
+  }
+
+  async function waitForSyncAuth(ms) {
+    const start = Date.now();
+    while (Date.now() - start < ms) {
+      if (fbReady()) return true;
+      await new Promise(r => setTimeout(r, 200));
+    }
+    return fbReady();
+  }
+
   /* ---------- Book tab controller (browser only) ---------- */
   let book = null, chapterIndex = 0, fontScale = 1, initialized = false, els = null;
 
@@ -248,6 +302,7 @@
       localStorage.removeItem(POS_KEY); // a fresh import starts at its own beginning
       await openBook(buffer); // validate before persisting
       await saveBookFile({ name: file.name, buffer });
+      cloudSaveBook(file.name, buffer, book && book.title).catch(() => {});
     } catch (err) {
       book = null;
       els.error.textContent = (err && err.message) || 'הקובץ לא נפתח. ודאו שזה קובץ EPUB תקין.';
@@ -256,6 +311,7 @@
 
   async function removeBook() {
     await clearBookFile();
+    cloudClearBook().catch(() => {});
     localStorage.removeItem(POS_KEY);
     book = null;
     els.loaded.classList.add('hidden');
@@ -291,11 +347,23 @@
     let record = null;
     try { record = await loadBookFile(); } catch {}
     if (record && record.buffer) {
-      try { await openBook(record.buffer); }
-      catch { els.loaded.classList.add('hidden'); els.empty.classList.remove('hidden'); els.error.textContent = 'הספר השמור לא נפתח. ייבאו אותו שוב.'; }
+      try { await openBook(record.buffer); return; }
+      catch { els.loaded.classList.add('hidden'); els.empty.classList.remove('hidden'); els.error.textContent = 'הספר השמור לא נפתח. ייבאו אותו שוב.'; return; }
+    }
+    // No local copy: restore from the signed-in account's cloud copy.
+    if (await waitForSyncAuth(3000)) {
+      try {
+        const data = await cloudLoadBook();
+        if (data && data.b64) {
+          const buffer = base64ToBuffer(data.b64);
+          await openBook(buffer);
+          saveBookFile({ name: data.name || 'book.epub', buffer }).catch(() => {});
+        }
+      } catch {}
     }
   }
 
   return { parseZipEntries, inflateRaw, openZip, loadEpub, sanitizeInto, initBookTab, showBookTab,
+    bufferToBase64, base64ToBuffer, cloudSaveBook, cloudLoadBook, cloudClearBook,
     _state: () => ({ book, chapterIndex, fontScale }) };
 });

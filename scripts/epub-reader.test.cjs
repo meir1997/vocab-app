@@ -84,3 +84,15 @@ class MiniDoc {
 class MiniParser {
   parseFromString(text) { return new MiniDoc(text); }
 }
+
+test('base64 helpers round-trip binary buffers', () => {
+  global.btoa = global.btoa || (s => Buffer.from(s, 'binary').toString('base64'));
+  global.atob = global.atob || (s => Buffer.from(s, 'base64').toString('binary'));
+  const bytes = new Uint8Array(40000);
+  for (let i = 0; i < bytes.length; i++) bytes[i] = (i * 37) % 256;
+  const b64 = reader.bufferToBase64(bytes.buffer);
+  const back = new Uint8Array(reader.base64ToBuffer(b64));
+  assert.deepEqual([...back.slice(0, 100)], [...bytes.slice(0, 100)]);
+  assert.equal(back.length, bytes.length);
+  assert.deepEqual(back[bytes.length - 1], bytes[bytes.length - 1]);
+});
