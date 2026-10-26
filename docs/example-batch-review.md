@@ -25,7 +25,7 @@ Overall coverage: 9465/9,998 reviewed examples; top 300 remains 259. This contin
 
 The source preserves ranks through 10,000 despite containing 9,998 words: ranks 8854 and 9542 are absent after duplicate removal. The final batches contain 699 and 599 words. All 6,898 remaining words are accounted for. The final cross-batch audit also removes deer and eagle because their glosses name gazelle and vulture, and tightens claimed to the legal damages sense; batch counts reflect these corrections. Total omissions include 41 in the top 300, beyond the batch exception list.
 
-The existing sense gate and masking behavior are preserved, with loaded or missing details. Browser fixtures include less common primary senses from the new batches. Cache and app readiness use `four-words-offline-v35`. Native iOS, vocab.json, details.json, scoring, synchronization and user progress are untouched. Browser suites use isolated synthetic sessions.
+The existing sense gate and masking behavior are preserved, with loaded or missing details. Browser fixtures include less common primary senses from the new batches. Cache and app readiness use `four-words-offline-v36`. Native iOS, vocab.json, details.json, scoring, synchronization and user progress are untouched. Browser suites use isolated synthetic sessions.
 
 Validation commands:
 
