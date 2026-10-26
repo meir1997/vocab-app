@@ -375,7 +375,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v38');
+    const cache = await caches.open('four-words-offline-v39');
     const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
@@ -421,8 +421,26 @@ function fitWord() {
 function fitFcWord() {
   const el = $('fcWord'); if (!el) return;
   el.style.fontSize = '';
+  el.style.paddingLeft = el.style.paddingRight = '';
+  // nowrap, like fitWord: with overflow-wrap anywhere the card word breaks
+  // mid-word (gamekeepe/r on iPhone, 26.10) before any overflow is visible.
+  el.style.whiteSpace = 'nowrap';
+  // The span is a flex item, so nowrap would size it to max-content and it
+  // would overflow the card; measure the glyph run against the card face
+  // content box instead of the span's own width.
+  const face = el.parentElement;
+  const fcs = getComputedStyle(face);
+  const faceContent = face.clientWidth - parseFloat(fcs.paddingLeft) - parseFloat(fcs.paddingRight);
+  const range = document.createRange();
+  const textWidth = () => { range.selectNodeContents(el); return range.getBoundingClientRect().width; };
   let size = parseFloat(getComputedStyle(el).fontSize) || 32;
-  while (size > 16 && el.scrollWidth > el.clientWidth) { size -= 2; el.style.fontSize = size + 'px'; }
+  let pad = parseFloat(getComputedStyle(el).paddingLeft) || 0;
+  // The horizontal padding clears the corner buttons. Shrink the font first;
+  // only if the floor is reached does the padding yield (narrow phones).
+  while (textWidth() > faceContent - 2 * pad && (size > 16 || pad > 8)) {
+    if (size > 16) { size -= 2; el.style.fontSize = size + 'px'; }
+    else { pad = Math.max(8, pad - 11); el.style.paddingLeft = el.style.paddingRight = pad + 'px'; }
+  }
 }
 let cardFlipped = false, cardDrag = null;
 function resetFlashcard() {

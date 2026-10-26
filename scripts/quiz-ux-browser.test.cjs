@@ -222,6 +222,59 @@ async function simpleWordCardAndLongWords() {
   console.log('PASS main example first, collapsed reference material, card focus, desktop/390px/320px long-word containment');
 }
 
+// Flashcard word wrap (user report, 26.10): on iPhone the card front broke
+// "gamekeeper" as gamekeepe/r. overflow-wrap:anywhere wrapped the word before
+// scrollWidth could overflow, so the shrink loop never ran. The card word must
+// be measured unwrapped (like fitWord) and fitted on one line at phone widths.
+async function flashcardWordStaysOneLine() {
+  for (const viewport of [{ width: 390, height: 844 }, { width: 320, height: 568 }]) {
+    const { page, context } = await newPage(viewport);
+    try {
+      for (const word of ['incomprehensible', 'gamekeeper']) {
+        // gamekeeper is a book word (user's exact report case), so clone a
+        // regular entry and relabel it; the card path only needs w/r/t.
+        await page.evaluate(word => {
+          const item = { ...vocab.find(entry => entry.w === 'right'), w: word };
+          settings.mode = 'cards';
+          session = { queue: [item], index: 0, correct: 0, wrong: 0, active: true };
+          locked = false;
+          document.getElementById('practiceHome').classList.add('hidden');
+          document.getElementById('summary').classList.add('hidden');
+          document.getElementById('quizCard').classList.remove('hidden');
+          showQuestion();
+        }, word);
+        await page.waitForFunction(w => document.getElementById('fcWord').textContent === w, word);
+        const fitted = await page.locator('#fcWord').evaluate(el => {
+          const cs = getComputedStyle(el);
+          const face = el.parentElement;
+          const fcs = getComputedStyle(face);
+          const card = document.getElementById('flashcard');
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          const rect = range.getBoundingClientRect();
+          const cardRect = card.getBoundingClientRect();
+          return {
+            whiteSpace: cs.whiteSpace,
+            fontSize: parseFloat(cs.fontSize),
+            lines: range.getClientRects().length,
+            textWidth: rect.width,
+            textLeft: rect.left, textRight: rect.right,
+            cardLeft: cardRect.left, cardRight: cardRect.right,
+            pad: parseFloat(cs.paddingLeft),
+            faceContent: face.clientWidth - parseFloat(fcs.paddingLeft) - parseFloat(fcs.paddingRight)
+          };
+        });
+        assert.equal(fitted.whiteSpace, 'nowrap', word + ': card word is measured without wrapping');
+        assert.equal(fitted.lines, 1, word + ': card word stays on one line');
+        assert.ok(fitted.textWidth + 2 * fitted.pad <= fitted.faceContent + 1, word + ': glyphs plus padding fit the card face content box (text ' + fitted.textWidth.toFixed(1) + 'px, pad ' + fitted.pad + 'px, box ' + fitted.faceContent.toFixed(1) + 'px)');
+        assert.ok(fitted.textLeft >= fitted.cardLeft && fitted.textRight <= fitted.cardRight, word + ': glyphs stay inside the visible card');
+        assert.ok(fitted.fontSize >= 16, word + ': fitted size stays at or above the 16px floor');
+      }
+    } finally { await context.close(); }
+  }
+  console.log('PASS flashcard words fit one line inside the content box at 390px and 320px (incl. gamekeeper report case)');
+}
+
 // iPhone speaker fix (user report, 26.10): iOS WebKit drops an utterance
 // spoken synchronously after cancel(), leaving every tap silent. The app must
 // cancel first, speak on a short delay, and resume the queue; rapid taps
@@ -313,6 +366,7 @@ async function preservedLearningRules() {
   await unambiguousChoicesAndContext();
   await feedbackAndContinuation();
   await simpleWordCardAndLongWords();
+  await flashcardWordStaysOneLine();
   await speakerPlaysWord();
   await preservedLearningRules();
 })().catch(error => {
