@@ -155,7 +155,7 @@ body {
 .cards-mode #cardGear { grid-column: 1; grid-row: 1; }
 .cards-mode #progressText { grid-column: 2; grid-row: 1; justify-self: center; font-size: 16px; color: var(--text); direction: ltr; }
 .cards-mode #cardClose { grid-column: 3; grid-row: 1; }
-.cards-mode .flashcard-box { position: relative; height: auto; min-height: 0; margin-top: 0; padding-inline: 24px; }
+.cards-mode .flashcard-box { position: relative; height: auto; min-height: 0; margin-top: 0; padding-inline: 24px; align-self: stretch; }
 .flashcard-box .side-pill { display: none; }
 .cards-mode .side-pill { display: block; position: absolute; top: 14px; z-index: 0; padding: 4px 10px; font-size: 14px; font-weight: 800; border-radius: 999px; border: 1px solid; }
 .cards-mode .pill-know { right: 0; background: #e9f9ef; color: #15803d; border-color: #b8ebc9; }
