@@ -37,7 +37,17 @@ async function loadVocab() {
     const res = await fetch('vocab.json', { cache: 'no-store' });
     if (res.ok) {
       const fresh = await res.json();
-      if (fresh.length > 1000) { vocab = fresh.map(x => ({ r: x.r, w: x.w, t: x.t })); save(K.vocab, vocab); onVocabReady(); return; }
+      if (fresh.length > 1000) {
+        let merged = fresh;
+        try { // Book-added cards (rank 10001+): same shape, web only (iOS untouched).
+          const bookRes = await fetch('book-vocab.json', { cache: 'no-store' });
+          if (bookRes.ok) {
+            const bookWords = await bookRes.json();
+            if (Array.isArray(bookWords) && bookWords.length) merged = fresh.concat(bookWords);
+          }
+        } catch {}
+        vocab = merged.map(x => ({ r: x.r, w: x.w, t: x.t })); save(K.vocab, vocab); onVocabReady(); return;
+      }
     }
     throw new Error('snapshot missing');
   } catch {
@@ -339,8 +349,8 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v32');
-    const required = ['index.html', 'app.js', 'quiz-content.js', 'vocab.json', 'details.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
+    const cache = await caches.open('four-words-offline-v34');
+    const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
     else label.textContent = 'מכינים שימוש אופליין… השאירו פתוח עם אינטרנט עד שמופיע אישור';
@@ -458,8 +468,8 @@ function showQuestion() {
   $('nextBtn').classList.add('hidden'); $('dontKnowBtn').classList.remove('hidden');
   $('typingCheck').disabled = false; $('typingInput').disabled = false;
   const mode = settings.mode;
-  const content = VocabQuiz.getWordContent(item, wordDetails[item.r]);
-  const context = VocabQuiz.getPromptContext(item, mode, wordDetails[item.r]);
+  const content = wordContent(item, wordDetails[item.r]);
+  const context = promptContext(item, mode, wordDetails[item.r]);
   $('questionContext').textContent = context;
   // Keep the context slot even when a later question needs no example.
   $('questionContext').classList.remove('hidden');
@@ -550,7 +560,7 @@ function completeAnswer(ok, item) {
 function renderAnswerFeedback(item) {
   // The answer may have advanced the current band since the prompt rendered.
   renderReviewBadge(item);
-  const content = VocabQuiz.getWordContent(item, wordDetails[item.r]);
+  const content = wordContent(item, wordDetails[item.r]);
   const box = $('answerFeedback'); box.replaceChildren(); box.classList.remove('hidden');
   const label = document.createElement('p'); label.className = 'feedback-label'; label.textContent = 'המשמעות הנלמדת';
   const meaning = document.createElement('p'); meaning.className = 'feedback-meaning'; meaning.textContent = content.meaning;
@@ -651,26 +661,22 @@ function renderLibrary(reset = true) {
 }
 /* ---------- Book word info (tap any word in the reader) ---------- */
 let wordSheetOpen = false, wordSheetItem = null, wordSheetTrigger = null, wordSheetSpan = null;
-function normalizeBookWord(raw) { return (raw || '').toLowerCase().replace(/[’‘]/g, "'").trim(); }
-// Exact form first, then common English inflections, so a clicked plural or
-// past tense still finds its app card. Never creates or alters progress here.
-function lookupBookWord(raw) {
+const normalizeBookWord = raw => BookLookup.normalizeBookWord(raw);
+let wordPosPromise = null, wordPos = {};
+function loadWordPos() {
+  if (!wordPosPromise) wordPosPromise = fetch('word-pos.json').then(r => { if (!r.ok) throw new Error('word-pos'); return r.json(); }).then(data => { wordPos = data; return data; }).catch(err => { wordPosPromise = null; throw err; });
+  return wordPosPromise;
+}
+// Exact form and inflections resolve immediately; derivational forms (-ly,
+// -er/-est, -ness) wait for word-pos.json so they only match adjective cards
+// and never show a wrong-POS gloss (see scripts/book-lookup.test.cjs).
+async function lookupBookWord(raw) {
+  const quick = BookLookup.lookupBookWord(raw, wordByLower, wordPos);
+  if (quick) return quick;
   const base = normalizeBookWord(raw);
-  if (!base) return null;
-  const cands = [base];
-  if (base.endsWith("'s") && base.length > 3) cands.push(base.slice(0, -2));
-  if (base.endsWith('ies') && base.length > 4) cands.push(base.slice(0, -3) + 'y');
-  if (base.endsWith('ied') && base.length > 4) cands.push(base.slice(0, -3) + 'y');
-  if (base.endsWith('ing') && base.length > 5) {
-    const stem = base.slice(0, -3);
-    cands.push(stem, stem + 'e'); // craning -> crane, circling -> circle
-    if (stem.length > 2 && stem[stem.length - 1] === stem[stem.length - 2] && /[bcdfghjklmnpqrstvwxz]/.test(stem[stem.length - 1])) cands.push(stem.slice(0, -1)); // cropping -> crop
-  }
-  if (base.endsWith('es') && base.length > 4) cands.push(base.slice(0, -2));
-  if (base.endsWith('ed') && base.length > 4) cands.push(base.slice(0, -2));
-  if (base.endsWith('s') && base.length > 3) cands.push(base.slice(0, -1));
-  for (const c of cands) { const hit = wordByLower.get(c); if (hit) return hit; }
-  return null;
+  if (!base || !BookLookup.derivationalCandidates(base).length) return null;
+  try { await loadWordPos(); } catch { return null; }
+  return BookLookup.lookupBookWord(raw, wordByLower, wordPos);
 }
 function renderWordSheetState() {
   const state = $('wordSheetState'), knownBtn = $('wordKnownBtn'), hlBtn = $('wordHighlightBtn');
@@ -687,8 +693,8 @@ function renderWordSheetState() {
   knownBtn.textContent = known ? 'סימון כלא ידועה' : 'סימון כידועה';
   knownBtn.setAttribute('aria-pressed', known ? 'true' : 'false');
 }
-function openWordSheet(surface, span) {
-  const item = lookupBookWord(surface);
+async function openWordSheet(surface, span) {
+  const item = await lookupBookWord(surface);
   if (!wordSheetOpen) wordSheetTrigger = document.activeElement;
   wordSheetOpen = true; wordSheetItem = item; wordSheetSpan = span || null;
   $('wordSheetWord').textContent = item ? item.w : surface;
@@ -727,9 +733,19 @@ function setBookWordKnown(known) {
 
 /* ---------- Word details card (synonyms, meanings, example) ---------- */
 let detailsPromise = null, wordDetails = {}, sheetOpen = false, pendingAdvance = null, sheetTrigger = null;
-const POS_HE = { n: 'שם עצם', v: 'פועל', a: 'תואר', r: 'תואר הפועל' };
+const POS_HE = { n: 'שם עצם', v: 'פועל', a: 'תואר', r: 'תואר הפועל', int: 'קריאה', p: 'מילת יחס' };
+// Book-coverage batch (ranks 10001+) ships its reviewed examples and details in
+// book-reviewed.js / book-details.json so quiz-content.js and details.json stay
+// untouched. BookContent applies the same sense gate as VocabQuiz.
+const wordContent = (item, detail) =>
+  (item && item.r >= 10001 && window.BookContent) ? BookContent.getWordContent(item, detail) : VocabQuiz.getWordContent(item, detail);
+const promptContext = (item, mode, detail) =>
+  (item && item.r >= 10001 && window.BookContent) ? BookContent.getWordContent(item, detail).context : VocabQuiz.getPromptContext(item, mode, detail);
 function loadDetails() {
-  if (!detailsPromise) detailsPromise = fetch('details.json').then(r => { if (!r.ok) throw new Error('details'); return r.json(); }).then(data => { wordDetails = data; return data; }).catch(err => { detailsPromise = null; throw err; });
+  if (!detailsPromise) detailsPromise = Promise.all([
+    fetch('details.json').then(r => { if (!r.ok) throw new Error('details'); return r.json(); }),
+    fetch('book-details.json').then(r => (r.ok ? r.json() : {})).catch(() => ({}))
+  ]).then(([main, book]) => { wordDetails = Object.assign({}, main, book); return wordDetails; }).catch(err => { detailsPromise = null; throw err; });
   return detailsPromise;
 }
 let freqPromise = null, bookFrequency = null;
@@ -747,7 +763,7 @@ async function openDetails(item) {
   const body = $('detailBody');
   if (!sheetOpen) sheetTrigger = document.activeElement;
   $('detailWord').textContent = item.w; $('detailSerial').textContent = `#${item.r.toLocaleString('he-IL')}`;
-  $('detailTranslation').textContent = VocabQuiz.getWordContent(item).meaning;
+  $('detailTranslation').textContent = wordContent(item).meaning;
   $('detailSpeak').onclick = () => speak(item.w);
   body.replaceChildren(); const loading = document.createElement('p'); loading.className = 'detail-empty'; loading.textContent = 'טוען…'; body.append(loading);
   $('detailSheet').classList.remove('hidden'); sheetOpen = true;
@@ -760,7 +776,7 @@ async function openDetails(item) {
   }
   if (!sheetOpen || $('detailWord').textContent !== item.w) return;
   body.replaceChildren();
-  const content = VocabQuiz.getWordContent(item, data);
+  const content = wordContent(item, data);
   if (content.example) {
     const row = document.createElement('div'); row.className = 'example-row';
     const q = document.createElement('p'); q.className = 'example-text'; q.lang = 'en'; q.dir = 'ltr'; q.textContent = content.example;
@@ -783,7 +799,9 @@ async function openDetails(item) {
     bookTitle.textContent = freq.book;
     const note = document.createElement('p');
     note.className = 'freq-note';
-    note.textContent = 'הספירה לפי צורת המילה המדויקת בלבד (ללא הטיות), בכל הספר כולל כותרות רצות ודפי פתיחה.';
+    note.textContent = item.r >= 10001
+        ? 'מילה שנוספה מהספר; הספירה כוללת את כל ההטיות שלה (למשל grabbed נספר תחת grab).'
+        : 'הספירה לפי צורת המילה המדויקת בלבד (ללא הטיות), בכל הספר כולל כותרות רצות ודפי פתיחה.';
     addDetailSection(body, 'שכיחות בספר', [line, bookTitle, note]);
   }
   const disclosure = (label, node) => {

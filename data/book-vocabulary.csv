@@ -1,0 +1,1128 @@
+Rank,Word,BookCount,Hebrew,POS,Gloss,Example
+10001,professor,180,פרופסור,n,a senior teacher; a title for a teacher,Professor Snape teaches Potions.
+10002,cloak,57,גלימה,n,a loose outer garment without sleeves,Harry wore a long black cloak.
+10003,wizard,41,קוסם,n,a man with magic powers,The wizard waved his wand.
+10004,broom,34,מטאטא,n,a brush on a long handle for sweeping,She swept the floor with a broom.
+10005,troll,31,טרול,n,a large ugly creature from folklore,A huge troll blocked the door.
+10006,broomstick,27,ידית מטאטא,n,the long handle of a broom,The witch sat on her broomstick.
+10007,unicorn,22,חד קרן,n,a mythical horse with one horn,A white unicorn stood in the forest.
+10008,yeah,21,כן (בדיבור),int,informal yes,"Yeah, I agree with you."
+10009,cauldron,18,קדרה,n,a large round pot for cooking over a fire,Soup bubbled in the cauldron.
+10010,mom,17,אמא,n,informal for mother,Her mom baked a cake.
+10011,fang,16,ניב,n,a long sharp tooth,The snake showed its fangs.
+10012,toad,16,קרפדה,n,a small frog-like animal,A fat toad sat by the pond.
+10013,turban,14,טורבן,n,a long cloth wound around the head,He wore a large purple turban.
+10014,invisibility,14,בלתי נראות,n,the state of being impossible to see,The cloak gave him invisibility.
+10015,miss,13,להתגעגע,v,to feel sad because someone or something is not there,I miss my old friends.
+10016,expel,13,לגרש,v,to officially force someone to leave a school or place,The school can expel a student for cheating.
+10017,easy,13,קל,a,not difficult,The test was easy.
+10018,classroom,12,כיתה,n,a room where a class is taught,The students sat quietly in the classroom.
+10019,wide,12,רחב,a,measuring a lot from side to side,The river is very wide.
+10020,crate,12,ארגז,n,a large box for storing or moving things,He carried a large wooden crate.
+10021,chess,12,שחמט,n,a board game for two players,They played a game of chess.
+10022,swoop,12,לזנק במעוף,v,to dive down quickly through the air,The owl swooped down on a mouse.
+10023,o'clock,12,בדיוק (אחרי ציון שעה),r,used after a number to say the exact hour,The train leaves at six o'clock.
+10024,goblin,10,גמד מכוער,n,a small ugly creature in fairy tales,An ugly goblin guarded the bank.
+10025,prefect,10,תלמיד אחראי,n,a senior student with authority in a school,The prefect showed the new students around.
+10026,dormitory,10,חדר שינה משותף,n,a room where several people sleep,The boys sleep in one large dormitory.
+10027,sweater,10,סוודר,n,a warm knitted piece of clothing,He wore a warm wool sweater.
+10028,television,10,טלוויזיה,n,a device for watching broadcast programs,They watched television after dinner.
+10029,halloween,10,ליל כל הקדושים,n,"the night of October 31, celebrated with costumes",We wear costumes on Halloween.
+10030,trapdoor,10,דלת מלכודת,n,"a door in a floor, ceiling, or roof",A trapdoor opened in the floor.
+10031,potion,9,שיקוי,n,a magic drink,The witch brewed a green potion.
+10032,twitch,9,לפרכס,v,to make a small quick movement,The rabbit's nose twitched.
+10033,threequarters,9,שלושה רבעים,n,three of four equal parts,The glass was three-quarters full.
+10034,motorcycle,8,אופנוע,n,a two-wheeled motor vehicle,He rode a black motorcycle.
+10035,passageway,8,מסדרון,n,a long narrow way between rooms or places,A dark passageway led to the cellar.
+10036,snarl,8,לנהום,v,to growl while showing the teeth,The dog snarled at the stranger.
+10037,halfway,8,באמצע הדרך,r,at the middle point between two places,We stopped halfway up the hill.
+10038,nostril,8,נחיר,n,one of the two openings of the nose,The horse's nostrils opened wide.
+10039,chessmen,8,כלי שחמט,n,chess pieces,The chessmen stood ready on the board.
+10040,centaur,7,קנטאור,n,"a mythical creature, half man and half horse",The centaur is half man and half horse.
+10041,zoo,7,גן חיות,n,a place where animals are kept for people to see,We saw lions at the zoo.
+10042,anymore,7,עוד (במשפט שלילי),r,any longer; used in negative sentences,He doesn't live here anymore.
+10043,midair,7,באוויר,n,"a point in the air, not touching the ground",The ball stopped in midair.
+10044,homework,7,שיעורי בית,n,school work done at home,She finished her homework early.
+10045,snout,7,חוטם,n,the long nose of an animal,The pig pushed its snout through the fence.
+10046,binoculars,7,משקפת,n,an instrument for seeing faraway things,He watched the birds through binoculars.
+10047,scramble,7,לטפס במהירות,v,to move or climb quickly and with difficulty,They scrambled over the wall.
+10048,sprint,7,לרוץ במרץ,v,to run very fast for a short distance,He sprinted to the bus stop.
+10049,werewolf,7,אדם זאב,n,a person who turns into a wolf,A werewolf howled at the full moon.
+10050,grab,6,לתפוס,v,to take hold of something quickly,Grab your coat before you leave.
+10051,exam,6,מבחן,n,a formal test,The exam starts at nine o'clock.
+10052,good-bye,6,שלום (בפרידה),n,a word said when leaving,He said good-bye and left.
+10053,lumpy,6,מלא גושים,a,full of lumps; not smooth,The lumpy pillow was hard to sleep on.
+10054,wizardry,6,כשפות,n,the skill or art of magic,He studied wizardry at a magic school.
+10055,soccer,6,כדורגל,n,football; a game played by kicking a ball,They played soccer after school.
+10056,pant,6,להתנשף,v,to breathe quickly with short breaths,The dog panted in the heat.
+10057,lurk,6,להתרבץ,v,"to wait hidden, usually with bad intent",A cat lurked in the shadows.
+10058,headless,6,חסר ראש,a,without a head,The headless statue stood in the hall.
+10059,trophy,6,גביע,n,a prize for winning a competition,She won a gold trophy.
+10060,backward,6,אחורה,r,in the direction behind,He took a step backward.
+10061,hoop,6,חישוק,n,a round ring,She threw the ball through the hoop.
+10062,mumble,6,למלמל,v,to speak quietly and unclearly,He mumbled an apology.
+10063,hurtle,6,להיטפל במהירות,v,"to move very fast, often out of control",The car hurtled down the hill.
+10064,squint,6,לפקפק,v,to look with eyes partly closed,He squinted at the tiny letters.
+10065,shuffle,6,לגרר את הרגליים,v,"to walk slowly, dragging the feet",The old man shuffled down the street.
+10066,three-headed,6,בעל שלושה ראשים,a,having three heads,A three-headed dog guarded the trapdoor.
+10067,nah,6,לא (בדיבור),int,informal: no,"""Coming?"" ""Nah, I'm tired."""
+10068,dive,5,לצלול,v,to jump head first into water; to plunge,She dived into the pool.
+10069,pop,5,פיצוץ קטן,n,a short sharp sound,The balloon burst with a loud pop.
+10070,detention,5,ריתוק אחרי שיעורים,n,a punishment of staying at school after hours,He got detention for being late.
+10071,gamekeeper,5,שומר חיות בר,n,a person who manages wild animals on land,The gamekeeper looks after the forest.
+10072,bathroom,5,חדר אמבטיה,n,a room with a bath or toilet,The bathroom is upstairs.
+10073,trash,5,אשפה,n,things thrown away; garbage,Throw the trash in the bin.
+10074,bike,5,אופניים,n,a bicycle,She rode her bike to school.
+10075,sock,5,גרב,n,a soft covering for the foot,He found a hole in his sock.
+10076,bald,5,קרח,a,having no hair on the head,The bald man wore a hat.
+10077,complain,5,להתלונן,v,to say that something is wrong or bad,He complained about the cold food.
+10078,slither,5,לזחול,v,to slide along the ground like a snake,The snake slithered across the path.
+10079,boa,5,נחש בואה,n,a large snake that squeezes its prey,A boa can grow very long.
+10080,mum,5,אמא (בריטי),n,British informal for mother,Her mum packed her lunch.
+10081,blimey,5,איזה כאב! (קריאת פליאה בריטית),int,British informal cry of surprise,"Blimey, that was close!"
+10082,transfiguration,5,שינוי צורה,n,a complete change of form or appearance,The magician worked a strange transfiguration.
+10083,archway,5,שער קשת,n,a passage under an arch,They walked under the stone archway.
+10084,plastic,5,פלסטיק,n,a light man-made material,The toy is made of plastic.
+10085,okay,5,בסדר,int,all right; yes,"Okay, let's go."
+10086,gran,5,סבתא (בדיבור),n,informal for grandmother,His gran makes great cakes.
+10087,hey,5,היי,int,a call to get someone's attention,"Hey, wait for me!"
+10088,romania,5,רומניה,n,a country in eastern Europe,Romania is a country in Europe.
+10089,bellow,5,לצעוק בקול רם,v,to shout in a deep loud voice,"""Stop!"" he bellowed."
+10090,tut,5,לנזוף בלשון (צליל),v,to make a disapproving clicking sound,She tutted at the mess.
+10091,crossbow,5,קשת מאוזנת,n,a bow fixed across a wooden stock,He aimed the crossbow at the target.
+10092,locker,5,לוקר (תא נעילה),n,a small lockable cupboard,He put his bag in the locker.
+10093,elixir,5,שיקוי קסם מרפא,n,a magic liquid believed to cure or give life,The elixir promised long life.
+10094,hug,5,לחבק,v,to hold someone close with the arms,She hugged her friend tightly.
+10095,blond,5,בלונדיני,a,with light yellow hair,He has short blond hair.
+10096,quill,4,נוצת כתיבה,n,a large feather used as a pen,He wrote the letter with a quill.
+10097,unwrap,4,לפתוח עטיפה,v,to remove the covering from something,The child unwrapped the gift.
+10098,flick,4,להעיף בקלות,v,to move or hit something with a quick light movement,She flicked the light switch.
+10099,award,4,להעניק,v,to give a prize or points officially,They awarded him a medal.
+10100,bathrobe,4,חלוק אמבטיה,n,a loose robe worn before or after a bath,He put on a warm bathrobe.
+10101,cheek,4,לחי,n,the soft side of the face below the eye,She kissed his cheek.
+10102,constrictor,4,נחש חונק,n,a snake that kills by squeezing,The constrictor squeezed its prey.
+10103,phoenix,4,עוף החול,n,a mythical bird that burns and is reborn,The phoenix rose from the ashes.
+10104,pumpkin,4,דלעת,n,a large round orange vegetable,We carved a pumpkin for Halloween.
+10105,tabby,4,חתול מפוספס,n,a cat with striped fur,A tabby cat sat on the wall.
+10106,sideways,4,הצידה,r,to or from the side,She looked sideways at him.
+10107,tape,4,סרט מדידה / סרט דביק,n,a long narrow strip used for measuring or sticking,He measured it with a tape.
+10108,mommy,4,אמא (ילדים),n,child's word for mother,The little boy ran to his mommy.
+10109,hamburger,4,המבורגר,n,a flat round piece of fried meat in a bun,He ordered a hamburger and fries.
+10110,problem,4,בעיה,n,something difficult that needs an answer,We solved the problem together.
+10111,budge,4,לזוז,v,"to move slightly, or make something move",The heavy door would not budge.
+10112,goodness,4,טובות / אבוי (קריאת פליאה),n,the quality of being good; also a cry of surprise,"My goodness, what a surprise!"
+10113,shiny,4,מבריק,a,bright; reflecting light,She polished her shiny shoes.
+10114,squashy,4,רך ומתמעך,a,soft and easy to squash,He sat on the big squashy armchair.
+10115,crunch,4,לכרסם בקול,v,to bite hard food with a noisy sound,She crunched the apple loudly.
+10116,glint,4,לנצוץ,v,to shine with small quick flashes,His eyes glinted in the dark.
+10117,headmaster,4,מנהל בית ספר,n,the man in charge of a school,The headmaster welcomed the students.
+10118,fudge,4,ממתק פאדג',n,"a soft sweet made of sugar, butter, and milk",She made chocolate fudge.
+10119,fungus,4,פטרייה,n,a plant-like growth such as a mushroom,A strange fungus grew on the log.
+10120,bartender,4,ברמן,n,a person who serves drinks in a bar,The bartender poured the drinks.
+10121,freckle,4,נמש,n,a small brown spot on the skin,She has freckles on her nose.
+10122,amazed,4,נדהם,a,very surprised,I was amazed by the trick.
+10123,championship,4,אליפות,n,a competition to find the best,They won the school championship.
+10124,spiral,4,סליל / ספירלה,n,a curve that winds around a center,A spiral staircase led down.
+10125,topple,4,להתמוטט,v,to fall over; to knock down,The pile of books toppled over.
+10126,petrify,4,להקפיא מפחד,v,to make so frightened one cannot move,The scream petrified him.
+10127,ajar,4,פתוח לרווחה,a,slightly open,The door stood ajar.
+10128,norwegian,4,נורווגי,a,from Norway,A Norwegian sailor told the story.
+10129,rumble,4,לרעום,v,to make a long low heavy sound,Thunder rumbled in the distance.
+10130,stammer,4,לגמגם,v,to speak with repeated sounds from fear,He stammered a nervous reply.
+10131,scribble,4,לשחור בכתב,v,to write quickly and carelessly,She scribbled a quick note.
+10132,wheeze,4,לנשום בשריקה,v,to breathe noisily with difficulty,The old man wheezed as he climbed.
+10133,paw,4,כף רגל (של חיה),n,an animal's foot,The dog lifted its paw.
+10134,wriggle,4,להתפתל,v,to twist the body from side to side,The fish wriggled in his hands.
+10135,soar,4,לרחף גבוה,v,to fly high in the air,An eagle soared above the mountains.
+10136,hatch,4,לבקוע (ביצה),v,to come out of an egg,Three chicks hatched this morning.
+10137,owlery,4,ינשופיה (בית ינשופים),n,a place where owls are kept,The school owlery was full of hooting owls.
+10138,black-haired,4,שחור שיער,a,having black hair,The black-haired boy smiled.
+10139,mutter,3,למלמל,v,to speak quietly and unclearly,She muttered something under her breath.
+10140,sausage,3,נקניק,n,minced meat in a thin tube of skin,He fried a sausage for breakfast.
+10141,referee,3,שופט,n,the official who controls a sports game,The referee blew the whistle.
+10142,swish,3,להשוויץ,v,to move quickly through the air with a soft sound,She swished the stick through the air.
+10143,pasty,3,כיסוני בשר,n,a pastry filled with meat or vegetables,He ate a hot pasty for lunch.
+10144,screech,3,לצרוח,v,to make a loud high harsh sound,The brakes screeched loudly.
+10145,sprout,3,נבט,n,a new young shoot of a plant,The beans grew into small sprouts.
+10146,twig,3,ענף דק,n,a small thin branch,He picked up a dry twig.
+10147,concentrate,3,להתרכז,v,to give all your attention to something,It is hard to concentrate in noise.
+10148,slot,3,חריץ,n,a long narrow opening,He dropped the letter into the slot.
+10149,peppermint,3,מנטה,n,a plant with a strong fresh flavor; a candy made from it,She sucked a peppermint candy.
+10150,tuesday,3,יום שלישי,n,the third day of the week,We have a test on Tuesday.
+10151,tantrum,3,התפרצות זעם,n,"a sudden burst of angry crying, especially by a child",The child threw a tantrum in the shop.
+10152,nighttime,3,שעות הלילה,n,the time of darkness; night,Owls hunt at nighttime.
+10153,half-moon,3,חצי ירח,n,the moon when only half of it is seen,A half-moon shone in the sky.
+10154,ruffle,3,לשבש (שיער/נוצות),v,to make something untidy by moving it,The wind ruffled her hair.
+10155,irritable,3,עצבני (רגיש לרגזות),a,easily annoyed,Lack of sleep made him irritable.
+10156,bushy,3,שעיר ועבה,a,"growing thickly, like hair or a tail",The squirrel has a bushy tail.
+10157,knobbly,3,מלא בליטות,a,with hard round lumps,He has thin legs and knobbly knees.
+10158,video,3,וידאו,n,a recording of moving pictures,They watched a funny video.
+10159,camera,3,מצלמה,n,a device for taking pictures,She took the photo with her camera.
+10160,lick,3,ללקק,v,to pass the tongue over something,The dog licked my hand.
+10161,reptile,3,זוחל,n,a cold-blooded animal like a snake or lizard,A snake is a reptile.
+10162,deafening,3,מחריש אוזניים,a,so loud it hurts the ears,A deafening roar filled the stadium.
+10163,rib,3,צלע,n,one of the curved bones around the chest,He broke a rib in the fall.
+10164,maroon,3,ארגמן כהה,a,dark red-brown in color,She wore a maroon coat.
+10165,gruff,3,גס בקולו,a,rough and unfriendly in voice or manner,He gave a gruff answer.
+10166,doormat,3,שטיחון כניסה,n,a small mat at a door for wiping shoes,Wipe your feet on the doormat.
+10167,postcard,3,גלויה,n,a card sent by mail without an envelope,She sent a postcard from Paris.
+10168,yellowish,3,צהבהב,a,slightly yellow,The old pages turned yellowish.
+10169,croak,3,לקרקר,v,"to make a low rough sound, like a frog",The frog croaked by the pond.
+10170,keyhole,3,חור מנעול,n,the hole in a lock for a key,He peeped through the keyhole.
+10171,dangle,3,להתנדנד באוויר,v,to hang or swing loosely,His legs dangled from the branch.
+10172,marmalade,3,ריבת תפוזים,n,jam made from oranges,He spread marmalade on his toast.
+10173,wrench,3,למושך בחוזקה,v,to pull or twist something hard,She wrenched the door open.
+10174,journey,3,מסע,n,travel from one place to another,The journey took three days.
+10175,teapot,3,קנקן תה,n,a pot for making and serving tea,She poured tea from the teapot.
+10176,battered,3,שחוק ופגום,a,old and damaged from hard use,He wore a battered old hat.
+10177,pewter,3,בדיל (סגסוגת),n,"a gray metal mixture, mostly tin",The tankard was made of pewter.
+10178,babble,3,לפטפט / רעש דיבורים,v,to talk quickly in a way hard to understand,The baby babbled happily.
+10179,apothecary,3,בית מרקחת ישן,n,"a person or shop selling medicines, long ago",The apothecary sold herbs and powders.
+10180,difficulty,3,קושי,n,the state of being hard to do,He breathed with difficulty.
+10181,grubby,3,מלוכלך,a,dirty,The grubby boy had not washed for days.
+10182,hello,3,שלום,int,a word used as a greeting,She said hello and smiled.
+10183,ingredient,3,מרכיב (במתכון),n,one of the things a recipe is made from,Flour is the main ingredient.
+10184,spindly,3,ארוך ורזה (חלש),a,"long, thin, and weak-looking",The plant had spindly legs of stems.
+10185,misty,3,ערפילי,a,full of mist; not clear,It was a misty morning.
+10186,crumple,3,להתקמט,v,to crush into a bent messy shape,He crumpled the paper into a ball.
+10187,tricky,3,מסובך / מערמומי,a,difficult; needing care,That is a tricky question.
+10188,jostle,3,לדחוף (בקהל),v,to push against someone roughly in a crowd,The crowd jostled him at the station.
+10189,sweaty,3,מזיע,a,wet with sweat,His hands were sweaty.
+10190,badge,3,תג,n,a small sign worn on clothing,The policeman showed his badge.
+10191,blurt,3,לבטא בפתאומיות,v,to say something suddenly without thinking,He blurted out the secret.
+10192,alchemy,3,אלכימיה,n,an old form of chemistry seeking to make gold,Alchemy tried to turn lead into gold.
+10193,bean,3,שעועית,n,"a seed of a climbing plant, eaten as food",She planted a bean in the garden.
+10194,countryside,3,אזור כפרי,n,land outside towns and cities,They drove through the open countryside.
+10195,bend,3,עיקול,n,a curve in a road or river,The car disappeared around a bend.
+10196,ruff,3,צווארון רום (התקופה),n,a stiff round collar worn long ago,The portrait wore an old lace ruff.
+10197,steak,3,סטייק,n,a thick slice of beef,He ordered a steak with chips.
+10198,treacle,3,מולסה / דבש סוכר,n,a thick dark sweet syrup,Treacle tart is very sweet.
+10199,ouch,3,אאוץ',int,a cry of sudden pain,Ouch! That hurt!
+10200,wednesday,3,יום רביעי,n,the fourth day of the week,The market opens on Wednesday.
+10201,bezoar,3,אבן בזור,n,"a stone from an animal's stomach, once used as medicine",A bezoar can work as an antidote.
+10202,jet,3,מטוס סילון,n,a fast aircraft with jet engines,A jet flew over the house.
+10203,skyward,3,שמיימה,r,toward the sky,He pointed skyward.
+10204,slump,3,להתמוטט בישיבה,v,to sit or fall heavily and weakly,"He slumped into the chair, tired."
+10205,relax,3,להירגע,v,to rest and stop worrying,"Relax, everything is fine."
+10206,astronomy,3,אסטרונומיה,n,the science of stars and planets,Astronomy is the study of the stars.
+10207,rummage,3,לחפש בבלגן,v,to search by moving things around,She rummaged in her bag for keys.
+10208,tidy,3,מסודר,a,neat and in order,Her room is always tidy.
+10209,prod,3,לגעת בדחיפה קלה,v,to push something with a finger or pointed thing,He prodded the meat with a fork.
+10210,rap,3,לדפוק (בקצב קצר),v,to hit quickly and lightly; to knock,Someone rapped on the window.
+10211,fry,3,לטגן,v,to cook in hot oil,She fried an egg for breakfast.
+10212,skinny,3,רזה מאוד,a,very thin,The stray cat was skinny.
+10213,unfold,3,לפרוש,v,to open something that was folded,He unfolded the map on the table.
+10214,straighten,3,ליישר,v,to make straight,She straightened her tie.
+10215,bounce,3,לקפץ / להקפיץ,v,to jump back after hitting a surface,The ball bounced off the wall.
+10216,hoot,3,לתרווע / לצפצף (ינשוף),v,to make the sound of an owl or a horn,An owl hooted in the tree.
+10217,chop,3,לקצוץ,v,to cut into pieces with a knife or axe,She chopped the carrots for the soup.
+10218,flit,3,לנופף בקלילות הלוך ושוב,v,to move quickly and lightly from place to place,Birds flitted between the trees.
+10219,hover,3,להתרחף,v,to stay in one place in the air,The helicopter hovered above the field.
+10220,splutter,3,לרסס דיבור (מהתרגשות),v,to speak quickly and unclearly from surprise,"""What?"" she spluttered in shock."
+10221,snore,3,לנחור,v,to breathe noisily while sleeping,He snores loudly at night.
+10222,spectacular,3,מרהיב,a,very impressive,The fireworks were spectacular.
+10223,emerald-green,3,ירוק אזמרגד,a,rich green like an emerald,She wore an emerald-green cloak.
+10224,first-year,3,תלמיד שנה ראשונה,n,a student in the first year,The first-years crossed the lake by boat.
+10225,toadless,3,בלי קרפדה,a,without a toad,The boy stood toadless and sad.
+10226,blink,2,למצמץ,v,to close and open the eyes quickly,She blinked in the bright light.
+10227,clamber,2,לטפס בכבדות,v,"to climb with difficulty, using hands and feet",They clambered over the rocks.
+10228,rip,2,לקרוע,v,to tear something quickly,He ripped the paper in half.
+10229,clap,2,למחוא כפיים,v,to hit the hands together with a sound,The crowd clapped loudly.
+10230,sniff,2,לשאוף באף,v,to breathe in through the nose with a sound,She sniffed the flower.
+10231,squeak,2,לצייץ,v,to make a short high sound,The mouse squeaked in the corner.
+10232,chip,2,להתנתז,v,to break a small piece off something hard,He chipped the old paint off the wall.
+10233,stack,2,ערימה,n,a neat pile of things,A stack of books sat on the desk.
+10234,boom,2,להרעים,v,to make a deep loud sound,Thunder boomed overhead.
+10235,gulp,2,לבלוע בגמיאה גדולה,v,to swallow quickly,He gulped his drink in one go.
+10236,flatten,2,לשטח,v,to make something flat,She flattened the dough with her hands.
+10237,haircut,2,תספורת,n,the cutting of hair,He needs a haircut.
+10238,slug,2,חילזון חשוף,n,a small slow animal like a snail without a shell,A slug crawled over the lettuce.
+10239,tiptoe,2,על קצות האצבעות,n,the tips of the toes; walking quietly on them,He walked on tiptoe to the door.
+10240,beetle,2,חיפושית,n,an insect with a hard shell,A black beetle crawled on the leaf.
+10241,squeal,2,לצרוח בצליל גבוה,v,to make a long high cry,The pig squealed loudly.
+10242,buckle,2,אבזם,n,a fastener for a belt or strap,The belt had a silver buckle.
+10243,tart,2,פשטידת פירות,n,a small open pie with a sweet filling,He ate a jam tart.
+10244,goblet,2,גביע שתייה,n,a drinking cup with a stem,He raised the silver goblet.
+10245,password,2,סיסמה,n,a secret word that lets you in,Type your password to enter.
+10246,stutter,2,לגמגם (חוזר על הברות),v,to repeat sounds when speaking with difficulty,He stuttered when he was nervous.
+10247,nettle,2,סרפד,n,a wild plant with stinging leaves,Nettles sting if you touch them.
+10248,crane,2,להושיט את הצוואר,v,to stretch the neck to see something,She craned her neck to see.
+10249,tawny,2,חום זהוב,a,yellowish-brown in color,A tawny owl sat on the branch.
+10250,tyke,2,ילד שובב,n,a small mischievous child,The little tyke hid my shoes.
+10251,chortle,2,לצחקק בשמחה,v,to laugh happily and loudly,He chortled at the funny story.
+10252,huddle,2,להתכרבל בצפיפות,v,to crowd close together,They huddled together for warmth.
+10253,weirdo,2,מוזר (אדם),n,a strange person (informal),"Don't mind him, he's a weirdo."
+10254,broad,2,רחב,a,wide; large from side to side,He gave a broad smile.
+10255,lunchtime,2,זמן ארוחת צהריים,n,the time when lunch is eaten,We met at lunchtime.
+10256,bun,2,לחמנייה מתוקה / קוקו,n,a small round bread; hair tied in a round shape,She twisted her hair into a bun.
+10257,contrary,2,ההפך,n,the opposite,"On the contrary, I agree with you."
+10258,passerby,2,עובר אורח,n,a person walking past,A passerby stopped to help.
+10259,yawn,2,לפהק,v,to open the mouth wide when tired,He yawned and went to bed.
+10260,flicker,2,להבהב,v,to shine unsteadily,The candle flickered in the wind.
+10261,doorstep,2,מפתן הדלת,n,the step in front of a door,He left the parcel on the doorstep.
+10262,auntie,2,דודה (בדיבור),n,informal for aunt,Auntie gave me a present.
+10263,airplane,2,מטוס,n,a flying vehicle with wings,The airplane landed safely.
+10264,vcr,2,מכשיר וידאו קלטות,n,a machine for playing video tapes,The old VCR still works.
+10265,scrawny,2,רזה ושקוע,a,unpleasantly thin,A scrawny cat begged at the door.
+10266,baggy,2,רחב ותלוי (בגד),a,"hanging loose, of clothes",He wore baggy jeans.
+10267,headmistress,2,מנהלת בית ספר,n,the woman in charge of a school,The headmistress spoke at assembly.
+10268,snigger,2,לצחקק בזלזול,v,to laugh quietly and rudely,The boys sniggered at his mistake.
+10269,afterward,2,אחר כך,r,at a later time; after that,We ate and went home afterward.
+10270,jab,2,לדקור,v,to push sharply with something pointed,She jabbed the needle into the cloth.
+10271,tighten,2,להדק,v,to make or become tight,He tightened the screw.
+10272,snort,2,לנחור בבוז,v,to force air noisily through the nose,She snorted with laughter.
+10273,flip,2,להפוך בקלות,v,to turn over with a quick movement,He flipped the pancake.
+10274,porridge,2,דייסת שיבולת שועל,n,oats boiled in milk or water,He ate porridge for breakfast.
+10275,choke,2,להיחנק,v,to be unable to breathe because something blocks the throat,He choked on a fish bone.
+10276,mouthful,2,ביס מלא פה,n,an amount of food filling the mouth,She took a mouthful of cake.
+10277,windowsill,2,אדן החלון,n,the ledge at the bottom of a window,A plant sat on the windowsill.
+10278,timid,2,ביישן ופחדן,a,shy and easily frightened,The timid mouse hid in the corner.
+10279,dud,2,כישלון / דוד (רימון),n,a thing that fails to work,The firework was a dud.
+10280,shack,2,צריף,n,a small rough hut,They lived in a wooden shack.
+10281,toothless,2,חסר שיניים,a,having no teeth,The old dog gave a toothless grin.
+10282,ration,2,מנת קצבה,n,a fixed share of food,Each soldier got a daily ration.
+10283,broken-down,2,מוזנח ושבור,a,old and not working or in bad condition,They slept in a broken-down barn.
+10284,shrivel,2,להתקמט ולהתייבש,v,to dry up and wrinkle,The leaves shriveled in the heat.
+10285,moldy,2,מעובש,a,covered with mold,Throw away that moldy bread.
+10286,smash,2,לנפץ,v,to break into pieces violently,He smashed the window with a ball.
+10287,sticky,2,דביק,a,"clinging to things, like glue",Her hands were sticky with honey.
+10288,sag,2,לשקוע / להתרפות,v,to sink or hang down loosely,The old sofa sagged in the middle.
+10289,poker,2,את האח (מוט ברזל),n,a metal rod for moving coal in a fire,He stirred the fire with a poker.
+10290,clamp,2,לתפוס בחוזקה,v,to hold something firmly in place,He clamped the wood to the table.
+10291,scuttle,2,לרוץ בצעדים קטנים,v,to run with quick short steps,The crab scuttled into a hole.
+10292,follower,2,חסיד / עוקב,n,a person who follows a leader or idea,The leader had many followers.
+10293,clench,2,לכווץ (אגרוף),v,to close or hold tightly,He clenched his fists in anger.
+10294,codswallop,2,שטויות (בריטי),n,British informal: nonsense,That's a load of codswallop.
+10295,warty,2,מלא יבלות,a,covered with warts,The toad had warty skin.
+10296,humbug,2,סוכריית מנטה בריטית / שטות,n,a hard mint candy; also nonsense,He sucked a peppermint humbug.
+10297,emetic,2,תרופה מקיאה,n,a medicine that causes vomiting,The doctor gave him an emetic.
+10298,escalator,2,דרגנוע,n,a moving staircase,Take the escalator to the second floor.
+10299,walnut,2,אגוז מלך,n,a large round nut with a hard shell,She cracked a walnut.
+10300,collapsible,2,מתקפל,a,able to fold up for storage,They carried a collapsible chair.
+10301,emporium,2,חנות ענק,n,a large shop selling many kinds of goods,The old emporium sold everything.
+10302,barn,2,אסם,n,a large farm building for animals or crops,The cows sleep in the barn.
+10303,cram,2,לדחוס,v,to stuff or fill too full,They crammed into the small car.
+10304,billow,2,להתנפח בגלים,v,to rise or roll in large waves,Smoke billowed from the chimney.
+10305,footstool,2,שולחן רגליים,n,a low stool for resting the feet,He rested his feet on the footstool.
+10306,postage,2,דמי משלוח (בולים),n,the cost of sending mail,The postage costs two pounds.
+10307,peel,2,לקלף,v,to remove the skin of fruit or vegetables,She peeled the orange.
+10308,creepy,2,מפחיד / מצמרר,a,strange and frightening,The old house looked creepy.
+10309,mahogany,2,מוהוגני (עץ אדמדם),n,a hard reddish-brown wood,The table was made of mahogany.
+10310,yew,2,עץ טקסוס,n,a dark evergreen tree,An old yew grew in the churchyard.
+10311,holly,2,עצבוץ,n,an evergreen bush with sharp leaves and red berries,Holly has red berries in winter.
+10312,redheaded,2,אדמוני,a,having red hair,The redheaded boy grinned.
+10313,disgruntled,2,מרומזם / ממורמר,a,annoyed and dissatisfied,The disgruntled workers complained.
+10314,bye,2,ביי,int,informal goodbye,"Bye, see you tomorrow!"
+10315,wow,2,וואו,int,a cry of surprise and admiration,"Wow, that's amazing!"
+10316,photo,2,תמונה,n,a photograph,She showed me a photo of her dog.
+10317,sidle,2,להתגנב הצידה,v,to walk sideways in a shy or sneaky way,He sidled up to the door quietly.
+10318,coconut,2,קוקוס,n,a large hard tropical fruit,The coconut fell from the tree.
+10319,nibble,2,לכרסם,v,to eat in small bites,The mouse nibbled the cheese.
+10320,bossy,2,שלטני,a,always telling people what to do,Don't be so bossy with your friends.
+10321,whisker,2,שפם (של חיה),n,a long stiff hair on an animal's face,The cat's whiskers twitched.
+10322,outstanding,2,מצטיין,a,extremely good,She is an outstanding student.
+10323,whichever,2,כל אחד ש-,r,any one of a group that you choose,Take whichever seat you like.
+10324,jolt,2,לנתר / לזעזע,n,a sudden rough movement,The train stopped with a jolt.
+10325,sleek,2,חלק ומבריק,a,"smooth, shiny, and healthy-looking",The sleek cat stretched in the sun.
+10326,jog,2,לרוץ בקלות,v,to run slowly and steadily,He jogs in the park every morning.
+10327,shaky,2,רועד,a,shaking slightly from fear or weakness,She answered in a shaky voice.
+10328,gravy,2,רוטב בשרים,n,a sauce made from meat juices,He poured gravy over the potatoes.
+10329,ketchup,2,קטשופ,n,a sweet tomato sauce,He put ketchup on his fries.
+10330,dessert,2,קינוח,n,sweet food eaten after a meal,We had ice cream for dessert.
+10331,caretaker,2,אב הבית / אחראי,n,a person who looks after a building,The caretaker locks the school at night.
+10332,poltergeist,2,פולטרגייסט (רוח שובבה),n,a noisy ghost that moves things,A poltergeist threw the books around.
+10333,cozy,2,נעים וחמים,a,"warm, comfortable, and safe",The cozy room had a warm fire.
+10334,pajamas,2,פיג'מה,n,loose clothes for sleeping,He put on his pajamas and went to bed.
+10335,wastepaper,2,נייר זבל,n,paper thrown away as rubbish,He threw the letter in the wastepaper basket.
+10336,out-of-bounds,2,מחוץ לתחום המותר,a,not allowed to enter,That corridor is out-of-bounds to students.
+10337,bulge,2,לתפוח / בליטה,v,to stick out in a rounded shape,His pockets bulged with sweets.
+10338,garlic,2,שום,n,a strong-smelling plant used in cooking,She added garlic to the sauce.
+10339,zombie,2,זומבי,n,a dead body brought back to walk again,The zombie walked slowly in the film.
+10340,untidy,2,מבולגן,a,not neat; messy,His room was untidy.
+10341,asphodel,2,אירוס (צמח),n,a flowering plant of the lily family,Asphodel grows in the fields of Greece.
+10342,infusion,2,תמצית חליטה,n,a drink or liquid made by soaking herbs,She made an infusion of herbs.
+10343,wormwood,2,לענה (צמח מר),n,a bitter-smelling plant,Wormwood is a bitter herb.
+10344,monkshood,2,קסקסית רעילה (צמח),n,a poisonous plant with hood-shaped flowers,Monkshood is a poisonous plant.
+10345,wolfsbane,2,צמח רעיל (בצק),n,a poisonous plant; another name for monkshood,Wolfsbane is said to harm wolves.
+10346,boarhound,2,כלב ציד גדול,n,a large dog used for hunting boar,The huge boarhound pulled on its leash.
+10347,fitch,2,בונה (חמוס),n,a polecat; its fur,A fitch is a kind of polecat.
+10348,wham,2,באם (צליל מכה),int,the sound of a hard hit,Wham! The door hit the wall.
+10349,thud,2,צליל נפילה כבדה,n,a dull heavy sound,The book fell with a thud.
+10350,facedown,2,עם הפנים כלפי מטה,r,with the face toward the ground,He lay facedown on the grass.
+10351,earshot,2,טווח שמיעה,n,the distance within which one can hear,Wait until they are out of earshot.
+10352,face-to-face,2,פנים אל פנים,a,in the direct presence of another,They met face-to-face at last.
+10353,hunch,2,להתגבנן / תחושה,v,to bend the back and shoulders forward,He sat hunched over his desk.
+10354,bogie,2,גלגלוף / ירוקת (בריטי),n,British informal: dried mucus from the nose,The boy wiped a bogie on his sleeve.
+10355,doorknob,2,ידית דלת,n,the round handle of a door,She turned the doorknob slowly.
+10356,bubble,2,בועה,n,a ball of air inside liquid,The children blew soap bubbles.
+10357,basketball,2,כדורסל,n,a game in which players throw a ball through a hoop,They played basketball at school.
+10358,zigzag,2,לזגזג,v,"to move in sharp turns, left and right",The path zigzagged up the hill.
+10359,golf,2,גולף,n,a game in which players hit a small ball into holes,He plays golf on Sundays.
+10360,askew,2,סולף / עקום,a,not straight; tilted,His hat sat askew on his head.
+10361,sickening,2,מבחיל,a,causing disgust or nausea,A sickening smell filled the room.
+10362,racket,2,מהומה / רעש,n,a loud unpleasant noise,The children made a terrible racket.
+10363,moleskin,2,בד כותנה עבה (מולסקין),n,a strong heavy cotton fabric,He wore a thick moleskin coat.
+10364,last-minute,2,ברגע האחרון,a,done at the latest possible time,They made a last-minute change.
+10365,staffroom,2,חדר מורים,n,a room for teachers in a school,The teachers met in the staffroom.
+10366,transfix,2,למשוך את המבט / לקפוא,v,to make unable to move from wonder or fear,The crowd stood transfixed by the sight.
+10367,skim,2,לרפרף (בקריאה),v,"to read quickly, taking the main points",She skimmed the letter quickly.
+10368,bunny,2,ארנבון,n,a child's word for a rabbit,The children petted the bunny.
+10369,grumpy,2,זעפני,a,in a bad mood; easily annoyed,He is grumpy before his coffee.
+10370,drinker,2,שותה,n,a person who drinks something regularly,He is a heavy coffee drinker.
+10371,erupt,2,להתפרץ,v,to burst out suddenly,The volcano erupted at dawn.
+10372,nearby,2,בקרבת מקום,r,close by; not far away,A dog barked nearby.
+10373,stoat,2,חמוס,n,a small wild animal like a weasel,A stoat ran across the road.
+10374,flare,2,להבעיר בפתאומיות,v,to burn brightly for a short time,The fire flared up suddenly.
+10375,thrash,2,להתפרע ולהתנפל,v,to move violently from side to side,The fish thrashed in the net.
+10376,hullo,2,שלום (בריטי ישן),int,British old-fashioned hello,"""Hullo!"" he called cheerfully."
+10377,hoof,2,פרסה,n,the hard foot of a horse,The horse has strong hooves.
+10378,snuffbox,2,קופסת טבק אף,n,a small box for snuff tobacco,He kept his tobacco in a silver snuffbox.
+10379,horrify,2,להזעזע,v,to shock deeply,The news horrified everyone.
+10380,loosen,2,לשחרר / להרפות,v,to make less tight,He loosened his tie.
+10381,knack,2,כשרון מיוחד,n,a special skill at doing something,She has a knack for cooking.
+10382,blistering,2,מהיר וקיצוני / לוהט,a,"extremely fast, hot, or strong",He ran at a blistering pace.
+10383,rocker,2,כיסא נדנדה,n,a rocking chair,Grandma sat in the old rocker.
+10384,gateway,2,שער / מעבר,n,an opening in a wall or fence,They passed through the old gateway.
+10385,dial,2,לחייג,v,to press numbers to make a call,She dialed the wrong number.
+10386,snooze,2,לנמנם,v,to sleep lightly for a short time,The cat snoozed in the sun.
+10387,totter,2,להתנודד,v,to walk in an unsteady way,The old man tottered across the room.
+10388,gawk,2,לגלגל עיניים / להבהות,v,to stare stupidly,Tourists gawked at the palace.
+10389,chew,2,ללעוס,v,to bite food repeatedly before swallowing,Chew your food slowly.
+10390,tickle,2,לדגדג,v,to touch lightly to cause laughing,She tickled the baby's feet.
+10391,fume,2,להתרגז מאוד,v,to be very angry; to give off smoke,She was fuming about the delay.
+10392,drool,2,לזלל ריר,v,to let saliva run from the mouth,The dog drooled at the smell of food.
+10393,clang,2,לצלצל בקול מתכתי,v,to make a loud ringing metal sound,The gate clanged shut.
+10394,loom,2,להתנשא באופן מאיים,v,to appear large and threatening,A dark figure loomed in the fog.
+10395,scurry,2,לרוץ במהירות קטנה,v,to move quickly with short steps,Mice scurried across the floor.
+10396,tug,2,למשוך בחוזקה,v,to pull hard,She tugged at his sleeve.
+10397,recite,2,לדקלם,v,to say aloud from memory,He recited a poem from memory.
+10398,flail,2,לנופף בידיים ובהלה,v,to wave the arms or legs wildly,"He fell into the water, flailing his arms."
+10399,leak,2,לדלוף,v,to let liquid or air escape through a hole,Water leaked from the old pipe.
+10400,bandage,2,תחבושת,n,a strip of cloth for covering a wound,She wrapped a bandage around his arm.
+10401,unblinking,2,בלי למצמץ,a,without blinking,The cat stared with unblinking eyes.
+10402,snakelike,2,כמו נחש,a,resembling a snake,A snakelike tail curled on the floor.
+10403,red-haired,2,ג'ינג'י (שיער אדום),a,having red hair,The red-haired girl waved.
+10404,pearly-white,2,לבן פניני,a,white like a pearl,She smiled with pearly-white teeth.
+10405,round-faced,2,בעל פנים עגולות,a,having a round face,A round-faced boy opened the door.
+10406,hook-nosed,2,בעל אף חד (מעוקל),a,having a hooked nose,The hook-nosed teacher glared at them.
+10407,seventy-two,2,שבעים ושתיים,n,the number 72,There were seventy-two stairs.
+10408,sorcerer,1,מכשף,n,a man with magic powers; a wizard,The sorcerer cast a powerful spell.
+10409,slam,1,לטרוק,v,to shut something with great force and noise,She slammed the door shut.
+10410,chuckle,1,לצחוק בשקט,v,to laugh quietly,He chuckled at the joke.
+10411,grunt,1,לנחור,v,to make a short low sound like a pig,He grunted and lifted the heavy box.
+10412,bewitch,1,לכשף,v,to put a magic spell on someone,The witch bewitched the prince.
+10413,poke,1,לדחוף (באצבע או מקל),v,to push something with a finger or a stick,He poked the fire with a stick.
+10414,fir,1,ברוש,n,a tall evergreen tree with needles,A tall fir grew by the house.
+10415,explode,1,להתפוצץ,v,to burst with a loud noise,The bomb could explode at any moment.
+10416,sandwich,1,כריך,n,two slices of bread with food between them,She made a cheese sandwich.
+10417,sneak,1,להתגנב,v,to move quietly so nobody notices,She sneaked out of the house at night.
+10418,dodge,1,להתחמק,v,to move quickly to avoid something,He dodged the flying ball.
+10419,galleon,1,גליאון (מטבע זהב בספר),n,"an old large sailing ship; in the book, a gold coin",The galleon sank long ago.
+10420,wrestle,1,להיאבק,v,to fight by holding and pushing the body,The two boys wrestled on the grass.
+10421,pelt,1,להטיל בכוח,v,to fall or throw hard and fast,Rain pelted against the windows.
+10422,tuck,1,לתקוע / לקפל פנימה,v,to push something into a small hidden place,She tucked the letter into her pocket.
+10423,vampire,1,ערפד,n,a creature that drinks blood at night,The vampire slept in a coffin.
+10424,tick,1,לתקתק,v,"to make short regular sounds, like a clock",The clock ticked all night.
+10425,flop,1,להתמוטט,v,to fall or sit down heavily,"He flopped onto the bed, exhausted."
+10426,swap,1,להחליף,v,to exchange one thing for another,They swapped seats on the bus.
+10427,claw,1,טופר,n,a curved pointed nail of an animal,The cat has sharp claws.
+10428,zoom,1,לזנק במהירות,v,to move very fast with a buzzing sound,The motorbike zoomed past us.
+10429,confuse,1,לבלבל,v,to make someone unable to think clearly,Do not confuse the two words.
+10430,knuckle,1,מפרק אצבע,n,a finger joint,He knocked with his knuckles.
+10431,knickerbocker,1,מכנסי ברית (מכנסיים קצרים רחבים),n,loose short trousers gathered at the knee,The old photo showed boys in knickerbockers.
+10432,drawl,1,לדבר בגרירה,v,to speak slowly with long vowel sounds,"""Well now,"" he drawled slowly."
+10433,hop,1,לקפץ על רגל אחת,v,to jump on one foot or in short jumps,The bird hopped along the path.
+10434,prickle,1,לעקצץ,v,to feel small stings on the skin,Wool makes my skin prickle.
+10435,scowl,1,לזעוף את הפנים,v,to look angry; to frown,He scowled at the bad news.
+10436,accident,1,תאונה,n,something bad that happens by chance,Nobody was hurt in the accident.
+10437,cackle,1,לקקק (צחוק מכשפה),v,to laugh in a loud harsh way,The old witch cackled with glee.
+10438,cracker,1,פתצית חג (בריטי),n,a paper tube that pops when pulled; also a thin dry biscuit,They pulled a Christmas cracker.
+10439,nag,1,לנדנד (בבקשות),v,to ask or complain again and again,Stop nagging me about my room.
+10440,stalagmite,1,זקיף,n,a rock column rising from a cave floor,Stalagmites rose from the cave floor.
+10441,whimper,1,לילל בחלשות,v,to cry softly from fear or pain,The puppy whimpered at the door.
+10442,skip,1,לדלג,v,to move with light little jumps; to leave out,The children skipped down the street.
+10443,doughnut,1,סופגנייה,n,a round fried sweet cake,He bought a jam doughnut.
+10444,phone,1,טלפון,n,a telephone,The phone rang twice.
+10445,belt,1,חגורה,n,a strip of leather worn around the waist,He fastened his belt.
+10446,tuft,1,ציצית שיער,n,"a small bunch of hair, grass, or feathers",A tuft of grass grew between the stones.
+10447,daddy,1,אבא,n,child's word for father,The little girl ran to her daddy.
+10448,wristwatch,1,שעון יד,n,a watch worn on the wrist,He looked at his wristwatch.
+10449,scruff,1,עורף,n,the back of the neck,He grabbed the cat by the scruff of its neck.
+10450,greenhouse,1,חממה,n,a glass building for growing plants,Tomatoes grow in the greenhouse.
+10451,creak,1,לחרוק,v,to make a long low harsh sound,The old stairs creaked under his feet.
+10452,hinge,1,ציר דלת,n,a joint on which a door or lid swings,The door swung on rusty hinges.
+10453,warlock,1,מכשף זקן,n,a male witch; a sorcerer,The old warlock knew many spells.
+10454,firework,1,זיקוק,n,a device that explodes with colored lights,Fireworks lit up the sky.
+10455,firecracker,1,פצצה קטנה / זיקוק,n,a small loud firework,Firecrackers popped in the street.
+10456,puncture,1,פנצ'ר,n,a small hole in a tire,The bike had a puncture.
+10457,stitch,1,תפר,n,a loop of thread in sewing or a wound,The doctor put three stitches in the cut.
+10458,waffle,1,וופל,n,a flat cake with a pattern of squares,He ate a waffle with syrup.
+10459,switch,1,מתג,n,a device for turning electricity on and off,She turned off the light switch.
+10460,buzz,1,לזמזם,v,to make a low humming sound,Bees buzzed around the flowers.
+10461,hag,1,מכשפה זקנה ומכוערת,n,an ugly old woman; a witch,The old hag lived in the forest.
+10462,stalactite,1,נטיף,n,a rock point hanging from a cave roof,Stalactites hung from the cave roof.
+10463,scoop,1,לכפות,v,to lift with a spoon or the hands,She scooped ice cream into a bowl.
+10464,sneeze,1,להתעטש,v,to blow air suddenly through the nose,Dust makes me sneeze.
+10465,right-hand,1,ימני (יד ימין),a,on or of the right side,Write with your right hand.
+10466,heartstring,1,מיתר לב,n,deepest feelings of love or pity,The sad story tugged at his heartstrings.
+10467,whoop,1,לצהול,v,to shout loudly with excitement,The children whooped with joy.
+10468,dump,1,לזרוק / להעמיס בכבדות,v,to put down carelessly,He dumped the bag on the floor.
+10469,shove,1,לדחוף בגסות,v,to push roughly,He shoved the door open.
+10470,strawberry,1,תות שדה,n,a soft red summer fruit,She picked a ripe strawberry.
+10471,lurch,1,להיטלטל,v,to move suddenly and unsteadily,The ship lurched in the storm.
+10472,drone,1,להמשיך במונוטוניות,v,to talk in a boring flat voice,The teacher droned on for an hour.
+10473,four-poster,1,מיטה עם ארבעה עמודים,n,a bed with four tall posts,He slept in a large four-poster bed.
+10474,whisk,1,לטרוף / להעיף במהירות,v,to mix quickly; to move fast,She whisked the eggs in a bowl.
+10475,scrawl,1,לכתוב בשחור רגלי,v,to write quickly and carelessly,He scrawled his name on the paper.
+10476,dunderhead,1,טיפש,n,a stupid person (old-fashioned),Don't be a dunderhead.
+10477,spill,1,לשפוך,v,to let liquid fall by accident,He spilled milk on the table.
+10478,vibrate,1,לרטוט,v,to shake quickly with small movements,The phone vibrated on the desk.
+10479,rocket,1,לזנק כמו רקטה,v,to move extremely fast,The car rocketed down the road.
+10480,jinx,1,מחסל (קללה קטנה),n,a curse that brings bad luck,The team believed there was a jinx on them.
+10481,yelp,1,לצייץ מכאב,v,to give a short sharp cry,The dog yelped when I stepped on its tail.
+10482,freeze,1,לקפוא / להקפיא,v,to turn to ice; to make very cold,The lake froze overnight.
+10483,snowball,1,כדור שלג,n,a ball made of pressed snow,They threw snowballs at each other.
+10484,shortcut,1,קיצור דרך,n,a quicker way to get somewhere,We took a shortcut through the park.
+10485,thump,1,לדפוק בחוזקה,v,to hit heavily with a dull sound,He thumped the table with his fist.
+10486,beefy,1,שרירי וגדול,a,big and muscular,The beefy guard blocked the door.
+10487,good-for-nothing,1,חסר תועלת,a,completely useless,He called his lazy son a good-for-nothing.
+10488,briefcase,1,תיק מסמכים,n,a flat case for carrying documents,He packed his papers into the briefcase.
+10489,peck,1,לנקר / לנשק בקלות,v,to strike with the beak; to kiss lightly,The bird pecked at the seeds.
+10490,cereal,1,דגני בוקר,n,breakfast food made from grain,He ate a bowl of cereal with milk.
+10491,getup,1,לבוש מוזר,n,an unusual set of clothes,He wore a strange getup to the party.
+10492,enrage,1,להזעים,v,to make very angry,The insult enraged him.
+10493,stunt,1,פעלול,n,a dangerous trick; something done for attention,The actor performed a dangerous stunt.
+10494,open-mouthed,1,פעור פה,a,with the mouth wide open in surprise,She stared at him open-mouthed.
+10495,bakery,1,מאפייה,n,a shop that makes and sells bread,The bakery sells fresh bread.
+10496,whisperer,1,לוחש,n,a person who whispers,The horse whisperer calmed the wild horse.
+10497,squeaky,1,צייקני,a,making a high short sound,The squeaky door needs oil.
+10498,driveway,1,שביל כניסה לבית,n,a private road from street to house,The car stood in the driveway.
+10499,shoo,1,להבריח,v,to drive away with a cry of 'shoo',She shooed the birds off the seeds.
+10500,sighting,1,תצפית / זיהוי,n,an occasion of seeing something unusual,There were several sightings of the rare bird.
+10501,newscaster,1,קריין חדשות,n,a person who reads the news on TV or radio,The newscaster read the evening news.
+10502,weatherman,1,מנבא מזג האוויר,n,a person who forecasts the weather on TV,The weatherman promised rain.
+10503,viewer,1,צופה,n,a person who watches television,Millions of viewers watched the show.
+10504,downpour,1,מבול גשם,n,a heavy fall of rain,We were caught in a sudden downpour.
+10505,bonfire,1,מדורה גדולה,n,a large outdoor fire,They lit a bonfire in the garden.
+10506,sip,1,ללגום,v,to drink in small amounts,She sipped her tea slowly.
+10507,high-heeled,1,בעל עקב גבוה,a,with high heels,She wore high-heeled shoes.
+10508,unwelcome,1,לא רצוי,a,not wanted,An unwelcome guest arrived.
+10509,pinprick,1,דקירת סיכה,n,a tiny hole or pain like a pin's point,He felt a pinprick in his finger.
+10510,living-room,1,סלון,n,the main room for relaxing in a house,The family sat in the living-room.
+10511,flinch,1,לספוג בחזרה מפחד,v,to make a quick small movement from fear or pain,He did not flinch at the sight of blood.
+10512,unstick,1,להדביק משהו שנדבק / לשחרר,v,to free something that is stuck,She unstuck the envelope carefully.
+10513,haven,1,מקלט בטוח,n,a safe and peaceful place,The garden was a haven of peace.
+10514,earmuffs,1,כיסויי אוזניים מחממים,n,soft coverings to keep the ears warm,She wore warm earmuffs in the snow.
+10515,glum,1,קודר,a,sad and silent,He looked glum after the bad news.
+10516,falter,1,לגמגם / להסס,v,to hesitate; to lose strength or confidence,His voice faltered as he spoke.
+10517,astounding,1,מדהים,a,very surprising,The view was astounding.
+10518,dab,1,לטפוח בקלות,v,to touch lightly and gently,She dabbed her eyes with a handkerchief.
+10519,headlight,1,פנס קדמי (רכב),n,the front light of a vehicle,The car's headlights lit the road.
+10520,astride,1,רכוב (רגליים משני הצדדים),r,with a leg on each side,He sat astride the horse.
+10521,tangle,1,לשבש / להסתבך,v,to twist into a confused mass,The yarn tangled into a knot.
+10522,dolphin,1,דולפין,n,a smart sea mammal,A dolphin jumped out of the water.
+10523,scratchy,1,מגרד (בד) / גרוני,a,rough and irritating to the skin,The wool sweater feels scratchy.
+10524,gingerly,1,בזהירות יתרה,r,very carefully,He stepped gingerly over the ice.
+10525,slink,1,להתגנב בענווה,v,"to move quietly and secretly, as if ashamed",The cat slunk away under the car.
+10526,inky,1,דיווי / שחור כדיו,a,dark like ink,The night was inky black.
+10527,fateful,1,גורלי,a,"having important, usually bad, results",That fateful day changed everything.
+10528,mantelpiece,1,כוורת האח,n,the shelf above a fireplace,Photos stood on the mantelpiece.
+10529,bicycle,1,אופניים,n,a two-wheeled vehicle moved by pedals,She rides her bicycle to work.
+10530,carousel,1,קרוסלה,n,a merry-go-round,The children rode the carousel at the fair.
+10531,darling,1,יקיר/ה,n,a loved person; dear,"Goodnight, darling."
+10532,movie,1,סרט,n,a film,We watched a funny movie.
+10533,dinky,1,קטן וחמוד,a,small and neat (informal),They live in a dinky little house.
+10534,mummy,1,"אמא (ילדים, בריטי)",n,British child's word for mother,The toddler cried for his mummy.
+10535,doorbell,1,פעמון דלת,n,a bell at a door rung by visitors,The doorbell rang twice.
+10536,scissors,1,מספריים,n,"a tool for cutting, with two blades",She cut the paper with scissors.
+10537,shear,1,לגזוז,v,to cut the wool off a sheep,They shear the sheep in spring.
+10538,puppet,1,בובת חוטים,n,a doll moved by strings or hands,The puppet danced on strings.
+10539,maniac,1,משוגע / מטורף,n,a wildly crazy person,He drove like a maniac.
+10540,hoodlum,1,בריון,n,a violent young criminal,Hoodlums broke the shop window.
+10541,beet,1,סלק,n,a dark red root vegetable,She cooked beet soup.
+10542,cartoon,1,קריקטורה,n,a funny drawing or animated film,He watches cartoons on Saturday.
+10543,gorilla,1,גורילה,n,a large powerful ape,The gorilla beat its chest.
+10544,hobby,1,תחביב,n,an activity done for pleasure,His hobby is collecting stamps.
+10545,lizard,1,לטאה,n,a small reptile with four legs,A small lizard sat on the rock.
+10546,cobra,1,קוברה,n,a poisonous snake,The cobra raised its head.
+10547,python,1,פיתון,n,a very large snake,A python can swallow large animals.
+10548,glisten,1,לזהור (רטוב),v,to shine as if wet,Her eyes glistened with tears.
+10549,whine,1,לילל בקול טרדני,v,to complain in a long high voice,The child whined for sweets.
+10550,beady,1,קטנות וזוהרות (עיניים),a,"small, round, and shiny (of eyes)",The rat had beady eyes.
+10551,waddle,1,להתהלך בגמגום,v,to walk with short swaying steps,The duck waddled to the pond.
+10552,uncoil,1,להשתחרר מגלילה,v,to straighten from a curled position,The rope uncoiled slowly.
+10553,amigo,1,חבר (ספרדית),n,"Spanish for friend, used in English informally","""Hello, amigo!"" he called."
+10554,apologize,1,להתנצל,v,to say you are sorry,He apologized for being late.
+10555,gibber,1,למלמל בטירוף,v,to speak fast and unclearly from fear,He was so scared he could only gibber.
+10556,bus,1,אוטובוס,n,a large road vehicle for many passengers,She takes the bus to school.
+10557,disagree,1,לא להסכים,v,to have a different opinion,They disagree about the best way.
+10558,brazilian,1,ברזילאי,a,from Brazil,Brazilian coffee is famous.
+10559,crutch,1,קב,n,a support stick used when a leg is hurt,He walked with crutches after the fall.
+10560,brand-new,1,חדש לגמרי,a,completely new,He showed off his brand-new bike.
+10561,tailcoat,1,מעיל זנב (חליפת טקס),n,a formal jacket with a long back,The waiter wore a black tailcoat.
+10562,boater,1,כובע קש שטוח,n,a stiff flat straw hat,He wore a straw boater in summer.
+10563,grown-up,1,מבוגר,n,an adult,Ask a grown-up to help you.
+10564,twang,1,צליל מתיחת מיתר,n,a sharp ringing sound of a tight string,The bowstring made a twang.
+10565,whinge,1,לילל תלונות (בריטי),v,British: to complain in an annoying way,Stop whingeing and do your work.
+10566,badger,1,בורקס (חיה),n,a gray-black wild animal that digs,A badger dug a hole in the field.
+10567,bomb,1,פצצה,n,a weapon that explodes,The army removed the old bomb.
+10568,whelk,1,חילזון ים,n,a small sea snail eaten as food,He bought whelks at the market.
+10569,grayish,1,אפרפר,a,slightly gray,The sky turned grayish.
+10570,cancel,1,לבטל,v,to stop something that was planned,They canceled the trip.
+10571,parrot,1,תוכי,n,a colorful bird that can copy speech,The parrot repeated every word.
+10572,bawl,1,לצעוק / לבכות בקול,v,to cry or shout loudly,The baby bawled all night.
+10573,whack,1,להכות בחוזקה,v,to hit hard,He whacked the ball over the fence.
+10574,tortoise,1,צב,n,a slow land reptile with a shell,The tortoise moved very slowly.
+10575,strangle,1,לחנוק,v,to kill or harm by squeezing the throat,The vine strangled the tree.
+10576,postman,1,דוור,n,a man who delivers letters,The postman brings the mail each morning.
+10577,fruitcake,1,עוגת פירות,n,a cake with dried fruit,She baked a fruitcake for the holiday.
+10578,tulip,1,צבעוני,n,a cup-shaped spring flower,Red tulips bloom in spring.
+10579,milkman,1,מוסר חלב / חליב,n,a man who delivers milk,The milkman left bottles at the door.
+10580,dairy,1,מחלבה,n,a place that makes milk products,The dairy makes cheese.
+10581,shred,1,לקרוע לרצועות,v,to tear into small strips,She shredded the old documents.
+10582,processor,1,מעבד (מחשב),n,the part of a computer that processes data,The new processor is very fast.
+10583,whizz,1,לשרוק במעוף,v,to move fast with a buzzing sound,The ball whizzed past my ear.
+10584,boarded-up,1,מסומן בקרשים,a,closed with boards of wood,They broke into the boarded-up shop.
+10585,sniffle,1,לשאוף אף (בהצטננות),v,to sniff repeatedly from a cold or crying,He sniffled all through the cold.
+10586,musty,1,עפוש,a,smelling damp and old,The old books smelled musty.
+10587,cornflakes,1,קורנפלקס,n,a breakfast cereal of toasted corn,He ate cornflakes for breakfast.
+10588,tomato,1,עגבנייה,n,a soft red fruit used as a vegetable,She sliced a tomato for the salad.
+10589,plow,1,לחרוש,v,to turn over soil before planting,The farmer plowed the field.
+10590,suspension,1,השהייה / מתלים,n,a system of springs; a hanging support,The bridge uses steel suspension.
+10591,multilevel,1,רב קומתי,a,having many levels,They parked in a multilevel garage.
+10592,garage,1,מוסך,n,a building for keeping a car,The car is in the garage.
+10593,snivel,1,לילל בבכי קטנוני,v,to cry and sniff in a weak way,Stop sniveling and be brave.
+10594,hanger,1,קולב בגדים,n,a frame for hanging clothes,Hang your coat on a hanger.
+10595,forecast,1,תחזית,n,a prediction of the weather,The forecast says rain tomorrow.
+10596,gleeful,1,שמח ומלא ששון,a,very happy and excited,The children were gleeful at the news.
+10597,amble,1,לצעוד בנחת,v,to walk in a slow relaxed way,They ambled along the beach.
+10598,rowboat,1,סירת חתירה,n,a small boat moved with oars,They crossed the lake in a rowboat.
+10599,seaweed,1,אצת ים,n,plants growing in the sea,Seaweed covered the wet rocks.
+10600,banana,1,בננה,n,a long yellow fruit,Monkeys love bananas.
+10601,splatter,1,להתיז,v,to splash in drops,Paint splattered onto the floor.
+10602,moth-eaten,1,אכול עש,a,damaged by moths; old and worn,He wore a moth-eaten old sweater.
+10603,slap,1,לסטר / לטפוח בקול,v,to hit with the flat of the hand,Waves slapped against the boat.
+10604,skid,1,להחליק בדריפט,v,to slide sideways out of control,The car skidded on the wet road.
+10605,crinkle,1,להתקמט בקול,v,to make small folds and a light noise,She crinkled the plastic bag.
+10606,rasp,1,לצרוד בקול,v,to say in a rough harsh voice,"""Quiet,"" he rasped in a rough voice."
+10607,prune,1,שזיף מיובש,n,a dried plum,She ate prunes for breakfast.
+10608,squash,1,למעוך,v,to press flat,He sat on my hat and squashed it.
+10609,icing,1,ציפוי סוכר (עוגה),n,a sweet covering for cakes,The cake has pink icing.
+10610,mug,1,ספל גדול,n,a large cup with a handle,He drank coffee from a big mug.
+10611,swig,1,לגמוע בגמיעה גדולה,v,to drink in large gulps,He took a swig of water.
+10612,sizzle,1,להשריק (בטיגון),v,to make the hissing sound of frying,The meat sizzled in the pan.
+10613,juicy,1,עסיסי,a,full of juice,The orange was sweet and juicy.
+10614,fidget,1,להתנועע מחוסר מנוחה,v,to keep moving from nervousness,Sit still and stop fidgeting.
+10615,cower,1,להתכווץ מפחד,v,to bend low and move back in fear,The dog cowered in the corner.
+10616,math,1,מתמטיקה,n,mathematics,She is good at math.
+10617,quail,1,להירתע,v,to shrink back in fear,He quailed at the angry shout.
+10618,gorgon,1,גורגונה (מיתולוגיה),n,a monster from Greek myth,Medusa was a gorgon with snakes for hair.
+10619,upside,1,צד עליון,n,the upper side; used in 'upside down',Turn the box upside down.
+10620,firelight,1,אור האש,n,the light from a fire,His face glowed in the firelight.
+10621,drat,1,אל הרע! (בריטי ישן),int,old-fashioned cry of annoyance,Drat! I missed the bus.
+10622,spawn,1,להשריץ / להוליד,v,to produce eggs or offspring in large numbers,Frogs spawn in ponds.
+10623,teacup,1,כוס תה,n,a small cup for tea,She poured tea into the teacups.
+10624,freak,1,פריק / משוגע דבר,n,a very unusual person or event,A freak storm hit the town.
+10625,rant,1,לצעוק בזעם ארוך,v,to speak angrily at length,He ranted about the bad service.
+10626,gargoyle,1,גרגויל (פסל),n,an ugly stone creature on old buildings,Gargoyles sat on the church roof.
+10627,foghorn,1,צופר ערפל,n,a loud horn warning ships in fog,A foghorn sounded in the harbor.
+10628,tosh,1,שטות (בריטי),n,British informal: nonsense,That's a load of old tosh.
+10629,clout,1,להאגיר / להכות (בריטי),v,British informal: to hit hard,She clouted him on the ear.
+10630,youngster,1,צעיר,n,a young person,The youngsters played football.
+10631,crackpot,1,משוגע (אדם),n,a crazy person with strange ideas,Some crackpot wrote to the paper.
+10632,rueful,1,מתחרט בצער,a,feeling sorry in a quiet way,He gave a rueful smile.
+10633,kip,1,תנומה (בריטי),n,British informal: a nap,He had a quick kip after lunch.
+10634,dormouse,1,נמנמן (חיה),n,a small mouse-like animal that hibernates,A dormouse sleeps through the winter.
+10635,pellet,1,כדורית קטנה,n,a small ball of something,The gun fires small pellets.
+10636,teabag,1,שקית תה,n,a small bag of tea leaves,Drop a teabag into the cup.
+10637,pouch,1,כיס קטן,n,a small bag,She kept her coins in a pouch.
+10638,bungler,1,פחזן / גס-ידיים,n,a person who does things badly,The bungler broke everything he touched.
+10639,bump,1,לנגוח,v,to hit something lightly,The car bumped into a tree.
+10640,meter,1,מטר,n,"a unit of length, 100 centimeters",The room is four meters long.
+10641,crikey,1,אלוהים! (בריטי),int,British cry of surprise,"Crikey, that was fast!"
+10642,protective,1,מגן,a,giving protection,Wear protective gloves.
+10643,fastening,1,סוגר / אבזם,n,a device that holds something closed,Check all the fastenings on the bag.
+10644,tag,1,תגית,n,a small label,The price tag said five pounds.
+10645,goshawk,1,נץ (עוף דורס),n,a large hawk,A goshawk hunted in the woods.
+10646,beginner,1,מתחיל,n,a person just starting to learn,This class is for beginners.
+10647,newt,1,"טריטון (חדו""ק)",n,a small animal like a lizard that lives in water,A newt lives in the pond.
+10648,self-protection,1,הגנה עצמית,n,the act of protecting yourself,He learned self-protection at school.
+10649,phial,1,בקבוקון,n,a small glass bottle,The potion was kept in a small phial.
+10650,cinema,1,קולנוע,n,a place where films are shown,We went to the cinema on Friday.
+10651,unbelievable,1,לא יאומן,a,too strange to be believed,The story was unbelievable.
+10652,sherry,1,שרי (יין מתחזק),n,a strong sweet Spanish wine,She poured a small glass of sherry.
+10653,bloke,1,בחור (בריטי),n,British informal: a man,He's a friendly bloke.
+10654,firsthand,1,ממקור ראשון,a,directly from experience,She knows the story firsthand.
+10655,cobble,1,אבן ריצוף מעוגלת,n,a rounded stone used for paving,The cart rattled over the cobbles.
+10656,spleen,1,טחול,n,an organ near the stomach,The spleen filters the blood.
+10657,eel,1,צלופח,n,a long snake-like fish,The eel slipped through his fingers.
+10658,burnish,1,להבריק בליטוש,v,to polish until shiny,He burnished the copper pot.
+10659,swarthy,1,שחום עור,a,dark-skinned,The sailor had a swarthy face.
+10660,ledger,1,פנקס חשבונות,n,a book of financial records,She wrote the sale in the ledger.
+10661,eyeglasses,1,משקפיים,n,glasses worn to help sight,He cleaned his eyeglasses.
+10662,maze,1,מבוך,n,a network of confusing paths,We got lost in the maze.
+10663,suck,1,למצוץ,v,to draw into the mouth,The baby sucked its thumb.
+10664,fabulous,1,נהדר,a,wonderful; amazing,The party was fabulous.
+10665,pick-me-up,1,משקה מרענן (מרים),n,something that restores energy,I need a coffee as a pick-me-up.
+10666,squat,1,קצר ושמנמן,a,"short, thick, and broad",A squat little man opened the door.
+10667,mauve,1,סגול בהיר,a,pale purple,She wore a mauve dress.
+10668,smuggle,1,להבריח,v,to bring something in secretly and illegally,He tried to smuggle sweets into class.
+10669,surname,1,שם משפחה,n,a family name,Write your surname in the box.
+10670,raspberry,1,פטל,n,a small soft red berry,She picked fresh raspberries.
+10671,pate,1,ראש קירח,n,the top of the head,The sun burned his bald pate.
+10672,duffer,1,אידיוט (בריטי ישן),n,a stupid or slow person,The old duffer forgot his keys.
+10673,pave,1,לרצף,v,to cover a surface with flat stones,They paved the path with stones.
+10674,befuddle,1,לבלבל לגמרי,v,to confuse completely,The noise befuddled him.
+10675,tongue-tied,1,קשור לשון,a,too shy or nervous to speak,He was tongue-tied in front of the crowd.
+10676,viridian,1,ירוק כחלחל,a,bluish-green,The sea was a deep viridian.
+10677,slimy,1,רירי ודביק,a,covered in unpleasant wet slime,A slimy frog sat in his hand.
+10678,minuscule,1,זעיר,a,extremely small,He writes in minuscule letters.
+10679,tinkle,1,לצלצל בצליל עדין,v,to make a light ringing sound,The little bell tinkled.
+10680,tingle,1,לעקצץ קלות,v,to feel a slight stinging feeling,Her fingers tingled with cold.
+10681,swishy,1,מושוויץ (גמיש),a,moving with a soft rushing sound,He swung the swishy wand.
+10682,pliable,1,גמיש,a,easy to bend,The clay is soft and pliable.
+10683,armpit,1,בית שחי,n,the hollow under the shoulder,He held the bag under his armpit.
+10684,flexible,1,גמיש,a,able to bend without breaking,Rubber is a flexible material.
+10685,maple,1,אדר (עץ),n,a tree with sweet sap,The table is made of maple.
+10686,ebony,1,אבנוס (עץ שחור),n,a hard black wood,The piano keys were made of ebony.
+10687,springy,1,קפיצי,a,returning to shape quickly; bouncy,The grass was soft and springy.
+10688,supple,1,גמיש ורך,a,bending easily; soft and flexible,She keeps her skin supple.
+10689,bravo,1,כל הכבוד!,int,a cry of praise,"""Bravo!"" shouted the audience."
+10690,depress,1,לדכא,v,to make sad,The gray weather depressed him.
+10691,vacuum,1,לשאוב בשואב,v,to clean with a vacuum cleaner,She vacuumed the carpet.
+10692,quiz,1,חידון,n,a short test of knowledge,We had a short quiz in class.
+10693,waster,1,בזבזן,n,a person who wastes time or things,Don't be a time waster.
+10694,tourist,1,תייר,n,a person traveling for pleasure,Tourists filled the old town.
+10695,backpack,1,תיק גב,n,a bag carried on the back,She carried her books in a backpack.
+10696,gangling,1,גבוה וגמלמל,a,"tall, thin, and awkward in movement",A tall gangling boy entered.
+10697,trolley,1,עגלה,n,a small cart on wheels,She pushed the shopping trolley.
+10698,wrought-iron,1,ברזל יצוק,a,shaped by hammering (of iron),A wrought-iron gate stood open.
+10699,dreadlocks,1,צמות דרדלוקס,n,hair twisted into thick ropelike locks,He wore his hair in long dreadlocks.
+10700,goggle,1,לנעוץ עיניים בולטות,v,to stare with wide-open eyes,They goggled at the huge cake.
+10701,tarantula,1,טרנטולה,n,a large hairy spider,A tarantula is a large hairy spider.
+10702,accountant,1,רואה חשבון,n,a person who manages financial accounts,The accountant checked the books.
+10703,dimple,1,גומה (בלחי),n,a small hollow in the cheek,She has dimples when she smiles.
+10704,licorice,1,ליקוריץ (שוש),n,a black sweet with a strong flavor,He chewed a stick of licorice.
+10705,tenpin,1,קערות (באולינג),n,a bowling game with ten pins,They played tenpin bowling.
+10706,druidess,1,דרואידית,n,"a female druid, an old Celtic priest",The druidess lived in the forest.
+10707,spinach,1,תרד,n,a green leafy vegetable,Spinach is full of iron.
+10708,tripe,1,קיבה (מאכל),n,the stomach of a cow eaten as food; also nonsense,Some people eat tripe soup.
+10709,curry,1,קארי,n,an Indian dish with hot spices,We had chicken curry for dinner.
+10710,sardine,1,סרדין,n,a small sea fish,He opened a tin of sardines.
+10711,tearful,1,דמעתי,a,crying or almost crying,She gave him a tearful goodbye.
+10712,aback,1,המום (נלקח אבק),r,surprised (used in 'taken aback'),I was taken aback by the news.
+10713,dumbfounded,1,המום ונדהם,a,so surprised that one cannot speak,He stood dumbfounded at the news.
+10714,thickset,1,קומפקטי ושרירי,a,"short, broad, and strong",A thickset man guarded the door.
+10715,bodyguard,1,שומר ראש,n,a person hired to protect someone,The star arrived with two bodyguards.
+10716,riffraff,1,עמך דל (חברה פחותה),n,people seen as low and worthless,He called the crowd riffraff.
+10717,sniffy,1,מתנשא (בריטי),a,British informal: acting superior,She was sniffy about my old car.
+10718,sneaker,1,נעל ספורט,n,a soft sports shoe,He tied his sneakers.
+10719,sec,1,שנייה (בדיבור),n,"informal: a second, a short time",Wait a sec!
+10720,atop,1,על ראש (פסגת),r,on top of,A flag flew atop the tower.
+10721,starry,1,מכוכב,a,full of stars,They walked under the starry sky.
+10722,turret,1,מגדלון,n,a small tower on a castle,The castle had round turrets.
+10723,smarten,1,להסתדר / להתחכם,v,to make neater or smarter,Smarten up before the guests arrive.
+10724,smudge,1,כתם מטושטש,n,a dirty blurred mark,There was a smudge of ink on the page.
+10725,candlelight,1,אור נרות,n,the light of candles,They dined by candlelight.
+10726,velvety,1,קטיפתי,a,soft and smooth like velvet,The moth had velvety wings.
+10727,bowler,1,כובע בומבי (מגבעת קשה),n,a hard round felt hat,He wore a black bowler hat.
+10728,unafraid,1,לא מפחד,a,not afraid,She was unafraid of the dark.
+10729,toil,1,לעמול,v,to work very hard,They toiled in the fields all day.
+10730,flap,1,לנפנף / להיטרף,v,to move up and down; to panic (informal),The bird flapped its wings.
+10731,quick-witted,1,חריף שכל,a,able to think fast,She is quick-witted and funny.
+10732,queasy,1,מבחיל (בבטן),a,feeling sick in the stomach,The boat ride made him queasy.
+10733,pigtail,1,צמה (צמת צד),n,a bunch of hair tied at the side of the head,She wore her hair in pigtails.
+10734,catcall,1,לשרוק בלעג,v,to make rude whistles or cries,The crowd catcalled the speaker.
+10735,gym,1,חדר כושר,n,a place for exercise and sports,We play basketball in gym class.
+10736,swagger,1,להתהלך בגאוותנות,v,"to walk in a proud, showy way",He swaggered into the room.
+10737,perk,1,הטבה,n,an extra benefit of a job,Free meals are a perk of the job.
+10738,ice-cold,1,קר כקרח,a,as cold as ice,He drank an ice-cold lemonade.
+10739,scroll,1,מגילה,n,a long roll of paper for writing,The old scroll was written in Latin.
+10740,nitwit,1,טמבל,n,a silly person,Don't be a nitwit.
+10741,blubber,1,לפתוק / שומן לווייתן,v,to cry noisily; also whale fat,The child blubbered for his mother.
+10742,oddment,1,שארית / פרט מיותר,n,a leftover item; an odd thing,A box of oddments lay in the attic.
+10743,tweak,1,לצבוט קלות / לכוונן,v,to twist slightly; to adjust,She tweaked the design a little.
+10744,carrot,1,גזר,n,a long orange root vegetable,Rabbits eat carrots.
+10745,miffed,1,מעוצבן קלות,a,slightly annoyed,She was miffed at being left out.
+10746,behead,1,לערוף ראש,v,to cut off the head,Kings once beheaded their enemies.
+10747,unbearable,1,בלתי נסבל,a,impossible to endure,The heat was unbearable.
+10748,eclair,1,אקלר,n,a long cream-filled pastry,He ate a chocolate eclair.
+10749,jell-o,1,ג'לי (ממתק),n,a brand of fruit-flavored gelatin dessert,She made red Jell-O for dessert.
+10750,meringue,1,מרנג,n,beaten egg whites baked until crisp,The pie was topped with meringue.
+10751,sallow,1,צהבהב (פנים),a,of a sickly yellowish color,"He had a thin, sallow face."
+10752,scabby,1,מכוסה גלדים,a,covered with scabs,The boy had scabby knees.
+10753,fluff,1,פוך / פשתן רך,n,soft light fibers or down,A ball of fluff floated in the air.
+10754,bedtime,1,זמן שינה,n,the time to go to bed,It's past your bedtime.
+10755,panel,1,פאנל (חלונית),n,"a flat section of a wall, door, or surface",A wooden panel covered the wall.
+10756,cross-legged,1,בישיבת טורקי,a,sitting with legs crossed,The children sat cross-legged on the floor.
+10757,rickety,1,רעוע,a,likely to break; shaky,He climbed the rickety old ladder.
+10758,conk,1,להכות בראש,v,informal: to hit on the head,He conked his head on the shelf.
+10759,patrol,1,לסייר,v,to walk around an area to guard it,Guards patrol the castle at night.
+10760,dumpy,1,קצר ושמנמן,a,short and stout,A dumpy little woman answered the door.
+10761,oddball,1,מוזר (אדם),n,a strange person,Everyone thought he was an oddball.
+10762,talking-to,1,נזיפה,n,informal: a scolding,His father gave him a good talking-to.
+10763,pointy,1,מחודד,a,having a sharp point,The witch wore a pointy hat.
+10764,thank-you,1,תודה,n,an expression of thanks,She said a polite thank-you.
+10765,pickle,1,מלפפון כבוש,n,a cucumber preserved in vinegar,He ate a pickle with his sandwich.
+10766,celebrity,1,סלבריטי,n,a famous person,The actor became a celebrity.
+10767,simmer,1,לבשל על אש קטנה,v,to cook gently just below boiling,Let the soup simmer for an hour.
+10768,shimmer,1,לנצנץ ברתת,v,to shine with a soft trembling light,The lake shimmered in the sun.
+10769,ensnare,1,ללכוד במלכודת,v,to catch in a trap,The trap ensnared the rabbit.
+10770,brew,1,לחלוט / לבשל שיכר,v,to make tea or beer by steeping or boiling,She brewed a pot of tea.
+10771,stopper,1,פקק (של בקבוק קטן),n,a plug for a bottle,She pulled the stopper from the bottle.
+10772,aconite,1,אזובית הרים (צמח רעיל),n,a poisonous plant used in potions,Aconite is also called monkshood.
+10773,criticize,1,לבקר,v,to point out faults,Don't criticize his cooking.
+10774,stew,1,לבשל תבשיל / תבשיל,v,to cook slowly in liquid; also the dish itself,She stewed the meat with vegetables.
+10775,blob,1,גוש נוזלי,n,a small shapeless drop or lump,A blob of paint fell on the floor.
+10776,seep,1,לחלחל,v,to flow slowly through small holes,Water seeped through the crack.
+10777,drench,1,להרטיב עד היסוד,v,to wet completely,The rain drenched us.
+10778,porcupine,1,דורבן,n,an animal covered with sharp quills,A porcupine has sharp quills.
+10779,galoshes,1,מגפי גשם (על-נעליים),n,waterproof overshoes,He pulled on his galoshes.
+10780,scrabble,1,לחטט בידיים,v,to scratch or grope about with the hands,He scrabbled in the dirt for the key.
+10781,pheasant,1,פסיון (עוף בר),n,a large game bird,They hunted pheasant in the autumn.
+10782,patchwork,1,עבודת טלאים,n,sewing of small cloth pieces together,She sewed a patchwork quilt.
+10783,quilt,1,שמיכת פוך תפורה,n,a padded bed covering,A warm quilt covered the bed.
+10784,shapeless,1,חסר צורה,a,without a clear shape,He wore a shapeless old sweater.
+10785,raisin,1,צימוק,n,a dried grape,She put raisins in the cake.
+10786,boastful,1,שוויצרי,a,full of showing off,His boastful talk annoyed everyone.
+10787,helicopter,1,מסוק,n,an aircraft with rotating blades,A helicopter landed on the roof.
+10788,glider,1,מטוס דאון,n,an aircraft without an engine,The glider soared silently.
+10789,poster,1,כרזה,n,a large printed notice or picture,A poster hung on the classroom wall.
+10790,gloat,1,לשמוח לאיד,v,to show smug pleasure at another's bad luck,He gloated over his victory.
+10791,breezy,1,מאוורר / עליז,a,pleasantly windy; also cheerful and casual,A breezy wind blew through the trees.
+10792,ripple,1,גלגלת / להתגלגל,n,a small wave,A ripple spread across the pond.
+10793,quaver,1,לרעוד (קול),v,"to shake or tremble, especially of the voice",Her voice quavered with fear.
+10794,jumpy,1,עצבני וזריז,a,nervous and easily startled,He was jumpy after the scare.
+10795,hobble,1,לצלוע,v,to walk with difficulty; to limp,The injured man hobbled home.
+10796,pansy,1,אמנון ותמר (פרח),n,a small garden flower,She planted pansies in the garden.
+10797,crybaby,1,בכיין,n,a person who cries easily,Don't be such a crybaby.
+10798,topmost,1,העליון ביותר,a,highest,The book lay on the topmost shelf.
+10799,javelin,1,כידון,n,a light spear thrown in sport,He threw the javelin in the competition.
+10800,about-face,1,פניית פרסה,n,a complete turn to face the opposite way,He did an about-face and marched off.
+10801,numb,1,רדום,a,without feeling,His fingers were numb with cold.
+10802,burly,1,שרירי וגדול,a,large and strong,A burly man lifted the box easily.
+10803,blackboard,1,לוח,n,a dark board for writing with chalk,The teacher wrote on the blackboard.
+10804,puzzlement,1,תמהון,n,the state of being confused,He stared in puzzlement.
+10805,dinnertime,1,זמן ארוחת ערב,n,the time for the evening meal,Come home before dinnertime.
+10806,kidney,1,כליה,n,an organ that cleans the blood,The kidneys clean the blood.
+10807,shovel,1,את (כלי חפירה),n,a tool for digging and lifting,He dug the hole with a shovel.
+10808,smarmy,1,חלקלק ומזייף,a,too smooth and insincere,The salesman gave a smarmy smile.
+10809,anytime,1,בכל עת,r,at any time,Call me anytime.
+10810,overhear,1,לשמוע במקרה,v,to hear something not meant for you,I overheard their conversation.
+10811,half-past,1,וחצי (שעה),r,thirty minutes past the hour,It's half-past seven.
+10812,ember,1,גחלת,n,a small glowing piece of a dying fire,The fire had died down to embers.
+10813,snuffle,1,לחרחר באף,v,to breathe noisily through the nose,The dog snuffled around the floor.
+10814,beckon,1,לקרוא במחווה,v,to signal someone to come,She beckoned him closer.
+10815,saintly,1,קדוש,a,very good and holy,She has a saintly patience.
+10816,swipe,1,לגנוב / להחטיא מכה,v,informal: to steal quickly; to hit with a swing,He swiped a cake from the table.
+10817,singsong,1,מנגיני (בקול שירה),a,rising and falling in a musical way,She spoke in a singsong voice.
+10818,whoosh,1,לשאוג,v,to move fast with a rushing sound,The ball whooshed past his ear.
+10819,saliva,1,רוק,n,the liquid in the mouth,Saliva helps digestion.
+10820,thunderous,1,רועם,a,"very loud, like thunder",Thunderous applause filled the hall.
+10821,grope,1,למשש בחושך,v,"to feel about with the hands, as in the dark",He groped for the light switch.
+10822,know-it-all,1,יודע כל,n,a person who acts as if they know everything,Nobody likes a know-it-all.
+10823,bonus,1,בונוס,n,an extra payment or benefit,Workers got a holiday bonus.
+10824,flashy,1,בולט ומפוצץ,a,too showy,He drove a flashy red car.
+10825,smother,1,לחנוק / לכסות לגמרי,v,to cover completely; to suffocate,She smothered the fire with a blanket.
+10826,stomp,1,לרקוע ברגליים,v,to step heavily and noisily,He stomped his feet in anger.
+10827,bedspread,1,כיסוי מיטה,n,a decorative cover for a bed,A flowered bedspread covered the bed.
+10828,stadium,1,אצטדיון,n,a large sports ground with seats,The match was played in a huge stadium.
+10829,baseball,1,בייסבול,n,a bat-and-ball game,Baseball is popular in America.
+10830,strap,1,רצועה,n,a narrow strip of material,The bag had a leather strap.
+10831,strapping,1,גברתן וחסון,a,"tall, strong, and healthy",A strapping young man carried the bags.
+10832,reel,1,להיטלטל / סליל,v,to stagger; also a spool for thread or film,He reeled from the blow.
+10833,offhand,1,באופן ישיר / ללא הכנה,r,without checking; without preparation,I don't know the answer offhand.
+10834,weave,1,לארוג / לפלס דרך,v,to make cloth by crossing threads; to move in and out,She wove a basket from reeds.
+10835,trudge,1,ללכת בכבדות,v,to walk slowly and heavily,They trudged through the snow.
+10836,waft,1,לרחף באוויר,v,to float gently through the air,The smell of baking wafted through the house.
+10837,desktop,1,שולחן עבודה / מחשב שולחני,n,the top of a desk; a desk computer,The papers sat on the desktop.
+10838,windmill,1,טחנת רוח,n,a mill worked by the wind,The windmill turned slowly.
+10839,griffin,1,גריפין (יצור אגדי),n,"a mythical creature, half eagle half lion",The griffin has an eagle's head and a lion's body.
+10840,stench,1,סירחון,n,a strong bad smell,A terrible stench came from the drain.
+10841,footfall,1,צעד (קול),n,the sound of a footstep,He heard soft footfalls behind him.
+10842,boulder,1,סלע גדול,n,a very large rock,A huge boulder blocked the path.
+10843,horny,1,קרני (מחוספס כקרן),a,hard like horn; rough,The toad had horny skin.
+10844,waggle,1,לנענע בקלות,v,to move with short quick movements,The dog waggled its tail.
+10845,slouch,1,לשקוע בעמידה,v,"to sit or stand in a lazy, drooping way",Don't slouch in your chair.
+10846,fumble,1,למסרבל / למשש,v,to handle clumsily; to grope,He fumbled for his keys.
+10847,pea-brain,1,מוח של אפונה (טמבל),n,informal: a stupid person,Don't listen to that pea-brain.
+10848,berserk,1,מטורף,a,wildly out of control with rage or excitement,The crowd went berserk.
+10849,glue,1,להדביק / דבק,v,to join with glue; also the substance,She glued the pieces together.
+10850,booger,1,פרך אף (ג'יבריש),n,informal: dried mucus from the nose,The little boy picked his booger.
+10851,full-grown,1,בוגר לחלוטין,a,having reached full size,A full-grown lion is dangerous.
+10852,grumble,1,לרטון,v,to complain quietly,He grumbled about the cold weather.
+10853,chill,1,לצנן / צינה,v,to make cold; also a feeling of cold,The night air chilled them.
+10854,defrost,1,להפשיר,v,to unfreeze,Defrost the chicken before cooking.
+10855,versus,1,נגד,p,against,The match was England versus Scotland.
+10856,mattress,1,מזרן,n,the soft part of a bed,The mattress was old and lumpy.
+10857,sahara,1,סהרה,n,the great desert of North Africa,The Sahara is the largest hot desert.
+10858,conjure,1,להכשיר / לעורר,v,to make appear as if by magic,The magician conjured a rabbit from his hat.
+10859,mangle,1,לעוות / לפצוע קשות,v,to crush or damage badly,The machine mangled the metal.
+10860,wheedle,1,לחנפן כדי להשיג,v,to persuade by soft flattering talk,She wheedled money out of her father.
+10861,clobber,1,לחבוט בחוזקה,v,informal: to hit hard,He got clobbered in the fight.
+10862,commentary,1,פרשנות (שידור),n,a spoken description of an event,The commentary described every goal.
+10863,nope,1,לא (בדיבור),int,informal: no,"""Are you coming?"" ""Nope."""
+10864,loop-the-loop,1,לולאה באוויר,n,a full circle flown or ridden in the air,The plane did a loop-the-loop.
+10865,cannonball,1,כדור תותח,n,a heavy iron ball fired from a cannon,The old cannonball lay in the museum.
+10866,spurt,1,להתיז / פרץ,v,to gush out suddenly; also a sudden burst,Water spurted from the pipe.
+10867,ref,1,שופט (בספורט),n,informal: referee,The ref blew his whistle.
+10868,spinner,1,מסובב / זנבוב (דיג),n,a thing that spins; a type of fishing lure,He used a spinner to catch fish.
+10869,goalpost,1,קורת שער,n,one of the posts of a goal,The ball hit the goalpost.
+10870,time-out,1,פסק זמן,n,a short break in a game,The coach called a time-out.
+10871,unseat,1,להפיל מהאוכף / להדיח,v,to throw from a seat or saddle; to remove from power,The horse unseated its rider.
+10872,commentate,1,לפרשן (משחק),v,to give a spoken commentary,He commentates on football matches.
+10873,nonstop,1,ללא הפסקה,r,without stopping,They flew nonstop to New York.
+10874,headfirst,1,בקדימת הראש,r,with the head first,He dived headfirst into the pool.
+10875,crouch,1,לכרוע / להתכופף,v,to bend low with legs bent,"The cat crouched, ready to jump."
+10876,chappie,1,בחור (בריטי ישן),n,"British informal: a fellow, a man",He's a decent old chappie.
+10877,drafty,1,מאוורר מפרצים,a,letting in cold currents of air,The old house was cold and drafty.
+10878,spine,1,עמוד שדרה,n,the backbone,He injured his spine in the fall.
+10879,lionfish,1,דג אריה (זנבונון),n,a striped tropical fish with poisonous spines,The lionfish has poisonous spines.
+10880,taunt,1,להתלוצץ,v,to mock in an insulting way,The other boys taunted him.
+10881,hi,1,היי,int,informal: hello,"""Hi!"" she called out."
+10882,silky,1,משיי,a,soft and smooth like silk,The cat has silky fur.
+10883,smirk,1,לחייך בייהנות,v,to smile in a smug way,He smirked at my mistake.
+10884,festoon,1,לקשט בשרשראות,v,to decorate with hanging chains of flowers or ribbons,The hall was festooned with ribbons.
+10885,mistletoe,1,דבקון (צמח חג),n,a plant hung as a Christmas decoration,They kissed under the mistletoe.
+10886,icicle,1,נטיף קרח,n,a hanging spike of ice,Icicles hung from the roof.
+10887,librarian,1,ספרן,n,a person who works in a library,The librarian helped us find the book.
+10888,brandish,1,להניף (נשק),v,to wave a weapon threateningly,He brandished his sword.
+10889,duster,1,מטלית אבק,n,a cloth for dusting,She wiped the shelf with a duster.
+10890,dentist,1,רופא שיניים,n,a doctor for teeth,I have an appointment at the dentist.
+10891,muffin,1,מאפין,n,a small round cake,She baked blueberry muffins.
+10892,marshmallow,1,מרשמלו,n,a soft spongy sweet,They roasted marshmallows over the fire.
+10893,drawback,1,חיסרון,n,a disadvantage,The only drawback is the price.
+10894,turnip,1,לפת,n,a round white root vegetable,The soup was made with turnips.
+10895,whittle,1,לגלף בעץ,v,to carve wood by cutting small pieces,He whittled a small boat from wood.
+10896,enclose,1,לצרף / להקיף,v,to put inside an envelope; to surround,I enclose a photo with this letter.
+10897,fascinate,1,לרתק,v,to interest greatly,The stars fascinate her.
+10898,pence,1,פנסים,n,"British coins, plural of penny",The ticket costs fifty pence.
+10899,homemade,1,ביתי,a,made at home,She baked homemade bread.
+10900,tasty,1,טעים,a,having a good flavor,The soup was very tasty.
+10901,loopy,1,משוגע קמעה,a,informal: slightly crazy,He went a bit loopy after the shock.
+10902,halfhearted,1,חצי לב,a,without real enthusiasm,He made a halfhearted attempt.
+10903,forge,1,לזייף / לחשל,v,to make a false copy; to shape hot metal,Someone forged the signature.
+10904,disapprove,1,להתנגד / לסלוד,v,to think something is wrong,Her parents disapproved of the plan.
+10905,frog-march,1,לגרור בכוח (כצפרדע),v,to force someone forward holding their arms,The guards frog-marched him out.
+10906,platter,1,מגש הגשה גדול,n,a large flat serving dish,A platter of sandwiches stood on the table.
+10907,chipolata,1,נקניקייה דקה,n,a small thin sausage,They served chipolatas with breakfast.
+10908,tureen,1,קערת מרק גדולה,n,a large deep dish for serving soup,Soup was served from a silver tureen.
+10909,cranberry,1,חמוציה,n,a small sour red berry,We had cranberry sauce with the turkey.
+10910,flimsy,1,שברירי / רפה,a,light and easily broken; weak,The shelf was too flimsy for books.
+10911,engulf,1,לבלוע / להציף,v,to swallow up completely,Flames engulfed the building.
+10912,embed,1,להטביע / לשבץ,v,to fix firmly into something,The arrow was embedded in the wall.
+10913,giggle,1,לגחך,v,to laugh lightly and nervously,The girls giggled at the joke.
+10914,lopsided,1,נטוי לצד,a,uneven; leaning to one side,He gave a lopsided grin.
+10915,kit,1,ערכה / ציוד,n,a set of tools or equipment,He opened his first-aid kit.
+10916,crumpet,1,קרמפט (מאפה בריטי),n,a soft flat British cake eaten toasted,He toasted a crumpet for tea.
+10917,wide-awake,1,ער לגמרי,a,fully awake,The baby was wide-awake at midnight.
+10918,squawk,1,לקרקר,v,to make a loud harsh cry,The parrot squawked loudly.
+10919,pitch-black,1,חשוך כחושך מעוף,a,completely dark,It was pitch-black in the cave.
+10920,eerie,1,מוזר ומפחיד,a,strange and frightening,An eerie silence filled the forest.
+10921,ping,1,לצפצף / צליל פינג,v,to make a short high ringing sound,The microwave pinged.
+10922,bloodcurdling,1,מקפיא דם,a,terrifying,A bloodcurdling scream rang out.
+10923,earsplitting,1,מפצח אוזניים,a,extremely loud,An earsplitting noise shook the room.
+10924,unused,1,לא בשימוש,a,not used,An unused room stood at the end of the hall.
+10925,upturned,1,הפוך כלפי מעלה,a,turned upside down or upward,She sat on an upturned bucket.
+10926,prop,1,להישען / תומך,v,to support by leaning something against,He propped the ladder against the wall.
+10927,ornate,1,מעוטר בכבדות,a,richly decorated,An ornate mirror hung in the hall.
+10928,retrace,1,לשוב על עקבות,v,to go back over the same path,We retraced our steps to find the keys.
+10929,paisley,1,פייזלי (דוגמה),n,a pattern of curved feather-like shapes,He wore a paisley tie.
+10930,shave,1,להתגלח,v,to cut off hair with a razor,He shaves every morning.
+10931,nearsighted,1,קצר רואי,a,unable to see distant things clearly,Without glasses she is nearsighted.
+10932,overshadow,1,להאפיל על,v,to make seem less important,Her success overshadowed his own.
+10933,woolen,1,עשוי צמר,a,made of wool,She wore a warm woolen scarf.
+10934,roam,1,לשוטט,v,to wander freely,Sheep roamed the hills.
+10935,dampen,1,להרטיב / לצנן (התלהבות),v,to make slightly wet; to lessen,The rain dampened their spirits.
+10936,fanatic,1,קנאי / מעריץ מושבע,n,a person with extreme enthusiasm,He is a football fanatic.
+10937,climb,1,לטפס,v,to go up,They climbed the mountain.
+10938,stink,1,להסריח / סירחון,v,to smell very bad; also the smell,The garbage stank in the heat.
+10939,mystify,1,לסבך / להדהים בתמהון,v,to puzzle completely,The trick mystified the audience.
+10940,legendary,1,אגדי,a,famous from stories; very famous,He is a legendary football player.
+10941,transform,1,להפוך / לשנות לחלוטין,v,to change completely,The caterpillar transforms into a butterfly.
+10942,alchemist,1,אלכימאי,n,an old-time scientist who sought to turn metals into gold,The alchemist tried to make gold.
+10943,bias,1,הטיה / דעה קדומה,n,an unfair preference,The report showed a clear bias.
+10944,pep,1,מרץ,n,energy and liveliness,She is full of pep.
+10945,somersault,1,סלטה (גלגול),n,a roll in which the body turns head over heels,He did a somersault on the grass.
+10946,scuffle,1,קטטה קלה,n,a short confused fight,A scuffle broke out in the crowd.
+10947,tight-lipped,1,מכווץ שפתיים (שתקן),a,unwilling to speak,She remained tight-lipped about the secret.
+10948,relive,1,לחוות מחדש,v,to experience again in memory,He relived the moment in his mind.
+10949,blur,1,לטשטש / כתם,v,to make unclear; also a smear,Tears blurred her vision.
+10950,nosebleed,1,דימום מהאף,n,bleeding from the nose,He got a nosebleed in the cold.
+10951,prowl,1,לשוטט בחשאי,v,"to move about quietly, hunting",A fox prowled through the garden.
+10952,noiseless,1,חסר רעש,a,silent,The owl made a noiseless flight.
+10953,beech,1,בוק (עץ),n,a tree with smooth gray bark,They sat under a tall beech.
+10954,hocus-pocus,1,הוקוס פוקוס (קסם מדומה),n,meaningless talk used to deceive; trickery,It's all just hocus-pocus.
+10955,single-handed,1,"לבד, ביד אחת",r,"alone, without help",He fixed the roof single-handed.
+10956,forget-me-not,1,זכריני (פרח),n,a small blue flower,She picked blue forget-me-nots.
+10957,dittany,1,דיטני (צמח מרפא),n,a healing herb,Dittany is used to heal wounds.
+10958,shifty,1,ערמומי,a,looking dishonest,He had shifty eyes.
+10959,inferno,1,תופת אש,n,a huge uncontrollable fire,The building became an inferno.
+10960,outlaw,1,פורע חוק / להוציא מחוץ לחוק,n,a criminal hiding from the law,The outlaw hid in the forest.
+10961,stifle,1,לחנוק / לבלום,v,to hold back; to suffocate,She stifled a yawn.
+10962,stoke,1,להסעיר אש,v,to feed fuel to a fire,He stoked the fire with coal.
+10963,trowel,1,מלקשת (כלי גינון),n,a small hand tool for digging or spreading,She dug with a small trowel.
+10964,usher,1,ללוות פנימה / סדרן,v,to guide people to their places,He ushered them to their seats.
+10965,spiny,1,קוצני,a,covered with spines,The hedgehog has spiny skin.
+10966,stub,1,לנגוע ברגל / קצה,v,to strike one's toe against something,He stubbed his toe on the step.
+10967,furl,1,"לגלול (דגל, מפרש)",v,to roll up a flag or sail,They furled the sails.
+10968,chime,1,לצלצל (פעמון),v,to ring like a bell,The clock chimed twelve.
+10969,lullaby,1,שיר ערש,n,a song to make a child sleep,She sang a soft lullaby.
+10970,hitch,1,להצמיד / תקלה,v,to fasten; also a small problem,They hitched the horse to the cart.
+10971,tennis,1,טניס,n,a racket game,They played tennis on Saturday.
+10972,grapple,1,להיאבק / להתמודד,v,to struggle with,He grappled with the problem.
+10973,tartan,1,טארטן (בד משובץ),n,a Scottish checkered cloth,He wore a tartan kilt.
+10974,jig,1,ריקוד ג'יג,n,a lively jumping dance,He danced a merry jig.
+10975,cheery,1,עליז,a,happy and bright,She gave a cheery wave.
+10976,rig,1,לתקן (תוצאה) / מתקן,v,to arrange dishonestly; also equipment,They rigged the election.
+10977,suspend,1,להשעות / לתלות,v,to hang; to stop temporarily,The lamp was suspended from the ceiling.
+10978,alibi,1,אליבי,n,proof one was elsewhere during a crime,He had a perfect alibi.
+10979,cover-up,1,הסתרה (של שערורייה),n,an attempt to hide wrongdoing,The cover-up was worse than the crime.
+10980,slipper,1,נעל בית,n,a soft indoor shoe,She wore warm slippers.
+10981,cock-and-bull,1,סיפור מופרך,a,obviously untrue (of a story),He told a cock-and-bull story.
+10982,hourglass,1,שעון חול,n,a glass timer with sand,The sand ran through the hourglass.
+10983,memorize,1,לשנן בעל פה,v,to learn by heart,She memorized the poem.
+10984,gamble,1,להמר / הימור,v,to bet money; to take a risk,He gambled away his savings.
+10985,kindling,1,חומר הסקה,n,small dry wood for starting a fire,They gathered kindling for the fire.
+10986,furor,1,מהומה / זעם ציבורי,n,an outbreak of public anger or excitement,The news caused a furor.
+10987,leer,1,להביט במבט זדוני,v,to look with a nasty sideways look,He leered at her unpleasantly.
+10988,scud,1,להיסחף במהירות (עננים),v,"to move fast, driven by wind",Clouds scudded across the sky.
+10989,oaf,1,גס רוח,n,a stupid clumsy person,The big oaf knocked over the vase.
+10990,snot,1,נזלת (ג'יבריש),n,informal: mucus from the nose,The child wiped the snot from his nose.
+10991,coward,1,פחדן,n,a person without courage,Only a coward would run away.
+10992,mossy,1,מכוסה אזוב,a,covered with moss,They sat on a mossy stone.
+10993,hoist,1,להרים בכוח,v,"to lift up, often with ropes",They hoisted the flag.
+10994,stargazer,1,צופה כוכבים,n,a person who watches the stars,The stargazer watched the sky all night.
+10995,undergrowth,1,סבך תחתון (שיחים),n,bushes and plants under trees,Snakes hid in the undergrowth.
+10996,dribble,1,לטפטף / לכדרר,v,to drip slowly; to bounce a ball,The baby dribbled milk.
+10997,stagger,1,להיטלטל / להדהים,v,to walk unsteadily; to shock,He staggered under the heavy load.
+10998,palomino,1,סוס פלומינו (זהוב),n,a golden horse with a pale mane,She rode a golden palomino.
+10999,sapphire,1,ספיר (אבן),n,a blue precious stone,The ring held a blue sapphire.
+11000,hind,1,אחורי / איילה,a,at the back (of legs); also a female deer,The horse kicked with its hind legs.
+11001,defenseless,1,חסר הגנה,a,unable to defend oneself,The village was left defenseless.
+11002,half-life,1,מחצית חיים,n,the time for half of a radioactive substance to decay,The isotope has a short half-life.
+11003,dappled,1,מנומר באור,a,marked with spots of light or color,Dappled sunlight fell through the leaves.
+11004,canter,1,לדהור בעדינות,v,to run at an easy gallop,The horse cantered across the field.
+11005,wide-eyed,1,עיניים פקוחות לרווחה,a,with eyes wide open in surprise,The child stared wide-eyed.
+11006,fortune-telling,1,חיזוי עתידות,n,predicting the future,Fortune-telling was her trade.
+11007,imprecise,1,לא מדויק,a,not exact,His directions were imprecise.
+11008,swelter,1,להתייבש מחום,v,to suffer from great heat,We sweltered in the heat.
+11009,pineapple,1,אננס,n,a tropical fruit,She sliced a pineapple.
+11010,tapdance,1,לרקד סטפס,v,to dance with clicking shoes,He tap-danced across the stage.
+11011,stab,1,לדקור / דקירה,v,to pierce with a pointed object,He stabbed the meat with a fork.
+11012,batty,1,משוגע (בדיבור),a,informal: crazy,The old man went a bit batty.
+11013,uprising,1,מרד,n,a rebellion,The uprising was put down.
+11014,tentacle,1,זרוע (של תמנון),n,a long flexible arm of a sea creature,The octopus has eight tentacles.
+11015,squid,1,דיונון,n,a sea animal with ten arms,The squid squirted ink.
+11016,bask,1,להשתזף / ליהנות,v,to lie in pleasant warmth,The lizard basked in the sun.
+11017,unsettled,1,לא יציב / מוטרד,a,changeable; worried,The weather remained unsettled.
+11018,fishy,1,חשוד (מסריח),a,suspicious; smelling of fish,Something fishy was going on.
+11019,whap,1,להכות בקול צלף,v,informal: to hit with a sharp sound,He whapped the ball over the fence.
+11020,percent,1,אחוז,n,one part in a hundred,Fifty percent of the class passed.
+11021,exasperation,1,יאוש מעצבים,n,strong irritation,She sighed in exasperation.
+11022,skulk,1,להתגנב,v,"to move secretly, hiding",A shadowy figure skulked in the corner.
+11023,beastie,1,חייתן קטן (סקוטי),n,a small creature,Watch out for wee beasties.
+11024,scoot,1,לזנק / לרוץ במהירות,v,to move quickly; to slide over,Scoot over and make room.
+11025,droop,1,לנבול / לשקוע,v,to hang down weakly,The flowers drooped in the heat.
+11026,smelly,1,מסריח,a,having a bad smell,Take off those smelly socks.
+11027,grit,1,לשקשק שיניים / חצץ,v,to clench the teeth; also small grains of sand,He gritted his teeth.
+11028,fingertip,1,קצה אצבע,n,the end of a finger,He touched it with his fingertips.
+11029,sprawl,1,להשתטח / להתפרש,v,to sit or lie with limbs spread out,He sprawled on the sofa.
+11030,struggle,1,להיאבק / מאבק,v,to fight; to try hard,She struggled with the heavy bag.
+11031,tendril,1,קנוקרן (של צמח),n,a thin curling stem of a climbing plant,The vine sent out thin tendrils.
+11032,creeper,1,צמח מטפס,n,a climbing plant,Ivy is a common creeper.
+11033,wring,1,לסחוט,v,to twist to remove water,She wrung out the wet cloth.
+11034,bluebell,1,פעמונית (פרח),n,a blue bell-shaped flower,Bluebells covered the forest floor.
+11035,cringe,1,להתכווץ מפחד / מבושה,v,to shrink back in fear or embarrassment,He cringed at the memory.
+11036,unravel,1,להתפרם / לפתור,v,to come apart at the threads; to solve,The sweater began to unravel.
+11037,drip,1,לטפטף / טיפה,v,to fall in drops,Water dripped from the tap.
+11038,trickle,1,לזלג בדלילות,v,to flow in a thin stream,A tear trickled down her cheek.
+11039,clink,1,לצלצל (כוסות),v,to make a light ringing sound,They clinked glasses.
+11040,tumble,1,להתגלגל / ליפול,v,to fall or roll clumsily,He tumbled down the hill.
+11041,pawn,1,רגלי (שחמט) / למשכן,n,the smallest chess piece; also to leave as security,He moved his pawn forward.
+11042,diagonal,1,אלכסוני,a,slanting from corner to corner,Draw a diagonal line.
+11043,checkmate,1,מט (שחמט),n,the winning move in chess,He declared checkmate.
+11044,pounce,1,לזנק על הטרף,v,to jump suddenly to catch something,The cat pounced on the mouse.
+11045,transfigure,1,לשנות צורה (קסם),v,to change in form or appearance,The wizard transfigured the rat into a cup.
+11046,killer,1,רוצח / קטלני,n,one who kills,The killer was caught.
+11047,forevermore,1,לנצח נצחים,r,for all time to come,He swore to serve forevermore.
+11048,friendship,1,ידידות,n,the relationship between friends,Their friendship lasted for years.
+11049,treble,1,משולש / צמרת (קול),a,three times as much; also high voice,Prices trebled in a year.
+11050,overgrown,1,מכוסה צמחייה פראית,a,covered with wild growth,The garden was overgrown with weeds.
+11051,unpopular,1,לא פופולרי,a,not liked,The new rule was unpopular.
+11052,nosy,1,חטטני,a,too curious about others,The nosy neighbor watched everything.
+11053,loathe,1,לתעב,v,to hate deeply,She loathes spiders.
+11054,spasm,1,עווית / התפרצות,n,a sudden muscle contraction; a sudden burst,A spasm of pain crossed his face.
+11055,slit,1,לחתוך בחדות / חריץ,v,to cut a narrow opening,He slit the envelope open.
+11056,surge,1,לגלוש בגאות / גל,v,to move forward in a powerful wave,The crowd surged forward.
+11057,sear,1,לצרוב / לצלות מהר,v,to burn the surface quickly,The hot pan seared the meat.
+11058,lunge,1,לזנק קדימה,v,to make a sudden forward movement,He lunged at the ball.
+11059,hygienic,1,היגייני,a,clean and healthy,Keep the kitchen hygienic.
+11060,confiscate,1,להחרים,v,to take away officially,The teacher confiscated the phone.
+11061,distract,1,להסיח את הדעת,v,to take attention away,The noise distracted him.
+11062,detest,1,לתעב,v,to hate strongly,I detest waiting in lines.
+11063,toffee,1,טופי,n,a chewy brown sweet,She gave him a piece of toffee.
+11064,steamroller,1,מכבש כבישים,n,a heavy road-flattening vehicle,The steamroller flattened the road.
+11065,risky,1,מסוכן,a,full of risk,It was a risky plan.
+11066,chuck,1,להשליך / לזרוק,v,informal: to throw,He chucked the ball to me.
+11067,checkup,1,בדיקה רפואית,n,a medical examination,She went for a yearly checkup.
+11068,radish,1,צנון,n,a small red or white root vegetable,He sliced a radish into the salad.
+11069,sunburn,1,כוויית שמש,n,red skin from too much sun,He got sunburned at the beach.
+11070,nudge,1,לדחוף קלות במרפק,v,to push gently,She nudged him to wake up.
+11071,jot,1,לרשום בקצרה,v,to write quickly,He jotted down the address.
+11072,abysmal,1,עלוב מאוד,a,extremely bad,The team's performance was abysmal.
+11073,wizened,1,מקומט וזקן,a,shriveled with age,A wizened old man sat by the fire.
+11074,broadly,1,באופן כללי / בלבבות,r,in a wide or general way,He smiled broadly at the joke.
+11075,spectacularly,1,באופן מרהיב,r,in a very impressive way,The fireworks exploded spectacularly.
+11076,boredom,1,שעמום,n,the state of being bored,He sighed with boredom.
+11077,bendy,1,גמיש,a,easy to bend,The young branch was bendy.
+11078,whiskery,1,מזוקן / עם שפם,a,having whiskers,The old man had a whiskery face.
+11079,whippy,1,גמיש וקפיצי,a,flexible; bending like a whip,The wand was springy and whippy.
+11080,disapproving,1,מסלוד / לא מסכים,a,showing that you think something is wrong,She gave him a disapproving look.
+11081,forgetfulness,1,שכחנות,n,the quality of being forgetful,His forgetfulness caused many problems.
+11082,horror-struck,1,פצוע אימה,a,overwhelmed by horror,"Horror-struck, she watched the accident."
+11083,ashen-faced,1,חיוור מפחד,a,pale-faced from fear,He stood ashen-faced at the news.
+11084,beady-eyed,1,בעל עיניים קטנות ונוצצות,a,"having small, bright, watchful eyes",A beady-eyed rat watched them.
+11085,birdcage,1,כלוב ציפורים,n,a cage for birds,The parrot sat in its birdcage.
+11086,chessboard,1,לוח שחמט,n,the checkered board for chess,He set the pieces on the chessboard.
+11087,doorpost,1,משקוף (עמוד דלת),n,one of the upright posts of a doorway,She leaned against the doorpost.
+11088,gamekeeping,1,שמירת חיות בר (מקצוע),n,the job of managing game animals,Gamekeeping keeps the forest healthy.
+11089,beechwood,1,עץ בוק,n,the wood of the beech tree,The wand was made of beechwood.
+11090,misters,1,אדונים (פנייה),n,"plural of mister, used before names",Misters Smith and Brown have arrived.
+11091,mugwump,1,אדם חשוב (זקן-שבט),n,a person who stays neutral; a bigwig,The mugwump refused to take sides.
+11092,first-ever,1,הראשון אי פעם,a,the very first to happen,It was his first-ever flight.
+11093,half-and-half,1,חצי-חצי,a,"half one thing, half another",The drink was half-and-half milk and cream.
+11094,blood-red,1,אדום כדם,a,deep red like blood,A blood-red sun set over the hills.
+11095,canary-yellow,1,צהוב כנרי,a,bright yellow like a canary,She painted the door canary-yellow.
+11096,golden-brown,1,חום זהוב,a,brown with golden tones,Bake until golden-brown.
+11097,iron-gray,1,אפור ברזל,a,gray like iron,His iron-gray hair was short.
+11098,jet-black,1,שחור כפחם,a,the deepest black,The horse was jet-black.
+11099,white-faced,1,חיוור פנים,a,"having a pale face, as from fear",He stood white-faced in the doorway.
+11100,funny-looking,1,מוזר למראה,a,strange in appearance,A funny-looking bird sat on the fence.
+11101,four-legged,1,בעל ארבע רגליים,a,having four legs,A four-legged creature ran past.
+11102,needle-sharp,1,חד כמחט,a,as sharp as a needle,The cat has needle-sharp claws.
+11103,fully-grown,1,בוגר לחלוטין,a,having reached full size,A fully-grown elephant is huge.
+11104,hand-knitted,1,סרוג ביד,a,knitted by hand,She wore a hand-knitted sweater.
+11105,well-chosen,1,נבחר היטב,a,carefully and aptly selected,A few well-chosen words ended the argument.
+11106,mid-december,1,אמצע דצמבר,n,the middle of December,Snow fell in mid-December.
+11107,dive-bombing,1,התרסקות צלילה (תקיפה),n,diving steeply to attack,The bird went dive-bombing after the cat.
+11108,flump,1,ליפול בפלופ / פלופ,v,to fall heavily with a dull sound,He landed with a flump.
+11109,nonmagic,1,לא-קסום,a,not magical,The nonmagic world knows nothing.
+11110,hebridean,1,מהאיים ההברידיים,a,from the Hebrides islands,The Hebridean coast is wild.
+11111,anticheating,1,נגד רמאות,a,preventing cheating,They used anticheating quills for the exam.
+11112,bye-bye,1,ביי ביי,int,informal: goodbye,"""Bye-bye!"" called the children."
+11113,aha,1,אהא!,int,a cry of discovery or triumph,"""Aha! I found it!"" he cried."
+11114,ahem,1,אחם (מנקה גרון),int,a small cough to get attention,"""Ahem,"" she said, wanting attention."
+11115,ooh,1,אווו (התפעלות),int,a cry of surprise or delight,"""Ooh, look at the fireworks!"""
+11116,fifty-eight,1,חמישים ושמונה,n,the number 58,The bus was fifty-eight minutes late.
+11117,fifty-two,1,חמישים ושתיים,n,the number 52,A deck has fifty-two cards.
+11118,forty-two,1,ארבעים ושתיים,n,the number 42,He is forty-two years old.
+11119,twenty-nine,1,עשרים ותשע,n,the number 29,February can have twenty-nine days.
+11120,thirty-seven,1,שלושים ושבע,n,the number 37,She scored thirty-seven points.
+11121,thirty-nine,1,שלושים ותשע,n,the number 39,The book has thirty-nine chapters.
+11122,sixty-five,1,שישים וחמש,n,the number 65,He retired at sixty-five.
+11123,sixty-fifth,1,שישים וחמישי,n,the ordinal form of 65,It was her sixty-fifth birthday.
+11125,astonishing,4,מַפְתִּיעַ,a,very surprising; amazing,Her progress was astonishing.
+11126,crossly,1,בְּכַעַס / בְּרֶגֶז,r,in a cross or annoyed way,"""You could have woken me up,"" said Ron, crossly."
+11127,lightest,1,הָקַל בִּיוֹתֵר,a,the least heavy; the gentlest,The broom turned at his lightest touch.
+11128,fixedly,1,בְּמַבָּט קָבוּעַ,r,in a fixed steady way; intently,She was squinting fixedly at him.

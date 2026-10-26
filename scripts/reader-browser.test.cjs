@@ -408,14 +408,14 @@ async function wordTapFlow() {
     await page.locator('#wordSheetClose').click();
 
     // Inflection lookup: an untaught plural finds the base card, case-insensitively.
-    const hit = await page.evaluate(() => lookupBookWord('SMALLS')?.w || null);
+    const hit = await page.evaluate(async () => (await lookupBookWord('SMALLS'))?.w || null);
     assert.equal(hit, 'small', 'plural/case-insensitive lookup finds the base form');
 
-    // -ing forms: silent-e restoration and consonant dedoubling find listed bases;
-    // a word family outside the app list (crane) still reports not-found honestly.
-    assert.equal(await page.evaluate(() => lookupBookWord('circling')?.w || null), 'circle', 'silent-e -ing finds the base');
-    assert.equal(await page.evaluate(() => lookupBookWord('cropping')?.w || null), 'crop', 'consonant-doubling -ing finds the base');
-    assert.equal(await page.evaluate(() => lookupBookWord('craning')?.w || null), null, 'crane family is not in the app list');
+    // -ing forms: silent-e restoration and consonant dedoubling find listed bases.
+    // crane entered the app list with the book vocabulary, so craning resolves too.
+    assert.equal(await page.evaluate(async () => (await lookupBookWord('circling'))?.w || null), 'circle', 'silent-e -ing finds the base');
+    assert.equal(await page.evaluate(async () => (await lookupBookWord('cropping'))?.w || null), 'crop', 'consonant-doubling -ing finds the base');
+    assert.equal(await page.evaluate(async () => (await lookupBookWord('craning'))?.w || null), 'crane', 'crane is a book-vocabulary card');
   } finally {
     await context.close();
   }

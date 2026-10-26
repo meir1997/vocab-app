@@ -15,6 +15,10 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const words = JSON.parse(fs.readFileSync(path.join(root, 'vocab.json'), 'utf8'));
+// The app merges the book vocabulary (ranks 10001+) into the word list, so
+// sort expectations must cover it too.
+const bookWords = JSON.parse(fs.readFileSync(path.join(root, 'book-vocab.json'), 'utf8'));
+const allWords = words.concat(bookWords);
 const frequency = JSON.parse(fs.readFileSync(path.join(root, 'book-frequency.json'), 'utf8'));
 const counts = frequency.counts || {};
 const byRank = rank => words.find(word => word.r === rank);
@@ -53,11 +57,11 @@ async function isolatedPage(progress, settings) {
 
 const learnedRec = () => ({ r: 1, w: 0, s: 1, next: past, last: past });
 const learningRec = stamp => ({ r: 1, w: 1, s: 0, next: past, last: stamp });
-const expectedBookQueue = progress => words
+const expectedBookQueue = progress => allWords
   .filter(v => !progress[v.w] && (counts[v.r] || 0) > 0)
   .sort((a, b) => ((counts[b.r] - counts[a.r]) || (a.r - b.r)))
   .map(v => v.w);
-const expectedAllQueue = progress => words.filter(v => !progress[v.w]).sort((a, b) => a.r - b.r).map(v => v.w);
+const expectedAllQueue = progress => allWords.filter(v => !progress[v.w]).sort((a, b) => a.r - b.r).map(v => v.w);
 
 async function bookScopeOrder() {
   const progress = {};
@@ -224,7 +228,7 @@ async function defaultScopeIsAllRankOrder() {
     await page.waitForFunction(() => session.active);
     const result = await page.evaluate(() => ({ first: session.queue[0].w, length: session.queue.length, band: document.getElementById('quizBandLabel').textContent, bookOptionDisabled: document.querySelector('#sortScopeSelect option[value="book"]').disabled }));
     assert.equal(result.first, byRank(1).w, 'default scope starts at rank 1');
-    assert.equal(result.length, words.length, 'default scope covers every unsorted word');
+    assert.equal(result.length, allWords.length, 'default scope covers every unsorted word');
     assert.ok(result.band.includes('לפי הסדר'), 'default label is rank order');
     assert.equal(result.bookOptionDisabled, false, 'book scope offered when a book is loaded');
   } finally { await context.close(); }
