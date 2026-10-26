@@ -421,13 +421,26 @@ function fitWord() {
 function fitFcWord() {
   const el = $('fcWord'); if (!el) return;
   el.style.fontSize = '';
-  let size = parseFloat(getComputedStyle(el).fontSize) || 32;
-  // Measure unwrapped, like fitWord: with overflow-wrap anywhere the card word
-  // breaks mid-word (gamekeepe/r on iPhone) before scrollWidth ever overflows,
-  // so the shrink loop never ran. nowrap makes overflow measurable and keeps
-  // the fitted line intact (fractional glyph widths round differently).
+  el.style.paddingLeft = el.style.paddingRight = '';
+  // nowrap, like fitWord: with overflow-wrap anywhere the card word breaks
+  // mid-word (gamekeepe/r on iPhone, 26.10) before any overflow is visible.
   el.style.whiteSpace = 'nowrap';
-  while (size > 16 && el.scrollWidth > el.clientWidth) { size -= 2; el.style.fontSize = size + 'px'; }
+  // The span is a flex item, so nowrap would size it to max-content and it
+  // would overflow the card; measure the glyph run against the card face
+  // content box instead of the span's own width.
+  const face = el.parentElement;
+  const fcs = getComputedStyle(face);
+  const faceContent = face.clientWidth - parseFloat(fcs.paddingLeft) - parseFloat(fcs.paddingRight);
+  const range = document.createRange();
+  const textWidth = () => { range.selectNodeContents(el); return range.getBoundingClientRect().width; };
+  let size = parseFloat(getComputedStyle(el).fontSize) || 32;
+  let pad = parseFloat(getComputedStyle(el).paddingLeft) || 0;
+  // The horizontal padding clears the corner buttons. Shrink the font first;
+  // only if the floor is reached does the padding yield (narrow phones).
+  while (textWidth() > faceContent - 2 * pad && (size > 16 || pad > 8)) {
+    if (size > 16) { size -= 2; el.style.fontSize = size + 'px'; }
+    else { pad = Math.max(8, pad - 11); el.style.paddingLeft = el.style.paddingRight = pad + 'px'; }
+  }
 }
 let cardFlipped = false, cardDrag = null;
 function resetFlashcard() {
