@@ -78,9 +78,20 @@ function parseCSV(text) {
   if (cell || row.length) { row.push(cell.replace(/\r$/, '')); rows.push(row); }
   return rows;
 }
+// Book words get their own numbering (user request, 26.10): a contiguous
+// series in book order (1..N), independent of the internal 10001+ ranks,
+// which have gaps from editorial exclusions.
+const BOOK_RANK_BASE = 10000;
+const isBookWord = item => item.r > BOOK_RANK_BASE;
+let bookSerial = new Map();
+const serialLabel = item => isBookWord(item)
+  ? `ספר #${(bookSerial.get(item.r) || item.r - BOOK_RANK_BASE).toLocaleString('he-IL')}`
+  : `#${item.r.toLocaleString('he-IL')}`;
 function onVocabReady() {
   rankOf = new Map(vocab.map(v => [v.w, v.r]));
   wordByLower = new Map(vocab.map(v => [v.w.toLowerCase(), v]));
+  bookSerial = new Map(vocab.filter(isBookWord).sort((a, b) => a.r - b.r).map((v, i) => [v.r, i + 1]));
+  if (bands.current > maxBand()) setBand(maxBand()); // clamp bands saved when book words counted as levels
   $('vocabCount').textContent = vocab.length.toLocaleString('he-IL');
   renderBandSelect();
   refreshHome(); renderLibrary();
@@ -89,12 +100,17 @@ function onVocabReady() {
 }
 
 /* ---------- Bands ---------- */
-const maxBand = () => Math.max(1, Math.ceil(vocab.length / BAND_SIZE));
+// Book words are a separate series, never a level (user request, 26.10):
+// the band ladder spans only the regular rank-ordered words.
+const maxBand = () => Math.max(1, Math.ceil(vocab.filter(v => !isBookWord(v)).length / BAND_SIZE));
 const bandLo = b => (b - 1) * BAND_SIZE + 1;
 const bandHi = b => (vocab.length ? Math.min(b * BAND_SIZE, vocab.length) : b * BAND_SIZE);
 const inCurrentBand = v => v.r >= bandLo(bands.current) && v.r <= bands.current * BAND_SIZE;
 const bandLabel = () => `רמה ${bands.current} · מילים ${bandLo(bands.current).toLocaleString('he-IL')}–${bandHi(bands.current).toLocaleString('he-IL')}`;
 function recordBandAnswer(ok, rank) {
+  // Book words carry no level advancement (user clarification, 26.10): their
+  // answers never enter band or thousand windows.
+  if (rank > BOOK_RANK_BASE) return;
   const thousand = Math.floor((bands.current - 1) / 10);
   if (!(rank > thousand * 1000 && rank <= (thousand + 1) * 1000)) return;
   bands.thousandRecent = [...(bands.thousandRecent || []), ok ? 1 : 0].slice(-100);
@@ -166,7 +182,7 @@ function buildQueue() {
     if (settings.sortScope === 'book' && bookSortAvailable()) {
       return unsorted.filter(v => bookCountFor(v.r) > 0).sort((a, b) => (bookCountFor(b.r) - bookCountFor(a.r)) || (a.r - b.r));
     }
-    return unsorted.sort((a, b) => a.r - b.r);
+    return unsorted.sort((a, b) => (isBookWord(a) ? 0 : 1) - (isBookWord(b) ? 0 : 1) || a.r - b.r);
   }
   // Learned words are never queued again; their records stay, they simply
   // leave the rotation. Before the learning pool fills, sessions introduce
@@ -184,8 +200,17 @@ function buildQueue() {
   // 200-word learning-pool cap above is unchanged.
   const classified = vocab.filter(v => isClassifiedUnknown(progress[v.w]))
     .sort((a, b) => ((progress[a.w].last || 0) - (progress[b.w].last || 0)) || a.r - b.r);
-  const fresh = vocab.filter(v => !progress[v.w] && inCurrentBand(v));
-  const combined = classified.concat(fresh);
+  // Book priority is everywhere (user clarification, 26.10): the whole book
+  // series precedes every regular word, including sort-classified regular
+  // words. Inside the series, explicitly classified book words lead, then the
+  // rest in book order. Band gating and advancement for regular words are
+  // unchanged - book answers never count toward band windows, so this is
+  // priority, not a level jump.
+  const classifiedBook = classified.filter(isBookWord);
+  const classifiedRegular = classified.filter(v => !isBookWord(v));
+  const bookFresh = vocab.filter(v => !progress[v.w] && isBookWord(v)).sort((a, b) => a.r - b.r);
+  const fresh = vocab.filter(v => !progress[v.w] && !isBookWord(v) && inCurrentBand(v));
+  const combined = classifiedBook.concat(bookFresh, classifiedRegular, fresh);
   const want = settings.length === 'all' ? combined.length : settings.length;
   return shuffle(combined.slice(0, want));
 }
@@ -349,7 +374,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v35');
+    const cache = await caches.open('four-words-offline-v36');
     const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
@@ -459,8 +484,10 @@ function cardPointerUp() {
 }
 function renderReviewBadge(item) {
   const badge = $('reviewBadge');
-  const reviewing = !inCurrentBand(item);
-  badge.textContent = reviewing ? `חזרה · רמה ${Math.ceil(item.r / BAND_SIZE)}` : '';
+  // Book cards are never a level jump: they carry a book badge, not a rank band.
+  const book = isBookWord(item);
+  const reviewing = book || !inCurrentBand(item);
+  badge.textContent = book ? 'מהספר' : reviewing ? `חזרה · רמה ${Math.ceil(item.r / BAND_SIZE)}` : '';
   badge.setAttribute('aria-hidden', String(!reviewing));
 }
 function showQuestion() {
@@ -469,7 +496,7 @@ function showQuestion() {
   if (!item) return finishSession();
   $('progressText').textContent = `מילה ${session.index + 1} מתוך ${session.queue.length}`;
   $('progressBar').style.width = `${(session.index / session.queue.length) * 100}%`;
-  $('serial').textContent = `#${item.r.toLocaleString('he-IL')}`;
+  $('serial').textContent = serialLabel(item);
   renderReviewBadge(item);
   $('hint').textContent = ''; $('hint').className = 'hint';
   $('quizCard').classList.remove('reviewing', 'answering-correct');
@@ -518,7 +545,7 @@ function showQuestion() {
     // front; the top counter is the compact "current / total" form.
     $('progressText').textContent = `${session.index + 1} / ${session.queue.length}`;
     $('fcWord').textContent = item.w;
-    $('fcSerial').textContent = `#${item.r.toLocaleString('he-IL')}`;
+    $('fcSerial').textContent = serialLabel(item);
     fitFcWord();
     $('fcMeaning').textContent = content.meaning;
     $('fcExample').textContent = content.example || '';
@@ -665,7 +692,7 @@ function renderLibrary(reset = true) {
     const row = document.createElement('div');
     row.className = 'word-item';
     const level = isClassifiedUnknown(p) ? '⏳' : (p.r + p.w) === 0 ? '☆' : p.s >= 4 ? '★★★' : p.s >= 2 ? '★★' : p.s >= 1 ? '★' : '☆';
-    row.innerHTML = `<span class="rank">#${v.r.toLocaleString('he-IL')}</span><span class="w"></span><span class="t"></span><span class="level" aria-label="רמת שליטה">${level}</span><button class="speak" aria-label="השמעה">${iconMarkup('volume')}</button>`;
+    row.innerHTML = `<span class="rank">${serialLabel(v)}</span><span class="w"></span><span class="t"></span><span class="level" aria-label="רמת שליטה">${level}</span><button class="speak" aria-label="השמעה">${iconMarkup('volume')}</button>`;
     row.querySelector('.w').textContent = v.w;
     row.querySelector('.t').textContent = v.t;
     row.querySelector('.speak').addEventListener('click', () => speak(v.w));
@@ -714,7 +741,7 @@ async function openWordSheet(surface, span) {
   if (!wordSheetOpen) wordSheetTrigger = document.activeElement;
   wordSheetOpen = true; wordSheetItem = item; wordSheetSpan = span || null;
   $('wordSheetWord').textContent = item ? item.w : surface;
-  $('wordSheetSerial').textContent = item ? `#${item.r.toLocaleString('he-IL')}` : '';
+  $('wordSheetSerial').textContent = item ? serialLabel(item) : '';
   const inflected = item && normalizeBookWord(surface) !== item.w.toLowerCase();
   $('wordSheetFormRow').classList.toggle('hidden', !inflected);
   if (inflected) $('wordSheetForm').textContent = surface;
@@ -778,7 +805,7 @@ function addDetailSection(parent, title, nodes) {
 async function openDetails(item) {
   const body = $('detailBody');
   if (!sheetOpen) sheetTrigger = document.activeElement;
-  $('detailWord').textContent = item.w; $('detailSerial').textContent = `#${item.r.toLocaleString('he-IL')}`;
+  $('detailWord').textContent = item.w; $('detailSerial').textContent = serialLabel(item);
   $('detailTranslation').textContent = wordContent(item).meaning;
   $('detailSpeak').onclick = () => speak(item.w);
   body.replaceChildren(); const loading = document.createElement('p'); loading.className = 'detail-empty'; loading.textContent = 'טוען…'; body.append(loading);
