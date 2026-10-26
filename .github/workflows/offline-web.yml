@@ -24,6 +24,7 @@ jobs:
       - run: node scripts/learning-rule-browser.test.cjs
       - run: node scripts/pool-cycle-browser.test.cjs
       - run: node scripts/flashcards-browser.test.cjs
+      - run: node scripts/sort-mode-browser.test.cjs
       - run: node scripts/feedback-layout-browser.test.cjs --screenshots test-results/feedback
       - run: node scripts/safe-area-browser.test.cjs --screenshots test-results/safe-area
       - run: node scripts/sense-examples-browser.test.cjs
