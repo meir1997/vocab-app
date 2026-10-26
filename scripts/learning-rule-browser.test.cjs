@@ -65,7 +65,7 @@ async function countsAndReadOnlyDerivation() {
         stats: document.getElementById('statsLearned').textContent,
         learningNote: document.getElementById('learningNote').textContent,
         queueLength: queue.length,
-        allNewCurrentBand: queue.every(item => inCurrentBand(item) && !isAttempted(progress[item.w])),
+        allBookFresh: queue.every(item => isBookWord(item) && !isAttempted(progress[item.w])),
         intervals: [...INTERVALS],
         inMemoryProgress: JSON.stringify(progress),
         firebaseReady: fb.ready,
@@ -85,14 +85,26 @@ async function countsAndReadOnlyDerivation() {
     assert.equal(result.stats, '15');
     assert.match(result.learningNote, /190\/200/);
     assert.equal(result.queueLength, 20, 'queue has no reserved learning slots');
-    assert.equal(result.allNewCurrentBand, true, 'freed capacity admits new current-band words');
+    assert.equal(result.allBookFresh, true, 'freed capacity admits the unsorted book words first');
     assert.deepEqual(result.predicates, [false, false, true, false, true]);
     assert.deepEqual(result.intervals, [1, 3, 7, 14, 30]);
     assert.equal(result.inMemoryProgress, seeded['fw.progress.v2'], 'derivation leaves every answer and next-review date intact');
     assert.equal(result.firebaseReady, false);
     const stored = await page.evaluate(keys => Object.fromEntries(keys.map(key => [key, localStorage.getItem(key)])), keys);
     assert.deepEqual(stored, seeded, 'counting, rendering and queue building perform no data migration or history writes');
-    console.log('PASS isolated counts: learned 5 -> 15; learning 200 -> 190; attempted 205 unchanged; 20 new current-band words admitted; stored history/dates/settings/stats/bands unchanged');
+    // Book priority is an ordering, not a replacement: once the book words are
+    // learned, the same freed capacity admits new current-band words as before.
+    const afterBook = await page.evaluate(() => {
+      for (const item of vocab.filter(isBookWord)) progress[item.w] = { r: 1, w: 0, s: 1, next: Date.now() };
+      const queue = buildQueue();
+      return {
+        allNewCurrentBand: queue.every(item => inCurrentBand(item) && !isAttempted(progress[item.w])),
+        noBook: queue.every(item => !isBookWord(item))
+      };
+    });
+    assert.equal(afterBook.allNewCurrentBand, true, 'with the book series learned, freed capacity admits new current-band words');
+    assert.equal(afterBook.noBook, true, 'learned book words never re-enter the queue');
+    console.log('PASS isolated counts: learned 5 -> 15; learning 200 -> 190; attempted 205 unchanged; book words admitted first, band words after; stored history/dates/settings/stats/bands unchanged');
   } finally { await context.close(); }
 }
 
@@ -185,11 +197,54 @@ async function laterMissRestoresExistingRule() {
   } finally { await context.close(); }
 }
 
+// Book series (user request + clarification, 26.10): book words carry their
+// own contiguous numbering, enter practice first, and a streak of correct
+// book answers never advances the level.
+async function bookNumberingPriorityAndNoLevelJump() {
+  const { context, page, seeded } = await isolatedPage({});
+  try {
+    const result = await page.evaluate(() => {
+      const serial = rank => serialLabel(vocab.find(item => item.r === rank));
+      const before = { current: bands.current, recent: bands.recent.length, thousand: (bands.thousandRecent || []).length };
+      const bookWord = vocab.find(item => item.r === 10001).w;
+      for (let i = 0; i < 12; i++) markWord(bookWord, true); // a full correct streak inside the book series
+      const after = { current: bands.current, recent: bands.recent.length, thousand: (bands.thousandRecent || []).length };
+      renderReviewBadge(vocab.find(item => item.r === 10001));
+      const bookBadge = document.getElementById('reviewBadge').textContent;
+      bands.current = 5;
+      renderReviewBadge(vocab.find(item => item.r === 1));
+      const reviewBadge = document.getElementById('reviewBadge').textContent;
+      return {
+        first: serial(10001),
+        afterHole: serial(11125), // rank 11124 was excluded editorially; the series must not show a gap
+        last: serial(11128),
+        regular: serial(1),
+        before, after, bookBadge, reviewBadge,
+        maxBand: maxBand(),
+        bookRecord: progress[bookWord]
+      };
+    });
+    assert.equal(result.first, 'ספר #1', 'book series starts at its own 1');
+    assert.equal(result.afterHole, `ספר #${(1124).toLocaleString('he-IL')}`, 'numbering closes over the editorially excluded rank');
+    assert.equal(result.last, `ספר #${(1127).toLocaleString('he-IL')}`, 'series ends at the book word count');
+    assert.equal(result.regular, '#1', 'regular words keep rank numbering');
+    assert.deepEqual(result.after, result.before, 'a correct streak inside the book series never enters band or thousand windows');
+    assert.deepEqual({ r: result.bookRecord.r, s: result.bookRecord.s }, { r: 12, s: 12 }, 'book answers still score learning progress');
+    assert.equal(result.bookBadge, 'מהספר', 'book words carry a book badge, never a level badge');
+    assert.equal(result.reviewBadge, 'חזרה · רמה 1', 'regular out-of-band words keep the review badge');
+    assert.equal(result.maxBand, 100, 'the level ladder spans only the 9,998 regular words');
+    const stored = await page.evaluate(keys => Object.fromEntries(keys.map(key => [key, localStorage.getItem(key)])), ['fw.progress.v2', 'fw.bands.v1']);
+    assert.equal(stored['fw.bands.v1'], seeded['fw.bands.v1'], 'book practice leaves stored bands untouched');
+    console.log('PASS book series: contiguous ספר #1..#1,127, correct streaks score learning but never advance levels, מהספר badge');
+  } finally { await context.close(); }
+}
+
 (async () => {
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   base = `http://127.0.0.1:${server.address().port}/vocab-app/`;
   browser = await chromium.launch({ args: ['--no-sandbox'], ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH } : {}) });
   await countsAndReadOnlyDerivation();
+  await bookNumberingPriorityAndNoLevelJump();
   await noReservationAndDynamicCap();
   await fullCapBlocksNewWords();
   await laterMissRestoresExistingRule();

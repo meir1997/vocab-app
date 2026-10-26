@@ -61,7 +61,11 @@ const expectedBookQueue = progress => allWords
   .filter(v => !progress[v.w] && (counts[v.r] || 0) > 0)
   .sort((a, b) => ((counts[b.r] - counts[a.r]) || (a.r - b.r)))
   .map(v => v.w);
-const expectedAllQueue = progress => allWords.filter(v => !progress[v.w]).sort((a, b) => a.r - b.r).map(v => v.w);
+// Book priority applies to sorting too (user clarification, 26.10): the 'all'
+// scope leads with the book series in book order, then regular rank order.
+const byAnyRank = rank => allWords.find(word => word.r === rank);
+const expectedAllQueue = progress => allWords.filter(v => !progress[v.w])
+  .sort((a, b) => ((a.r > 10000 ? 0 : 1) - (b.r > 10000 ? 0 : 1)) || (a.r - b.r)).map(v => v.w);
 
 async function bookScopeOrder() {
   const progress = {};
@@ -94,12 +98,13 @@ async function allScopeRankOrder() {
     await page.waitForFunction(() => session.active);
     const queue = await page.evaluate(() => session.queue.map(item => item.w));
     const expected = expectedAllQueue(progress);
-    assert.deepEqual(queue, expected, 'all scope: every unsorted word in rank order');
+    assert.deepEqual(queue, expected, 'all scope: book series first, then every unsorted word in rank order');
     assert.ok(queue.includes(byRank(50).w), 'words outside the current band are included');
     assert.ok(!queue.includes(byRank(1).w) && !queue.includes(byRank(11).w), 'graded and classified words are excluded');
-    assert.equal(queue[0], byRank(12).w, 'starts at the first unsorted rank');
+    assert.equal(queue[0], byAnyRank(10001).w, 'starts at the first unsorted book word');
+    assert.equal(queue[1127], byRank(12).w, 'the regular series follows the whole book block, in rank order');
   } finally { await context.close(); }
-  console.log('PASS sort all scope: rank order, no band gate, graded/classified excluded');
+  console.log('PASS sort all scope: book priority then rank order, no band gate, graded/classified excluded');
 }
 
 async function gradeRightScoresKnown() {
@@ -140,7 +145,7 @@ async function gradeLeftClassifies() {
     assert.ok(!remaining.includes(word), 'classified word leaves the sort queue');
     // The waiting-not-known status is visible: the library marks the word.
     const level = await page.evaluate(w => {
-      libFilter = ''; renderLibrary();
+      libFilter = w; renderLibrary(); // book words sort last in the library; filter to find the row
       const row = [...document.querySelectorAll('.word-item')].find(r => r.querySelector('.w').textContent === w);
       return row ? row.querySelector('.level').textContent : null;
     }, word);
@@ -181,20 +186,21 @@ async function resumeAcrossSessions() {
   } finally { await firstRun.context.close(); }
   const saved = {};
   for (let rank = 1; rank <= 5; rank++) saved[byRank(rank).w] = learnedRec();
-  saved[byRank(6).w] = { r: 1, w: 0, s: 1, next: past, last: past };
-  saved[byRank(7).w] = { r: 0, w: 0, s: 0, u: 1, last: past };
+  saved[byAnyRank(10001).w] = { r: 1, w: 0, s: 1, next: past, last: past };
+  saved[byAnyRank(10002).w] = { r: 0, w: 0, s: 0, u: 1, last: past };
   const secondRun = await isolatedPage(saved, { mode: 'sort', sortScope: 'all' });
   try {
     await secondRun.page.locator('#startBtn').click();
     await secondRun.page.waitForFunction(() => session.active);
     const first = await secondRun.page.evaluate(() => session.queue[session.index].w);
-    assert.equal(first, byRank(8).w, 'a later session resumes at the next unsorted word');
+    assert.equal(first, byAnyRank(10003).w, 'a later session resumes at the next unsorted book word');
   } finally { await secondRun.context.close(); }
   console.log('PASS sort resume: graded words stay sorted, queue continues in order');
 }
 
 async function admissionPriorityAndCap() {
-  // Room in the pool: the classified word enters practice even outside the band.
+  // Book priority is everywhere (user clarification, 26.10): with room in the
+  // pool, the book series fills sessions ahead of a classified regular word.
   const room = {};
   for (let rank = 1; rank <= 190; rank++) room[byRank(rank).w] = learningRec(rank * 1000);
   room[byRank(5000).w] = { r: 0, w: 0, s: 0, u: 1, last: past };
@@ -203,8 +209,32 @@ async function admissionPriorityAndCap() {
     await page.locator('#startBtn').click();
     await page.waitForFunction(() => session.active);
     const queue = await page.evaluate(() => session.queue.map(item => item.w));
-    assert.ok(queue.includes(byRank(5000).w), 'classified word is admitted ahead of band-gated fresh words');
+    assert.ok(queue.every(w => bookWords.some(b => b.w === w)), 'the book series fills the session first');
+    assert.ok(!queue.includes(byRank(5000).w), 'a classified regular word waits behind the book series');
   } finally { await context.close(); }
+  // Once the book series is graded, the classified regular word keeps its
+  // priority over band-gated fresh words.
+  const afterBook = {};
+  for (const b of bookWords) afterBook[b.w] = learnedRec();
+  for (let rank = 1; rank <= 190; rank++) afterBook[byRank(rank).w] = learningRec(rank * 1000);
+  afterBook[byRank(5000).w] = { r: 0, w: 0, s: 0, u: 1, last: past };
+  const secondRun = await isolatedPage(afterBook, { mode: 'choice' });
+  try {
+    await secondRun.page.locator('#startBtn').click();
+    await secondRun.page.waitForFunction(() => session.active);
+    const queue = await secondRun.page.evaluate(() => session.queue.map(item => item.w));
+    assert.ok(queue.includes(byRank(5000).w), 'classified regular word admitted ahead of band-gated fresh words once the book series is graded');
+  } finally { await secondRun.context.close(); }
+  // A classified book word leads the book series itself.
+  const flaggedBook = {};
+  flaggedBook[byAnyRank(10050).w] = { r: 0, w: 0, s: 0, u: 1, last: past };
+  const thirdRun = await isolatedPage(flaggedBook, { mode: 'choice' });
+  try {
+    await thirdRun.page.locator('#startBtn').click();
+    await thirdRun.page.waitForFunction(() => session.active);
+    const queue = await thirdRun.page.evaluate(() => session.queue.map(item => item.w));
+    assert.ok(queue.includes(byAnyRank(10050).w), 'a classified book word leads the book series');
+  } finally { await thirdRun.context.close(); }
   // Full pool: the cap holds, the classified word waits.
   const full = {};
   for (let rank = 1; rank <= 200; rank++) full[byRank(rank).w] = learningRec(rank * 1000);
@@ -218,7 +248,7 @@ async function admissionPriorityAndCap() {
     assert.ok(!queue.includes(byRank(5000).w), 'a full pool keeps the classified word waiting');
     assert.ok(queue.every(w => full[w].s < 2 && full[w].r + full[w].w > 0), 'only pool words are cycled');
   } finally { await second.context.close(); }
-  console.log('PASS admission: classified words enter with room, wait when the 200 pool is full');
+  console.log('PASS admission: book series first everywhere, classified book words lead it, classified regular words follow; the full 200 pool keeps everyone waiting');
 }
 
 async function defaultScopeIsAllRankOrder() {
@@ -227,12 +257,12 @@ async function defaultScopeIsAllRankOrder() {
     await page.locator('#startBtn').click();
     await page.waitForFunction(() => session.active);
     const result = await page.evaluate(() => ({ first: session.queue[0].w, length: session.queue.length, band: document.getElementById('quizBandLabel').textContent, bookOptionDisabled: document.querySelector('#sortScopeSelect option[value="book"]').disabled }));
-    assert.equal(result.first, byRank(1).w, 'default scope starts at rank 1');
+    assert.equal(result.first, byAnyRank(10001).w, 'default scope starts with the book series');
     assert.equal(result.length, allWords.length, 'default scope covers every unsorted word');
     assert.ok(result.band.includes('לפי הסדר'), 'default label is rank order');
     assert.equal(result.bookOptionDisabled, false, 'book scope offered when a book is loaded');
   } finally { await context.close(); }
-  console.log('PASS default scope: all words by rank, book scope optional');
+  console.log('PASS default scope: book series first, then all words by rank; book scope optional');
 }
 
 async function main() {

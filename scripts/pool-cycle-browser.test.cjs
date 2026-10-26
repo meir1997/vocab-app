@@ -61,7 +61,7 @@ async function noRepeatsBeforePoolFills() {
       return {
         length: queue.length,
         allFresh: queue.every(item => !isAttempted(progress[item.w])),
-        allInBand: queue.every(item => inCurrentBand(item)),
+        allBook: queue.every(item => isBookWord(item)),
         due: dueCount(),
         learned: learnedCount(),
         learning: learningCount()
@@ -69,12 +69,12 @@ async function noRepeatsBeforePoolFills() {
     });
     assert.equal(result.length, 20, 'session fills with 20 new words');
     assert.ok(result.allFresh, 'no attempted word repeats before the pool fills');
-    assert.ok(result.allInBand, 'new words come from the current band');
+    assert.ok(result.allBook, 'the unsorted book series is admitted before band-gated words');
     assert.equal(result.due, 0, 'nothing counts as due during ramp-up');
     assert.equal(result.learned, 30);
     assert.equal(result.learning, 50);
   } finally { await context.close(); }
-  console.log('PASS before 200 in learning: new words only, no repeats, nothing due');
+  console.log('PASS before 200 in learning: book words first, no repeats, nothing due');
 }
 
 async function fullPoolCyclesInOrder() {
