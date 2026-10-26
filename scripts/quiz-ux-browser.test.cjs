@@ -222,6 +222,29 @@ async function simpleWordCardAndLongWords() {
   console.log('PASS main example first, collapsed reference material, card focus, desktop/390px/320px long-word containment');
 }
 
+// Flashcard word wrap (user report, 26.10): on iPhone the card front broke
+// "gamekeeper" as gamekeepe/r. overflow-wrap:anywhere wrapped the word before
+// scrollWidth could overflow, so the shrink loop never ran. The card word must
+// be measured unwrapped (like fitWord) and fitted on one line at phone widths.
+async function flashcardWordStaysOneLine() {
+  for (const viewport of [{ width: 390, height: 844 }, { width: 320, height: 568 }]) {
+    const { page, context } = await newPage(viewport);
+    try {
+      await seedQuestion(page, 'cards', ['incomprehensible', 'run', 'light']);
+      await page.waitForFunction(() => document.getElementById('fcWord').textContent === 'incomprehensible');
+      const fitted = await page.locator('#fcWord').evaluate(el => {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        return { whiteSpace: getComputedStyle(el).whiteSpace, lines: range.getClientRects().length, overflow: el.scrollWidth - el.clientWidth };
+      });
+      assert.equal(fitted.whiteSpace, 'nowrap', 'card word is measured without wrapping');
+      assert.equal(fitted.lines, 1, 'long card word stays on one line');
+      assert.ok(fitted.overflow <= 1, 'long card word fits its line box');
+    } finally { await context.close(); }
+  }
+  console.log('PASS flashcard long words stay on one fitted line at 390px and 320px');
+}
+
 // iPhone speaker fix (user report, 26.10): iOS WebKit drops an utterance
 // spoken synchronously after cancel(), leaving every tap silent. The app must
 // cancel first, speak on a short delay, and resume the queue; rapid taps
@@ -313,6 +336,7 @@ async function preservedLearningRules() {
   await unambiguousChoicesAndContext();
   await feedbackAndContinuation();
   await simpleWordCardAndLongWords();
+  await flashcardWordStaysOneLine();
   await speakerPlaysWord();
   await preservedLearningRules();
 })().catch(error => {
