@@ -355,6 +355,46 @@ async function preservedLearningRules() {
   console.log('PASS 100-word levels, 7/10 threshold, 70/100 thousand skip, untouched unseen progress, 200-word learning cap');
 }
 
+async function libraryCategoryPicker() {
+  // Library category picker (user request, 26.10): choose all words, the
+  // book, or one hundred-word band; the list scrolls through the category
+  // and search composes with it.
+  const { page, context } = await newPage();
+  try {
+    await page.locator('.tab-btn[data-tab="library"]').click();
+    await page.waitForFunction(() => document.querySelectorAll('#libraryList .word-item').length > 0);
+    const optionCount = await page.locator('#libCatSelect option').count();
+    assert.equal(optionCount, 102, 'all + book + 100 bands');
+    // Band 1: exactly the first hundred, in rank order, paged.
+    await page.selectOption('#libCatSelect', '1');
+    await page.waitForFunction(() => document.querySelector('#libraryCount').textContent.includes('רמה 1'));
+    const bandOne = await page.evaluate(() => ({
+      count: document.querySelector('#libraryCount').textContent,
+      ranks: [...document.querySelectorAll('#libraryList .word-item .rank')].map(el => el.textContent)
+    }));
+    assert.ok(bandOne.count.startsWith('100 '), 'band 1 lists its hundred words');
+    assert.equal(bandOne.ranks.length, 60, 'first page renders sixty rows');
+    assert.equal(bandOne.ranks[0], '#1', 'band 1 starts at rank 1');
+    assert.equal(bandOne.ranks[59], '#60', 'band 1 rows are its ranks in order');
+    // The book category lists book words with their book serials.
+    await page.selectOption('#libCatSelect', 'book');
+    await page.waitForFunction(() => document.querySelector('#libraryCount').textContent.includes('הספר'));
+    const bookFirst = await page.evaluate(() => document.querySelector('#libraryList .word-item .rank').textContent);
+    assert.ok(bookFirst.includes('ספר #1'), 'book category starts at book serial 1');
+    // Search composes with the chosen category.
+    await page.selectOption('#libCatSelect', '1');
+    await page.fill('#searchInput', 'the');
+    await page.waitForFunction(() => document.querySelector('#libraryCount').textContent.includes('"the"'));
+    const hits = await page.evaluate(() => [...document.querySelectorAll('#libraryList .word-item .w')].map(el => el.textContent));
+    assert.ok(hits.length > 0 && hits.every(w => w.toLowerCase().includes('the')), 'search stays inside the chosen band');
+    // Back to all words.
+    await page.selectOption('#libCatSelect', 'all');
+    await page.fill('#searchInput', '');
+    await page.waitForFunction(() => !document.querySelector('#libraryCount').textContent.includes('רמה') && !document.querySelector('#libraryCount').textContent.includes('הספר'));
+  } finally { await context.close(); }
+  console.log('PASS library category picker: band/book categories scroll their words, search composes');
+}
+
 (async () => {
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   base = `http://127.0.0.1:${server.address().port}/vocab-app/`;
@@ -369,6 +409,7 @@ async function preservedLearningRules() {
   await flashcardWordStaysOneLine();
   await speakerPlaysWord();
   await preservedLearningRules();
+  await libraryCategoryPicker();
 })().catch(error => {
   console.error(error);
   process.exitCode = 1;
