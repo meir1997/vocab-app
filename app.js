@@ -379,7 +379,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v40');
+    const cache = await caches.open('four-words-offline-v41');
     const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
@@ -1165,6 +1165,15 @@ $('modeBtn').addEventListener('click', () => switchTab('settings'));
 function switchTab(name) { document.querySelector(`.tab-btn[data-tab="${name}"]`).click(); }
 $('searchInput').addEventListener('input', e => { libFilter = e.target.value.trim(); renderLibrary(); });
 $('libCatSelect').addEventListener('change', e => { libCategory = e.target.value; renderLibrary(); });
+// Category words must be reachable by scrolling alone (user request, 26.10):
+// the next page loads automatically as the list bottom approaches. The "show
+// more" button stays as a fallback when IntersectionObserver is unavailable.
+if ('IntersectionObserver' in window) {
+  const libAutoLoad = new IntersectionObserver(entries => {
+    if (entries.some(e => e.isIntersecting) && !$('moreBtn').classList.contains('hidden')) renderLibrary(false);
+  }, { rootMargin: '600px' });
+  libAutoLoad.observe($('moreBtn'));
+}
 $('moreBtn').addEventListener('click', () => renderLibrary(false));
 $('goalSelect').addEventListener('change', e => { settings.goal = Number(e.target.value); persist(); refreshHome(); });
 $('lengthSelect').addEventListener('change', e => { settings.length = e.target.value === 'all' ? 'all' : Number(e.target.value); persist(); refreshHome(); });
