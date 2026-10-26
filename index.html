@@ -67,10 +67,12 @@
 
         <div id="quizCard" class="hidden">
           <div class="quiz-head">
+            <button class="round-btn card-chrome" id="cardClose" aria-label="סיום התרגול"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#icon-close"/></svg></button>
             <span class="chip" id="sessionLabel">20 מילים</span>
             <span class="chip" id="quizBandLabel">רמה 1</span>
             <span class="review-badge" id="reviewBadge" aria-hidden="true"></span>
             <span id="progressText" class="progress-text">מילה 1 מתוך 20</span>
+            <button class="round-btn card-chrome" id="cardGear" aria-label="הגדרות"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#icon-settings"/></svg></button>
           </div>
           <div class="progress-track"><div class="progress-fill" id="progressBar"></div></div>
           <p class="prompt-label" id="promptLabel">מה התרגום של</p>
@@ -83,9 +85,14 @@
           <p id="questionContext" class="question-context hidden" lang="en" dir="ltr"></p>
           <div class="answers" id="answers"></div>
           <div id="flashcardBox" class="flashcard-box hidden">
+            <span class="side-pill pill-know" id="pillKnow" aria-hidden="true">0</span>
+            <span class="side-pill pill-dont" id="pillDont" aria-hidden="true">0</span>
             <div class="flashcard" id="flashcard" role="button" tabindex="0" aria-label="כרטיסיה, הקישו לחשיפת התרגום">
               <div class="fc-face fc-front">
-                <span class="fc-question" aria-hidden="true">?</span>
+                <button class="fc-corner fc-corner-l" id="fcSpeak" aria-label="השמעת המילה"><svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#icon-volume"/></svg></button>
+                <button class="fc-corner fc-corner-r" id="fcInfo" aria-label="פרטים על המילה"><svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#icon-info"/></svg></button>
+                <span class="fc-word" id="fcWord" lang="en" dir="ltr"></span>
+                <span class="fc-serial" id="fcSerial"></span>
                 <span class="fc-hint">הקישו לחשיפת התרגום</span>
               </div>
               <div class="fc-face fc-back">

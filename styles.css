@@ -79,6 +79,9 @@ body {
 
 /* Quiz */
 .quiz-head { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: center; margin-bottom: 12px; }
+.round-btn { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border); background: #fff; color: var(--muted); cursor: pointer; padding: 0; }
+.round-btn:hover { color: var(--text); }
+.card-chrome { display: none; }
 .quiz-head .chip { cursor: default; white-space: nowrap; width: fit-content; }
 #quizBandLabel { grid-column: 1 / -1; grid-row: 2; font-size: 12px; padding: 6px 10px; }
 .review-badge { grid-column: 2; grid-row: 2; justify-self: end; color: var(--muted); background: #f2f4fb; border-radius: 7px; padding: 3px 7px; font-size: 11px; font-weight: 700; white-space: nowrap; }
@@ -141,6 +144,43 @@ body {
 .cards-mode .quiz-footer > * { flex: 1; margin-top: 0; }
 .cards-mode .quiz-footer .hint { display: none; }
 .cards-mode #knowBtn { order: -1; }
+
+/* Card session chrome (redesign 26.10, reference image): immersive white
+   card, X / counter / gear on top, side pills count the session grades. */
+#quizCard.cards-mode { grid-template-rows: 52px 12px 0 0 0 minmax(340px, 50vh) 48px; }
+.cards-mode .prompt-label, .cards-mode .word-row, .cards-mode .question-context { display: none; }
+.cards-mode .quiz-head { grid-template-columns: auto 1fr auto; }
+.cards-mode #sessionLabel, .cards-mode #quizBandLabel, .cards-mode #reviewBadge { display: none; }
+.cards-mode .card-chrome { display: inline-flex; }
+.cards-mode #cardGear { grid-column: 1; grid-row: 1; }
+.cards-mode #progressText { grid-column: 2; grid-row: 1; justify-self: center; font-size: 16px; color: var(--text); direction: ltr; }
+.cards-mode #cardClose { grid-column: 3; grid-row: 1; }
+.cards-mode .flashcard-box { position: relative; height: auto; min-height: 0; margin-top: 0; padding-inline: 24px; }
+.flashcard-box .side-pill { display: none; }
+.cards-mode .side-pill { display: block; position: absolute; top: 14px; z-index: 0; padding: 4px 10px; font-size: 14px; font-weight: 800; border-radius: 999px; border: 1px solid; }
+.cards-mode .pill-know { right: 0; background: #e9f9ef; color: #15803d; border-color: #b8ebc9; }
+.cards-mode .pill-dont { left: 0; background: #fdf1e7; color: #c2610c; border-color: #f3d5b5; }
+.cards-mode .flashcard { position: relative; z-index: 1; border-radius: 24px; background: #fff; border: 1px solid var(--border); box-shadow: 0 10px 28px rgba(15, 23, 42, .07); }
+.cards-mode #knowBtn { background: #16a34a; border-color: #16a34a; }
+.cards-mode #dontKnowBtn { color: #c2610c; border: 1px solid #f3d5b5; background: #fdf1e7; }
+.cards-mode .fc-face { background: #fff; border: 0; border-radius: 24px; gap: 8px; }
+.cards-mode .fc-back { background: var(--accent-soft); }
+.fc-corner { position: absolute; top: 12px; display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border: 0; background: none; color: var(--muted); cursor: pointer; padding: 0; }
+.fc-corner:hover { color: var(--accent); }
+.fc-corner-l { left: 12px; }
+.fc-corner-r { right: 12px; }
+.fc-word { font-size: 32px; font-weight: 750; color: var(--text); text-align: center; padding: 0 52px; overflow-wrap: anywhere; line-height: 1.25; }
+.fc-serial { font-size: 12.5px; color: var(--muted); font-weight: 700; }
+.fc-front .fc-hint { position: absolute; bottom: 12px; }
+@media (max-width: 600px) {
+  #quizCard.cards-mode { grid-template-rows: 44px 10px 0 0 0 minmax(320px, 50vh) 44px; }
+  .fc-word { font-size: 28px; }
+}
+@media (min-width: 960px) {
+  #quizCard.cards-mode { grid-template-columns: minmax(0, 1fr); grid-template-rows: 52px 14px 0 0 0 minmax(380px, 52vh) 48px; }
+  .cards-mode .flashcard-box { grid-area: 6 / 1; max-width: 560px; width: 100%; justify-self: center; }
+  .cards-mode .quiz-footer { grid-area: 7 / 1; max-width: 560px; width: 100%; justify-self: center; }
+}
 .typing-box { display: flex; gap: 10px; margin-top: 10px; }
 .typing-box input {
   flex: 1; min-width: 0; width: 0; border: 2px solid #dfe4f2; border-radius: 16px; padding: 14px; font-size: 17px; background: #fff;

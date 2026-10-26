@@ -349,7 +349,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v34');
+    const cache = await caches.open('four-words-offline-v35');
     const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
@@ -374,6 +374,7 @@ async function startSession() {
   } catch {} // Choices still use Hebrew aliases if details are unavailable.
   finally { clearTimeout(waitTimer); startingSession = false; }
   session = { queue: buildQueue(), index: 0, correct: 0, wrong: 0, active: true };
+  $('pillKnow').textContent = '0'; $('pillDont').textContent = '0';
   $('practiceHome').classList.add('hidden'); $('summary').classList.add('hidden'); $('quizCard').classList.remove('hidden');
   const sorting = settings.mode === 'sort';
   const bookSorting = sorting && settings.sortScope === 'book' && bookSortAvailable();
@@ -390,6 +391,12 @@ function fitWord() {
   while (size > 14 && el.scrollWidth > el.clientWidth) { size -= 2; el.style.fontSize = size + 'px'; }
   // Keep the fitted line intact: re-enabling wrapping can add a line because
   // fractional glyph widths round differently from scrollWidth.
+}
+function fitFcWord() {
+  const el = $('fcWord'); if (!el) return;
+  el.style.fontSize = '';
+  let size = parseFloat(getComputedStyle(el).fontSize) || 32;
+  while (size > 16 && el.scrollWidth > el.clientWidth) { size -= 2; el.style.fontSize = size + 'px'; }
 }
 let cardFlipped = false, cardDrag = null;
 function resetFlashcard() {
@@ -417,6 +424,8 @@ function gradeCard(ok) {
   else markWord(item.w, ok);
   markAnswer(ok);
   if (ok) session.correct++; else session.wrong++;
+  $('pillKnow').textContent = session.correct;
+  $('pillDont').textContent = session.wrong;
   persist(); refreshHome();
   const card = $('flashcard');
   card.classList.add('fly-out');
@@ -505,6 +514,12 @@ function showQuestion() {
   if (cards) {
     $('questionContext').textContent = ''; $('questionContext').classList.add('empty');
     resetFlashcard();
+    // Reference design (user request, 26.10): the word lives on the card
+    // front; the top counter is the compact "current / total" form.
+    $('progressText').textContent = `${session.index + 1} / ${session.queue.length}`;
+    $('fcWord').textContent = item.w;
+    $('fcSerial').textContent = `#${item.r.toLocaleString('he-IL')}`;
+    fitFcWord();
     $('fcMeaning').textContent = content.meaning;
     $('fcExample').textContent = content.example || '';
   }
@@ -570,11 +585,12 @@ function renderAnswerFeedback(item) {
   box.append(label, meaning, word);
   if (content.example) box.append(example);
 }
-function finishSession() {
+function finishSession(early) {
   session.active = false;
   $('quizCard').classList.add('hidden'); $('summary').classList.remove('hidden');
   const total = session.correct + session.wrong;
-  if (settings.mode === 'sort' && total === 0) $('summaryText').textContent = 'כל המילים מוינו — אין כרגע מילים חדשות למיון.';
+  if (early && total === 0) $('summaryText').textContent = 'התרגול הופסק — לא סומנו מילים הפעם.';
+  else if (settings.mode === 'sort' && total === 0) $('summaryText').textContent = 'כל המילים מוינו — אין כרגע מילים חדשות למיון.';
   else if (settings.mode === 'sort') $('summaryText').textContent = `מיינת ${total} מילים: ${session.correct} ידועות, ${session.wrong} מסומנות ללמידה וייכנסו לתרגול כשיתפנה מקום.`;
   else $('summaryText').textContent = `ענית נכון על ${session.correct} מתוך ${total} מילים — ${pct(session.correct, total)} הצלחה.`;
   refreshHome();
@@ -989,6 +1005,14 @@ document.addEventListener('keydown', e => {
   }
 });
 $('speakBtn').addEventListener('click', () => { const item = session.queue[session.index]; if (item) speak(item.w); });
+// Card-mode chrome (redesign 26.10): corner actions must not start a drag or
+// flip the card; X ends the session, the gear opens the settings tab.
+$('fcSpeak').addEventListener('pointerdown', e => e.stopPropagation());
+$('fcSpeak').addEventListener('click', e => { e.stopPropagation(); const item = session.queue[session.index]; if (item) speak(item.w); });
+$('fcInfo').addEventListener('pointerdown', e => e.stopPropagation());
+$('fcInfo').addEventListener('click', e => { e.stopPropagation(); const item = session.queue[session.index]; if (item) openDetails(item); });
+$('cardClose').addEventListener('click', () => { if (session.active) finishSession(true); });
+$('cardGear').addEventListener('click', () => switchTab('settings'));
 $('sessionBtn').addEventListener('click', () => switchTab('settings'));
 $('modeBtn').addEventListener('click', () => switchTab('settings'));
 function switchTab(name) { document.querySelector(`.tab-btn[data-tab="${name}"]`).click(); }
