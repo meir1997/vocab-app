@@ -10,7 +10,7 @@ const readJSON = (key, fb) => { try { return JSON.parse(localStorage.getItem(key
 const save = (key, val) => localStorage.setItem(key, JSON.stringify(val));
 
 let vocab = [];
-let settings = Object.assign({ length: 20, mode: 'choice', goal: 20 }, readJSON(K.settings, {}));
+let settings = Object.assign({ length: 20, mode: 'choice', goal: 20, sortScope: 'all' }, readJSON(K.settings, {}));
 let progress = readJSON(K.progress, {});           // word -> {r,w,s,next}
 let stats = readJSON(K.stats, { days: {}, attempts: 0, correct: 0 });
 /* Bands: practice runs inside one 100-word band by rank. At least 7 correct out
@@ -143,7 +143,21 @@ const isAttempted = p => !!p && (p.r + p.w) > 0;
 const isLearned = p => isAttempted(p) && p.s >= (p.w === 0 ? 1 : 2);
 const isLearning = p => isAttempted(p) && !isLearned(p);
 const learningCount = () => Object.values(progress).filter(isLearning).length;
+// Sort-mode "don't know" writes a classification, not a learning record: the
+// word stays out of the capped learning pool until capped practice admits it.
+const isClassifiedUnknown = p => !!p && p.u > 0 && (p.r + p.w) === 0;
+const isCardMode = () => settings.mode === 'cards' || settings.mode === 'sort';
 function buildQueue() {
+  // Sort mode (user request, 26.10): every word never graded yet, no band
+  // gate, no length cap, no admission check - sorting skips nothing. Book
+  // scope orders by occurrences in the loaded book; 'all' follows rank order.
+  if (settings.mode === 'sort') {
+    const unsorted = vocab.filter(v => !progress[v.w]);
+    if (settings.sortScope === 'book' && bookSortAvailable()) {
+      return unsorted.filter(v => bookCountFor(v.r) > 0).sort((a, b) => (bookCountFor(b.r) - bookCountFor(a.r)) || (a.r - b.r));
+    }
+    return unsorted.sort((a, b) => a.r - b.r);
+  }
   // Learned words are never queued again; their records stay, they simply
   // leave the rotation. Before the learning pool fills, sessions introduce
   // new words only - nothing repeats. Once the pool reaches LEARNING_LIMIT,
@@ -155,11 +169,18 @@ function buildQueue() {
     const want = settings.length === 'all' ? pool.length : settings.length;
     return pool.slice(0, want);
   }
-  const fresh = vocab.filter(v => !isAttempted(progress[v.w]) && inCurrentBand(v));
-  const want = settings.length === 'all' ? fresh.length : settings.length;
-  return shuffle(fresh.slice(0, want));
+  // Sort-classified "don't know" words enter first, oldest classification
+  // first, while the pool has room; band-gated fresh words follow. The
+  // 200-word learning-pool cap above is unchanged.
+  const classified = vocab.filter(v => isClassifiedUnknown(progress[v.w]))
+    .sort((a, b) => ((progress[a.w].last || 0) - (progress[b.w].last || 0)) || a.r - b.r);
+  const fresh = vocab.filter(v => !progress[v.w] && inCurrentBand(v));
+  const combined = classified.concat(fresh);
+  const want = settings.length === 'all' ? combined.length : settings.length;
+  return shuffle(combined.slice(0, want));
 }
 function skipUnadmittedQuestions() {
+  if (settings.mode === 'sort') return; // sorting never skips ungraded words
   let removed = false;
   while (session.queue[session.index] && !isAttempted(progress[session.queue[session.index].w]) && learningCount() >= LEARNING_LIMIT) {
     session.queue.splice(session.index, 1);
@@ -207,7 +228,7 @@ function selectSyncAccount(uid) {
   const stored = readJSON('fw.account.' + (uid || 'guest'), null);
   if (stored || activeUID !== null || uid === null) {
     progress = stored?.progress || {};
-    settings = stored?.settings || { length: 20, mode: 'choice', goal: 20 };
+    settings = stored?.settings || { length: 20, mode: 'choice', goal: 20, sortScope: 'all' };
     stats = stored?.stats || { days: {}, attempts: 0, correct: 0 };
     bands = stored?.bands || { current: 1, recent: [] };
     dirty = stored?.dirty || false; localRevision = stored?.localRevision || 0;
@@ -274,7 +295,7 @@ function mergeRemote(data) {
     stats.days[d] = { a: Math.max(l.a, r.a || 0), c: Math.max(l.c, r.c || 0) };
   });
   if (!dirty && (data.fwUpdatedAt || 0) > (readJSON('fw.settingsTs', 0)) && rs.length !== undefined) {
-    settings = Object.assign({ length: 20, mode: 'choice', goal: 20 }, rs);
+    settings = Object.assign({ length: 20, mode: 'choice', goal: 20, sortScope: 'all' }, rs);
     applySettingsToUI();
   }
   fb.applying = false;
@@ -318,7 +339,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v31');
+    const cache = await caches.open('four-words-offline-v32');
     const required = ['index.html', 'app.js', 'quiz-content.js', 'vocab.json', 'details.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
@@ -326,7 +347,7 @@ async function updateOfflineStatus() {
   } catch { label.textContent = 'שמירה אופליין לא זמינה בדפדפן זה'; }
 }
 /* ---------- Quiz ---------- */
-const MODE_LABELS = { choice: 'בחירה אנגלית ← עברית', reverse: 'בחירה הפוכה', typing: 'הקלדה', cards: 'כרטיסיות' };
+const MODE_LABELS = { choice: 'בחירה אנגלית ← עברית', reverse: 'בחירה הפוכה', typing: 'הקלדה', cards: 'כרטיסיות', sort: 'מיון לפי הסדר' };
 let startingSession = false;
 async function startSession() {
   if (!vocab.length || startingSession) return;
@@ -335,12 +356,19 @@ async function startSession() {
   try {
     // A stalled optional details request must not block locally cached practice.
     await Promise.race([loadDetails(), new Promise(resolve => { waitTimer = setTimeout(resolve, 1200); })]);
+    // Book-scoped sorting needs the occurrence counts; without them the queue
+    // would silently fall back to rank order under a book label.
+    if (settings.mode === 'sort' && settings.sortScope === 'book' && !bookSortAvailable()) {
+      await Promise.race([loadBookFrequency(), new Promise(resolve => setTimeout(resolve, 1200))]);
+    }
   } catch {} // Choices still use Hebrew aliases if details are unavailable.
   finally { clearTimeout(waitTimer); startingSession = false; }
   session = { queue: buildQueue(), index: 0, correct: 0, wrong: 0, active: true };
   $('practiceHome').classList.add('hidden'); $('summary').classList.add('hidden'); $('quizCard').classList.remove('hidden');
-  $('sessionLabel').textContent = settings.length === 'all' ? 'כל הדחופות' : `${session.queue.length} מילים`;
-  $('quizBandLabel').textContent = bandLabel();
+  const sorting = settings.mode === 'sort';
+  const bookSorting = sorting && settings.sortScope === 'book' && bookSortAvailable();
+  $('sessionLabel').textContent = sorting ? `${session.queue.length} מילים למיון` : settings.length === 'all' ? 'כל הדחופות' : `${session.queue.length} מילים`;
+  $('quizBandLabel').textContent = sorting ? (bookSorting ? 'מילים מהספר · בלי דילוגים' : 'לפי הסדר · בלי דילוגים') : bandLabel();
   showQuestion();
 }
 // Shrink the prompt word until it fits on one line; wrapping is the fallback.
@@ -365,15 +393,19 @@ function resetFlashcard() {
   card.classList.remove('no-anim');
 }
 function flipFlashcard() {
-  if (!session.active || settings.mode !== 'cards' || locked) return;
+  if (!session.active || !isCardMode() || locked) return;
   cardFlipped = !cardFlipped;
   $('flashcard').classList.toggle('flipped', cardFlipped);
 }
 function gradeCard(ok) {
-  if (locked || !session.active || settings.mode !== 'cards') return;
+  if (locked || !session.active || !isCardMode()) return;
   locked = true;
   const item = session.queue[session.index];
-  markWord(item.w, ok); markAnswer(ok);
+  // Sort-left is a classification, not a miss: it is not a band answer and
+  // the word waits outside the capped pool until practice admits it.
+  if (settings.mode === 'sort' && !ok) progress[item.w] = { r: 0, w: 0, s: 0, u: 1, last: Date.now() };
+  else markWord(item.w, ok);
+  markAnswer(ok);
   if (ok) session.correct++; else session.wrong++;
   persist(); refreshHome();
   const card = $('flashcard');
@@ -382,7 +414,7 @@ function gradeCard(ok) {
   advanceWhenReady(nextQuestion, 320);
 }
 function cardPointerDown(e) {
-  if (locked || !session.active || settings.mode !== 'cards') return;
+  if (locked || !session.active || !isCardMode()) return;
   cardDrag = { x: e.clientX, dx: 0, moved: false };
   try { $('flashcard').setPointerCapture(e.pointerId); } catch {}
 }
@@ -444,7 +476,7 @@ function showQuestion() {
     $('word').textContent = reverse ? content.meaning : item.w;
     $('word').setAttribute('lang', reverse ? 'he' : 'en'); $('word').dir = reverse ? 'rtl' : 'ltr';
     $('typingBox').classList.add('hidden');
-    if (mode !== 'cards') {
+    if (mode !== 'cards' && mode !== 'sort') {
       VocabQuiz.buildChoices(item, vocab, mode, wordDetails).forEach(choice => {
         const b = document.createElement('button');
         b.className = 'answer'; b.textContent = choice.label; b.dir = reverse ? 'ltr' : 'rtl';
@@ -456,7 +488,7 @@ function showQuestion() {
   }
   // Flashcards: the answer lives behind the card; grading is self-declared,
   // right = know (a correct answer), left = don't know (same as "לא יודע").
-  const cards = mode === 'cards';
+  const cards = mode === 'cards' || mode === 'sort';
   $('quizCard').classList.toggle('cards-mode', cards);
   $('flashcardBox').classList.toggle('hidden', !cards);
   $('knowBtn').classList.toggle('hidden', !cards);
@@ -532,7 +564,9 @@ function finishSession() {
   session.active = false;
   $('quizCard').classList.add('hidden'); $('summary').classList.remove('hidden');
   const total = session.correct + session.wrong;
-  $('summaryText').textContent = `ענית נכון על ${session.correct} מתוך ${total} מילים — ${pct(session.correct, total)} הצלחה.`;
+  if (settings.mode === 'sort' && total === 0) $('summaryText').textContent = 'כל המילים מוינו — אין כרגע מילים חדשות למיון.';
+  else if (settings.mode === 'sort') $('summaryText').textContent = `מיינת ${total} מילים: ${session.correct} ידועות, ${session.wrong} מסומנות ללמידה וייכנסו לתרגול כשיתפנה מקום.`;
+  else $('summaryText').textContent = `ענית נכון על ${session.correct} מתוך ${total} מילים — ${pct(session.correct, total)} הצלחה.`;
   refreshHome();
 }
 function refreshHome() {
@@ -548,7 +582,9 @@ function refreshHome() {
   $('learnedStat').textContent = learnedCount().toLocaleString('he-IL');
   $('accuracyStat').textContent = pct(stats.correct, stats.attempts);
   $('sessionBtn').textContent = settings.length === 'all' ? 'כל הדחופות' : `${settings.length} מילים`;
-  $('modeBtn').textContent = MODE_LABELS[settings.mode];
+  $('modeBtn').textContent = settings.mode === 'sort' && settings.sortScope === 'book' && bookSortAvailable() ? 'מיון · מילים מהספר' : MODE_LABELS[settings.mode];
+  const bookScopeOption = $('sortScopeSelect').querySelector('option[value="book"]');
+  if (bookScopeOption) bookScopeOption.disabled = !bookSortAvailable();
   if (vocab.length) {
     $('bandBtn').textContent = bandLabel();
     $('bandNote').textContent = bandAccuracyNote();
@@ -602,7 +638,7 @@ function renderLibrary(reset = true) {
     const p = rec(v.w);
     const row = document.createElement('div');
     row.className = 'word-item';
-    const level = (p.r + p.w) === 0 ? '☆' : p.s >= 4 ? '★★★' : p.s >= 2 ? '★★' : p.s >= 1 ? '★' : '☆';
+    const level = isClassifiedUnknown(p) ? '⏳' : (p.r + p.w) === 0 ? '☆' : p.s >= 4 ? '★★★' : p.s >= 2 ? '★★' : p.s >= 1 ? '★' : '☆';
     row.innerHTML = `<span class="rank">#${v.r.toLocaleString('he-IL')}</span><span class="w"></span><span class="t"></span><span class="level" aria-label="רמת שליטה">${level}</span><button class="speak" aria-label="השמעה">${iconMarkup('volume')}</button>`;
     row.querySelector('.w').textContent = v.w;
     row.querySelector('.t').textContent = v.t;
@@ -646,7 +682,8 @@ function renderWordSheetState() {
     return;
   }
   const known = isLearned(rec(wordSheetItem.w));
-  state.textContent = known ? 'מסומנת כידועה' : isAttempted(rec(wordSheetItem.w)) ? 'בתהליך למידה' : 'עוד לא נלמדה';
+  state.textContent = known ? 'מסומנת כידועה' : isAttempted(rec(wordSheetItem.w)) ? 'בתהליך למידה'
+    : isClassifiedUnknown(rec(wordSheetItem.w)) ? 'מסומנת ללמידה · תיכנס לתרגול כשיתפנה מקום במאגר' : 'עוד לא נלמדה';
   knownBtn.textContent = known ? 'סימון כלא ידועה' : 'סימון כידועה';
   knownBtn.setAttribute('aria-pressed', known ? 'true' : 'false');
 }
@@ -697,9 +734,11 @@ function loadDetails() {
 }
 let freqPromise = null, bookFrequency = null;
 function loadBookFrequency() {
-  if (!freqPromise) freqPromise = fetch('book-frequency.json').then(r => { if (!r.ok) throw new Error('book-frequency'); return r.json(); }).then(data => { bookFrequency = data; return data; }).catch(err => { freqPromise = null; throw err; });
+  if (!freqPromise) freqPromise = fetch('book-frequency.json').then(r => { if (!r.ok) throw new Error('book-frequency'); return r.json(); }).then(data => { bookFrequency = data; const opt = document.querySelector('#sortScopeSelect option[value="book"]'); if (opt) opt.disabled = false; return data; }).catch(err => { freqPromise = null; throw err; });
   return freqPromise;
 }
+const bookCountFor = rank => (bookFrequency && bookFrequency.counts && bookFrequency.counts[rank]) || 0;
+const bookSortAvailable = () => !!(bookFrequency && bookFrequency.counts && Object.keys(bookFrequency.counts).length);
 function addDetailSection(parent, title, nodes) {
   const sec = document.createElement('section'); sec.className = 'detail-section';
   const h = document.createElement('h3'); h.textContent = title; sec.append(h, ...nodes); parent.append(sec);
@@ -814,6 +853,8 @@ function applySettingsToUI() {
   $('goalSelect').value = String(settings.goal);
   $('lengthSelect').value = String(settings.length);
   $('modeSelect').value = settings.mode;
+  $('sortScopeSelect').value = settings.sortScope;
+  $('sortScopeGroup').classList.toggle('hidden', settings.mode !== 'sort');
 }
 function exportData() {
   const blob = new Blob([JSON.stringify({ app: 'fourWords', version: 2, exportedAt: new Date().toISOString(), settings, progress, stats, bands }, null, 2)], { type: 'application/json' });
@@ -871,7 +912,7 @@ $('startBtn').addEventListener('click', startSession);
 $('againBtn').addEventListener('click', startSession);
 $('homeBtn').addEventListener('click', () => { $('summary').classList.add('hidden'); $('practiceHome').classList.remove('hidden'); });
 $('dontKnowBtn').addEventListener('click', () => {
-  if (settings.mode === 'cards') gradeCard(false);
+  if (isCardMode()) gradeCard(false);
   else if (settings.mode === 'typing') { locked || checkTypingDontKnow(); }
   else answerChoice(false, null);
 });
@@ -885,7 +926,7 @@ $('flashcard').addEventListener('keydown', e => {
   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flipFlashcard(); }
 });
 document.addEventListener('keydown', e => {
-  if (!session.active || settings.mode !== 'cards') return;
+  if (!session.active || !isCardMode()) return;
   if (e.key === 'ArrowRight') gradeCard(true);
   else if (e.key === 'ArrowLeft') gradeCard(false);
 });
@@ -937,7 +978,8 @@ $('searchInput').addEventListener('input', e => { libFilter = e.target.value.tri
 $('moreBtn').addEventListener('click', () => renderLibrary(false));
 $('goalSelect').addEventListener('change', e => { settings.goal = Number(e.target.value); persist(); refreshHome(); });
 $('lengthSelect').addEventListener('change', e => { settings.length = e.target.value === 'all' ? 'all' : Number(e.target.value); persist(); refreshHome(); });
-$('modeSelect').addEventListener('change', e => { settings.mode = e.target.value; persist(); refreshHome(); });
+$('modeSelect').addEventListener('change', e => { settings.mode = e.target.value; $('sortScopeGroup').classList.toggle('hidden', settings.mode !== 'sort'); persist(); refreshHome(); });
+$('sortScopeSelect').addEventListener('change', e => { settings.sortScope = e.target.value; persist(); refreshHome(); });
 $('bandSelect').addEventListener('change', e => { setBand(Number(e.target.value)); showToast(`הרמה שונתה — ${bandLabel()}`); });
 $('bandBtn').addEventListener('click', () => switchTab('settings'));
 $('exportBtn').addEventListener('click', exportData);

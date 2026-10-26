@@ -211,7 +211,16 @@
             <option value="reverse">בחירה הפוכה — עברית ← אנגלית</option>
             <option value="typing">הקלדה — כתיבת המילה באנגלית</option>
             <option value="cards">כרטיסיות — חשיפה וגרירה</option>
+            <option value="sort">מיון — סימון יודע/לא יודע לפי הסדר</option>
           </select>
+        </div>
+        <div class="settings-group hidden" id="sortScopeGroup">
+          <label for="sortScopeSelect">מה ממיינים</label>
+          <select id="sortScopeSelect">
+            <option value="all">כל המילים — לפי הסדר</option>
+            <option value="book">מילים מהספר בלבד — לפי שכיחות בספר</option>
+          </select>
+          <span class="settings-hint">המיון מציג כל מילה שעוד לא סווגה, בלי דילוגים. גרירה ימינה מסמנת ידועה, שמאלה מסמנת ללמידה — והמילה נכנסת לתרגול כשמתפנה מקום במאגר הלמידה.</span>
         </div>
         <div class="settings-group">
           <label for="bandSelect">רמת תרגול — מאה מילים לפי דירוג</label>
