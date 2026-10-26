@@ -177,6 +177,40 @@ async function poolSemanticsShared() {
   console.log('PASS cards mode shares the 200-pool FIFO cycle, learned words never queued');
 }
 
+async function cardChrome() {
+  // Redesign (user request, 26.10): the word on the card front, "1 / N"
+  // counter, session grade pills, X ends the session, corner actions.
+  const { context, page } = await isolatedPage({});
+  try {
+    await startCardsSession(page);
+    const word = await page.evaluate(() => session.queue[session.index].w);
+    assert.equal(await page.locator('#fcWord').textContent(), word, 'card front shows the word');
+    assert.equal(await page.locator('#progressText').textContent(), '1 / 20', 'compact counter');
+    assert.equal(await page.locator('#pillKnow').textContent(), '0');
+    assert.equal(await page.locator('#pillDont').textContent(), '0');
+    assert.equal(await page.locator('#fcSpeak').isVisible(), true, 'speaker on the card');
+    assert.equal(await page.locator('#fcInfo').isVisible(), true, 'details on the card');
+    await page.locator('#knowBtn').click();
+    await page.waitForFunction(() => session.index === 1);
+    assert.equal(await page.locator('#pillKnow').textContent(), '1', 'right pill counts known');
+    assert.equal(await page.locator('#progressText').textContent(), '2 / 20', 'counter advances');
+    await page.locator('#dontKnowBtn').click();
+    await page.waitForFunction(() => session.index === 2);
+    assert.equal(await page.locator('#pillDont').textContent(), '1', 'left pill counts unknown');
+    // Corner speaker does not flip or grade the card.
+    const before = await page.evaluate(() => session.index);
+    await page.locator('#fcSpeak').click();
+    await page.waitForTimeout(300);
+    assert.equal(await page.evaluate(() => session.index), before, 'speaker leaves the card ungraded');
+    assert.equal(await page.locator('#flashcard').evaluate(el => el.classList.contains('flipped')), false, 'speaker does not flip');
+    // X ends the session early.
+    await page.locator('#cardClose').click();
+    await page.waitForFunction(() => !session.active);
+    assert.equal(await page.locator('#summary').isVisible(), true, 'X closes to the summary');
+  } finally { await context.close(); }
+  console.log('PASS card chrome: word on card, counter, pills, corner actions, X ends session');
+}
+
 async function main() {
   server.listen(0);
   await new Promise(resolve => server.once('listening', resolve));
@@ -187,6 +221,7 @@ async function main() {
   await gradeLeftLikeDontKnow();
   await swipeGestures();
   await poolSemanticsShared();
+  await cardChrome();
   await browser.close();
   await new Promise(resolve => server.close(resolve));
 }
