@@ -93,7 +93,7 @@ function onVocabReady() {
   bookSerial = new Map(vocab.filter(isBookWord).sort((a, b) => a.r - b.r).map((v, i) => [v.r, i + 1]));
   if (bands.current > maxBand()) setBand(maxBand()); // clamp bands saved when book words counted as levels
   $('vocabCount').textContent = vocab.length.toLocaleString('he-IL');
-  renderBandSelect();
+  renderBandSelect(); renderLibCatSelect();
   refreshHome(); renderLibrary();
   loadDetails().catch(() => {}); // Warm local/offline examples and synonym exclusions.
   loadBookFrequency().catch(() => {}); // Warm per-word book occurrence counts.
@@ -187,38 +187,42 @@ function buildQueue() {
   }
   // Learned words are never queued again; their records stay, they simply
   // leave the rotation. Before the learning pool fills, sessions introduce
-  // new words only - nothing repeats. Once the pool reaches LEARNING_LIMIT,
-  // it cycles in order: the word answered longest ago returns first, and
-  // every answer moves a word to the back of the cycle.
+  // new words only - nothing repeats, and classified "don't know" words keep
+  // waiting outside the pool (user rule, 26.10: a marked word returns only
+  // once there are 200 words in learning). Book priority is everywhere: the
+  // whole book series precedes every regular word. Band gating and
+  // advancement for regular words are unchanged - book answers never count
+  // toward band windows, so this is priority, not a level jump.
   const pool = vocab.filter(v => isLearning(progress[v.w]));
-  if (pool.length >= LEARNING_LIMIT) {
-    pool.sort((a, b) => ((progress[a.w].last || 0) - (progress[b.w].last || 0)) || a.r - b.r);
-    const want = settings.length === 'all' ? pool.length : settings.length;
-    return pool.slice(0, want);
-  }
-  // Sort-classified "don't know" words enter first, oldest classification
-  // first, while the pool has room; band-gated fresh words follow. The
-  // 200-word learning-pool cap above is unchanged.
   const classified = vocab.filter(v => isClassifiedUnknown(progress[v.w]))
     .sort((a, b) => ((progress[a.w].last || 0) - (progress[b.w].last || 0)) || a.r - b.r);
-  // Book priority is everywhere (user clarification, 26.10): the whole book
-  // series precedes every regular word, including sort-classified regular
-  // words. Inside the series, explicitly classified book words lead, then the
-  // rest in book order. Band gating and advancement for regular words are
-  // unchanged - book answers never count toward band windows, so this is
-  // priority, not a level jump.
   const classifiedBook = classified.filter(isBookWord);
   const classifiedRegular = classified.filter(v => !isBookWord(v));
+  if (pool.length >= LEARNING_LIMIT) {
+    // Full pool: practice admits the waiting classified words first (book
+    // classified ahead of regular classified, oldest classification first),
+    // then cycles the pool in order: the word answered longest ago returns
+    // first, and every answer moves a word to the back of the cycle.
+    pool.sort((a, b) => ((progress[a.w].last || 0) - (progress[b.w].last || 0)) || a.r - b.r);
+    const cycling = classifiedBook.concat(classifiedRegular, pool);
+    const want = settings.length === 'all' ? cycling.length : settings.length;
+    return cycling.slice(0, want);
+  }
   const bookFresh = vocab.filter(v => !progress[v.w] && isBookWord(v)).sort((a, b) => a.r - b.r);
   const fresh = vocab.filter(v => !progress[v.w] && !isBookWord(v) && inCurrentBand(v));
-  const combined = classifiedBook.concat(bookFresh, classifiedRegular, fresh);
+  let combined = bookFresh.concat(fresh);
+  // Only when there is genuinely nothing new left to introduce do waiting
+  // classified words fill sessions early.
+  if (!combined.length) combined = classifiedBook.concat(classifiedRegular);
   const want = settings.length === 'all' ? combined.length : settings.length;
   return shuffle(combined.slice(0, want));
 }
 function skipUnadmittedQuestions() {
   if (settings.mode === 'sort') return; // sorting never skips ungraded words
   let removed = false;
-  while (session.queue[session.index] && !isAttempted(progress[session.queue[session.index].w]) && learningCount() >= LEARNING_LIMIT) {
+  // Admitted classified words are part of the session, not unadmitted new
+  // words: the full-pool skip never removes them.
+  while (session.queue[session.index] && !isAttempted(progress[session.queue[session.index].w]) && !isClassifiedUnknown(progress[session.queue[session.index].w]) && learningCount() >= LEARNING_LIMIT) {
     session.queue.splice(session.index, 1);
     removed = true;
   }
@@ -375,7 +379,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v39');
+    const cache = await caches.open('four-words-offline-v40');
     const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
@@ -683,6 +687,24 @@ function renderBandSelect() {
   }
   sel.value = String(bands.current);
 }
+// Library category picker (user request, 26.10): choose all words, the book,
+// or one hundred-word band; the list below scrolls through the category.
+function renderLibCatSelect() {
+  const sel = $('libCatSelect'); if (!sel) return;
+  sel.replaceChildren();
+  const all = document.createElement('option');
+  all.value = 'all'; all.textContent = 'כל המילים';
+  const book = document.createElement('option');
+  book.value = 'book'; book.textContent = 'הספר';
+  sel.append(all, book);
+  for (let b = 1; b <= maxBand(); b++) {
+    const opt = document.createElement('option');
+    opt.value = String(b);
+    opt.textContent = `רמה ${b} — מילים ${bandLo(b).toLocaleString('he-IL')}–${bandHi(b).toLocaleString('he-IL')}`;
+    sel.append(opt);
+  }
+  sel.value = libCategory;
+}
 let toastTimer = null;
 function showToast(text) {
   const el = $('toast'); if (!el) return;
@@ -692,17 +714,25 @@ function showToast(text) {
 }
 
 /* ---------- Library ---------- */
-let libFilter = '', libShown = 0;
+let libFilter = '', libShown = 0, libCategory = 'all';
 const LIB_PAGE = 60;
+function categoryItems() {
+  if (libCategory === 'book') return vocab.filter(isBookWord);
+  if (libCategory === 'all') return vocab;
+  const b = Number(libCategory);
+  return vocab.filter(v => !isBookWord(v) && v.r >= bandLo(b) && v.r <= b * BAND_SIZE);
+}
 function filteredVocab() {
-  if (!libFilter) return vocab;
+  const items = categoryItems();
+  if (!libFilter) return items;
   const q = libFilter.toLowerCase();
-  return vocab.filter(v => v.w.toLowerCase().includes(q) || v.t.includes(libFilter));
+  return items.filter(v => v.w.toLowerCase().includes(q) || v.t.includes(libFilter));
 }
 function renderLibrary(reset = true) {
   if (reset) { libShown = 0; $('libraryList').replaceChildren(); }
   const items = filteredVocab();
-  $('libraryCount').textContent = `${items.length.toLocaleString('he-IL')} מילים${libFilter ? ` עבור "${libFilter}"` : ''}`;
+  const catLabel = libCategory === 'all' ? '' : libCategory === 'book' ? ' · הספר' : ` · רמה ${libCategory}`;
+  $('libraryCount').textContent = `${items.length.toLocaleString('he-IL')} מילים${catLabel}${libFilter ? ` עבור "${libFilter}"` : ''}`;
   const page = items.slice(libShown, libShown + LIB_PAGE);
   libShown += page.length;
   const list = $('libraryList');
@@ -755,7 +785,7 @@ function renderWordSheetState() {
   const marked = !!rec(wordSheetItem.w).u;
   state.textContent = known ? 'מסומנת כידועה'
     : isAttempted(rec(wordSheetItem.w)) ? (marked ? 'בתהליך למידה · מסומנת כלא ידועה' : 'בתהליך למידה')
-    : classified ? 'מסומנת ללמידה · תיכנס לתרגול כשיתפנה מקום במאגר' : 'עוד לא נלמדה';
+    : classified ? 'מסומנת ללמידה · תחזור לתרגול כשיהיו 200 בלמידה' : 'עוד לא נלמדה';
   knownBtn.textContent = known ? 'סימון כלא ידועה' : 'סימון כידועה';
   knownBtn.setAttribute('aria-pressed', known ? 'true' : 'false');
   // "Mark unknown" (user request, 26.10): an additive marker, never a quiz
@@ -797,7 +827,7 @@ function closeWordSheet() {
 // the word back into learning, due now, like the quiz's "לא יודע" button.
 // Reader "mark unknown" (user request, 26.10) mirrors the sort-mode left
 // swipe: a classification record ({u:1}), not a miss. No quiz stats, no band
-// answer; the word enters practice when the capped pool has room. Tapping
+// answer; the word waits outside the pool until it fills (200 in learning). Tapping
 // again removes only the classification - learning history is never touched.
 function setBookWordClassified(unknown) {
   const item = wordSheetItem; if (!item) return;
@@ -1134,6 +1164,7 @@ $('sessionBtn').addEventListener('click', () => switchTab('settings'));
 $('modeBtn').addEventListener('click', () => switchTab('settings'));
 function switchTab(name) { document.querySelector(`.tab-btn[data-tab="${name}"]`).click(); }
 $('searchInput').addEventListener('input', e => { libFilter = e.target.value.trim(); renderLibrary(); });
+$('libCatSelect').addEventListener('change', e => { libCategory = e.target.value; renderLibrary(); });
 $('moreBtn').addEventListener('click', () => renderLibrary(false));
 $('goalSelect').addEventListener('change', e => { settings.goal = Number(e.target.value); persist(); refreshHome(); });
 $('lengthSelect').addEventListener('change', e => { settings.length = e.target.value === 'all' ? 'all' : Number(e.target.value); persist(); refreshHome(); });

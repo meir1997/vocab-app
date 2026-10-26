@@ -3,7 +3,8 @@
 // session-length cap and no pool-admission check. Right swipe (or יודע) scores
 // like a correct answer; left swipe (or לא יודע) writes a classification
 // record ({u:1}), not a miss: the word waits outside the capped 200-word
-// learning pool and capped practice admits it first when room frees up.
+// learning pool until the pool fills; a full pool admits it first (book
+// classified ahead of regular classified) ahead of the cycle.
 // Isolated synthetic state, no Firebase.
 'use strict';
 
@@ -198,9 +199,10 @@ async function resumeAcrossSessions() {
   console.log('PASS sort resume: graded words stay sorted, queue continues in order');
 }
 
-async function admissionPriorityAndCap() {
-  // Book priority is everywhere (user clarification, 26.10): with room in the
-  // pool, the book series fills sessions ahead of a classified regular word.
+async function admissionDeferralAndFullPool() {
+  // User rule (26.10): a classified "don't know" word returns only once there
+  // are 200 words in learning. While the pool fills, sessions introduce new
+  // words only, book series first - classified words wait, book or regular.
   const room = {};
   for (let rank = 1; rank <= 190; rank++) room[byRank(rank).w] = learningRec(rank * 1000);
   room[byRank(5000).w] = { r: 0, w: 0, s: 0, u: 1, last: past };
@@ -210,10 +212,11 @@ async function admissionPriorityAndCap() {
     await page.waitForFunction(() => session.active);
     const queue = await page.evaluate(() => session.queue.map(item => item.w));
     assert.ok(queue.every(w => bookWords.some(b => b.w === w)), 'the book series fills the session first');
-    assert.ok(!queue.includes(byRank(5000).w), 'a classified regular word waits behind the book series');
+    assert.ok(!queue.includes(byRank(5000).w), 'a classified regular word waits while the pool fills');
   } finally { await context.close(); }
-  // Once the book series is graded, the classified regular word keeps its
-  // priority over band-gated fresh words.
+  // With the book series graded and the pool still short of 200, band-gated
+  // fresh words fill sessions - the classified regular word keeps waiting.
+  // (The seeded band is 3, so ranks 201-300 are the fresh band words here.)
   const afterBook = {};
   for (const b of bookWords) afterBook[b.w] = learnedRec();
   for (let rank = 1; rank <= 190; rank++) afterBook[byRank(rank).w] = learningRec(rank * 1000);
@@ -223,9 +226,10 @@ async function admissionPriorityAndCap() {
     await secondRun.page.locator('#startBtn').click();
     await secondRun.page.waitForFunction(() => session.active);
     const queue = await secondRun.page.evaluate(() => session.queue.map(item => item.w));
-    assert.ok(queue.includes(byRank(5000).w), 'classified regular word admitted ahead of band-gated fresh words once the book series is graded');
+    assert.ok(!queue.includes(byRank(5000).w), 'a classified regular word waits behind band-gated fresh words too');
+    assert.ok(queue.length > 0 && queue.every(w => { const v = allWords.find(x => x.w === w); return v && v.r >= 201 && v.r <= 300; }), 'band-gated fresh words fill the session instead');
   } finally { await secondRun.context.close(); }
-  // A classified book word leads the book series itself.
+  // A classified book word also waits behind fresh words while the pool fills.
   const flaggedBook = {};
   flaggedBook[byAnyRank(10050).w] = { r: 0, w: 0, s: 0, u: 1, last: past };
   const thirdRun = await isolatedPage(flaggedBook, { mode: 'choice' });
@@ -233,22 +237,29 @@ async function admissionPriorityAndCap() {
     await thirdRun.page.locator('#startBtn').click();
     await thirdRun.page.waitForFunction(() => session.active);
     const queue = await thirdRun.page.evaluate(() => session.queue.map(item => item.w));
-    assert.ok(queue.includes(byAnyRank(10050).w), 'a classified book word leads the book series');
+    assert.ok(!queue.includes(byAnyRank(10050).w), 'a classified book word waits while the pool fills');
+    assert.ok(queue.length > 0, 'fresh words are offered instead');
   } finally { await thirdRun.context.close(); }
-  // Full pool: the cap holds, the classified word waits.
+  // Full pool: practice admits the waiting classified words first, book
+  // classified ahead of regular classified, then cycles the pool.
   const full = {};
   for (let rank = 1; rank <= 200; rank++) full[byRank(rank).w] = learningRec(rank * 1000);
   full[byRank(5000).w] = { r: 0, w: 0, s: 0, u: 1, last: past };
+  full[byAnyRank(10060).w] = { r: 0, w: 0, s: 0, u: 1, last: past - 1000 };
   const second = await isolatedPage(full, { mode: 'choice' });
   try {
     await second.page.locator('#startBtn').click();
     await second.page.waitForFunction(() => session.active);
     const queue = await second.page.evaluate(() => session.queue.map(item => item.w));
-    assert.equal(queue.length, 20, 'pool cycle unchanged');
-    assert.ok(!queue.includes(byRank(5000).w), 'a full pool keeps the classified word waiting');
-    assert.ok(queue.every(w => full[w].s < 2 && full[w].r + full[w].w > 0), 'only pool words are cycled');
+    assert.equal(queue.length, 20, 'session length unchanged');
+    assert.equal(queue[0], byAnyRank(10060).w, 'a full pool admits the classified book word first');
+    assert.equal(queue[1], byRank(5000).w, 'classified regular words follow book classified');
+    // The admitted classified words are part of the session: the full-pool
+    // skip that removes unadmitted new words never touches them.
+    const kept = await second.page.evaluate(() => { skipUnadmittedQuestions(); return session.queue.slice(0, 2).map(item => item.w); });
+    assert.deepEqual(kept, [byAnyRank(10060).w, byRank(5000).w], 'the full-pool skip keeps admitted classified words');
   } finally { await second.context.close(); }
-  console.log('PASS admission: book series first everywhere, classified book words lead it, classified regular words follow; the full 200 pool keeps everyone waiting');
+  console.log('PASS admission: classified words wait while the pool fills (new words only, book first); a full pool admits them first, book classified leading, skip-exempt');
 }
 
 async function defaultScopeIsAllRankOrder() {
@@ -276,7 +287,7 @@ async function main() {
     await gradeLeftClassifies();
     await noSkipWithFullPool();
     await resumeAcrossSessions();
-    await admissionPriorityAndCap();
+    await admissionDeferralAndFullPool();
     await defaultScopeIsAllRankOrder();
   } finally {
     await browser.close();
