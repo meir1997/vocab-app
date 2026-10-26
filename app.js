@@ -187,38 +187,42 @@ function buildQueue() {
   }
   // Learned words are never queued again; their records stay, they simply
   // leave the rotation. Before the learning pool fills, sessions introduce
-  // new words only - nothing repeats. Once the pool reaches LEARNING_LIMIT,
-  // it cycles in order: the word answered longest ago returns first, and
-  // every answer moves a word to the back of the cycle.
+  // new words only - nothing repeats, and classified "don't know" words keep
+  // waiting outside the pool (user rule, 26.10: a marked word returns only
+  // once there are 200 words in learning). Book priority is everywhere: the
+  // whole book series precedes every regular word. Band gating and
+  // advancement for regular words are unchanged - book answers never count
+  // toward band windows, so this is priority, not a level jump.
   const pool = vocab.filter(v => isLearning(progress[v.w]));
-  if (pool.length >= LEARNING_LIMIT) {
-    pool.sort((a, b) => ((progress[a.w].last || 0) - (progress[b.w].last || 0)) || a.r - b.r);
-    const want = settings.length === 'all' ? pool.length : settings.length;
-    return pool.slice(0, want);
-  }
-  // Sort-classified "don't know" words enter first, oldest classification
-  // first, while the pool has room; band-gated fresh words follow. The
-  // 200-word learning-pool cap above is unchanged.
   const classified = vocab.filter(v => isClassifiedUnknown(progress[v.w]))
     .sort((a, b) => ((progress[a.w].last || 0) - (progress[b.w].last || 0)) || a.r - b.r);
-  // Book priority is everywhere (user clarification, 26.10): the whole book
-  // series precedes every regular word, including sort-classified regular
-  // words. Inside the series, explicitly classified book words lead, then the
-  // rest in book order. Band gating and advancement for regular words are
-  // unchanged - book answers never count toward band windows, so this is
-  // priority, not a level jump.
   const classifiedBook = classified.filter(isBookWord);
   const classifiedRegular = classified.filter(v => !isBookWord(v));
+  if (pool.length >= LEARNING_LIMIT) {
+    // Full pool: practice admits the waiting classified words first (book
+    // classified ahead of regular classified, oldest classification first),
+    // then cycles the pool in order: the word answered longest ago returns
+    // first, and every answer moves a word to the back of the cycle.
+    pool.sort((a, b) => ((progress[a.w].last || 0) - (progress[b.w].last || 0)) || a.r - b.r);
+    const cycling = classifiedBook.concat(classifiedRegular, pool);
+    const want = settings.length === 'all' ? cycling.length : settings.length;
+    return cycling.slice(0, want);
+  }
   const bookFresh = vocab.filter(v => !progress[v.w] && isBookWord(v)).sort((a, b) => a.r - b.r);
   const fresh = vocab.filter(v => !progress[v.w] && !isBookWord(v) && inCurrentBand(v));
-  const combined = classifiedBook.concat(bookFresh, classifiedRegular, fresh);
+  let combined = bookFresh.concat(fresh);
+  // Only when there is genuinely nothing new left to introduce do waiting
+  // classified words fill sessions early.
+  if (!combined.length) combined = classifiedBook.concat(classifiedRegular);
   const want = settings.length === 'all' ? combined.length : settings.length;
   return shuffle(combined.slice(0, want));
 }
 function skipUnadmittedQuestions() {
   if (settings.mode === 'sort') return; // sorting never skips ungraded words
   let removed = false;
-  while (session.queue[session.index] && !isAttempted(progress[session.queue[session.index].w]) && learningCount() >= LEARNING_LIMIT) {
+  // Admitted classified words are part of the session, not unadmitted new
+  // words: the full-pool skip never removes them.
+  while (session.queue[session.index] && !isAttempted(progress[session.queue[session.index].w]) && !isClassifiedUnknown(progress[session.queue[session.index].w]) && learningCount() >= LEARNING_LIMIT) {
     session.queue.splice(session.index, 1);
     removed = true;
   }
@@ -375,7 +379,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v39');
+    const cache = await caches.open('four-words-offline-v40');
     const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
@@ -755,7 +759,7 @@ function renderWordSheetState() {
   const marked = !!rec(wordSheetItem.w).u;
   state.textContent = known ? 'מסומנת כידועה'
     : isAttempted(rec(wordSheetItem.w)) ? (marked ? 'בתהליך למידה · מסומנת כלא ידועה' : 'בתהליך למידה')
-    : classified ? 'מסומנת ללמידה · תיכנס לתרגול כשיתפנה מקום במאגר' : 'עוד לא נלמדה';
+    : classified ? 'מסומנת ללמידה · תחזור לתרגול כשיהיו 200 בלמידה' : 'עוד לא נלמדה';
   knownBtn.textContent = known ? 'סימון כלא ידועה' : 'סימון כידועה';
   knownBtn.setAttribute('aria-pressed', known ? 'true' : 'false');
   // "Mark unknown" (user request, 26.10): an additive marker, never a quiz
@@ -797,7 +801,7 @@ function closeWordSheet() {
 // the word back into learning, due now, like the quiz's "לא יודע" button.
 // Reader "mark unknown" (user request, 26.10) mirrors the sort-mode left
 // swipe: a classification record ({u:1}), not a miss. No quiz stats, no band
-// answer; the word enters practice when the capped pool has room. Tapping
+// answer; the word waits outside the pool until it fills (200 in learning). Tapping
 // again removes only the classification - learning history is never touched.
 function setBookWordClassified(unknown) {
   const item = wordSheetItem; if (!item) return;
