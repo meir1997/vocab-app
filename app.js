@@ -153,6 +153,7 @@ function markWord(word, ok) {
   if (ok) { p.r++; p.s++; p.next = now + INTERVALS[Math.min(p.s - 1, INTERVALS.length - 1)] * DAY; }
   else { p.w++; p.s = 0; p.next = now; }
   p.last = now; // cycle order: the word answered longest ago returns first
+  delete p.u; // a real answer supersedes any reader "unknown" mark
   progress[word] = p;
   const r = rankOf.get(word);
   if (r) recordBandAnswer(ok, r);
@@ -166,7 +167,7 @@ function priorityOf(w) {
 const isAttempted = p => !!p && (p.r + p.w) > 0;
 // A clean first answer is learned immediately; after any miss, two consecutive
 // correct answers are still required. Derive this from the unchanged history.
-const isLearned = p => isAttempted(p) && p.s >= (p.w === 0 ? 1 : 2);
+const isLearned = p => isAttempted(p) && !p.u && p.s >= (p.w === 0 ? 1 : 2);
 const isLearning = p => isAttempted(p) && !isLearned(p);
 const learningCount = () => Object.values(progress).filter(isLearning).length;
 // Sort-mode "don't know" writes a classification, not a learning record: the
@@ -322,7 +323,7 @@ function mergeRemote(data) {
   }
   Object.keys(rp).forEach(w => {
     const l = progress[w], r = rp[w];
-    if (!l || (r.r + r.w) > (l.r + l.w) || ((r.r + r.w) === (l.r + l.w) && (r.next || 0) > (l.next || 0))) progress[w] = r;
+    if (!l || (r.r + r.w) > (l.r + l.w) || ((r.r + r.w) === (l.r + l.w) && (r.last || r.next || 0) > (l.last || l.next || 0))) progress[w] = r;
   });
   if ((rt.attempts || 0) > stats.attempts) stats = Object.assign({ days: {}, attempts: 0, correct: 0 }, rt);
   Object.keys(rt.days || {}).forEach(d => {
@@ -374,7 +375,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v37');
+    const cache = await caches.open('four-words-offline-v38');
     const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
@@ -733,16 +734,19 @@ function renderWordSheetState() {
   }
   const known = isLearned(rec(wordSheetItem.w));
   const classified = isClassifiedUnknown(rec(wordSheetItem.w));
-  state.textContent = known ? 'מסומנת כידועה' : isAttempted(rec(wordSheetItem.w)) ? 'בתהליך למידה'
+  const marked = !!rec(wordSheetItem.w).u;
+  state.textContent = known ? 'מסומנת כידועה'
+    : isAttempted(rec(wordSheetItem.w)) ? (marked ? 'בתהליך למידה · מסומנת כלא ידועה' : 'בתהליך למידה')
     : classified ? 'מסומנת ללמידה · תיכנס לתרגול כשיתפנה מקום במאגר' : 'עוד לא נלמדה';
   knownBtn.textContent = known ? 'סימון כלא ידועה' : 'סימון כידועה';
   knownBtn.setAttribute('aria-pressed', known ? 'true' : 'false');
-  // "Mark unknown" (user request, 26.10): only unattempted words classify -
-  // an in-learning word is already in the pool, a learned word uses the
-  // known toggle instead.
-  unknownBtn.textContent = classified ? 'ביטול סימון כלא ידועה' : 'סימון כלא ידועה';
-  unknownBtn.setAttribute('aria-pressed', classified ? 'true' : 'false');
-  unknownBtn.classList.toggle('hidden', known || isAttempted(rec(wordSheetItem.w)));
+  // "Mark unknown" (user request, 26.10): an additive marker, never a quiz
+  // answer - unattempted words get a classification record; a word already in
+  // learning gets the same u flag plus a due-now nudge, history untouched;
+  // a learned word uses the known toggle instead.
+  unknownBtn.textContent = marked ? 'ביטול סימון כלא ידועה' : 'סימון כלא ידועה';
+  unknownBtn.setAttribute('aria-pressed', marked ? 'true' : 'false');
+  unknownBtn.classList.toggle('hidden', known);
 }
 async function openWordSheet(surface, span) {
   const item = await lookupBookWord(surface);
@@ -785,6 +789,23 @@ function setBookWordClassified(unknown) {
   persist(); refreshHome();
   renderWordSheetState();
 }
+// For a word already in learning, "mark unknown" (user follow-up, 26.10) is
+// an additive marker, not a miss and not a quiz answer: the u flag is set on
+// the existing record and the word is nudged due now. Every answer count
+// (r/w) and the streak stay exactly as they were, stats and band advancement
+// stay clean, and removing the mark deletes only the flag.
+function setBookWordUnknownMarked(unknown) {
+  const item = wordSheetItem; if (!item) return;
+  const p = rec(item.w);
+  if (!isAttempted(p) || isLearned(p)) return;
+  if (unknown) { p.u = 1; p.next = Date.now(); }
+  else delete p.u; // the due-now nudge from marking is not reverted
+  p.last = Date.now(); // sync tiebreaker: most recently touched record wins
+  progress[item.w] = p;
+  persist(); refreshHome();
+  renderWordSheetState();
+  if (unknown) showToast('סומנה כלא ידועה · נתרגל אותה שוב בקרוב');
+}
 function setBookWordKnown(known) {
   const item = wordSheetItem; if (!item) return;
   const p = rec(item.w); const now = Date.now();
@@ -792,7 +813,14 @@ function setBookWordKnown(known) {
     const need = p.w === 0 ? 1 : 2;
     if (p.s < need) { p.r += need - p.s; p.s = need; }
     p.next = now + INTERVALS[INTERVALS.length - 1] * DAY;
-  } else { p.w++; p.s = 0; p.next = now; }
+    delete p.u; // marking known clears the unknown mark
+  } else {
+    // Unmarking a learned word is additive, never a quiz mistake: the u flag
+    // suppresses the learned status (word returns to practice, due now) while
+    // every answer count and the streak stay exactly as they were.
+    p.u = 1; p.next = now;
+  }
+  p.last = now; // sync tiebreaker: most recently touched record wins
   progress[item.w] = p;
   persist(); refreshHome();
   renderWordSheetState();
@@ -901,13 +929,27 @@ function closeDetails() {
 function advanceWhenReady(fn, delay) {
   setTimeout(() => { if (sheetOpen) pendingAdvance = fn; else fn(); }, delay);
 }
+// iOS WebKit drops an utterance that is spoken synchronously right after
+// cancel() (the synthesizer wedges and every tap stays silent). Cancel first,
+// speak on a short delay, then resume(): the queue can also be left paused.
+// The utterance is kept referenced so it cannot be collected mid-speech.
+let speakTimer = null, speakUtterance = null;
 function speak(text) {
   try {
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'en-US'; u.rate = 0.92;
-    const voice = speechSynthesis.getVoices().find(v => v.lang.startsWith('en'));
-    if (voice) u.voice = voice;
-    speechSynthesis.cancel(); speechSynthesis.speak(u);
+    if (!('speechSynthesis' in window)) return;
+    clearTimeout(speakTimer);
+    if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
+    speakTimer = setTimeout(() => {
+      try {
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'en-US'; u.rate = 0.92;
+        const voice = speechSynthesis.getVoices().find(v => v.lang.startsWith('en'));
+        if (voice) try { u.voice = voice; } catch {}
+        speakUtterance = u;
+        speechSynthesis.speak(u);
+        speechSynthesis.resume();
+      } catch {}
+    }, 60);
   } catch {}
 }
 
@@ -1038,7 +1080,12 @@ $('wordSheetClose').addEventListener('click', closeWordSheet);
 $('wordSheet').addEventListener('click', e => { if (e.target === $('wordSheet')) closeWordSheet(); });
 $('wordCardBtn').addEventListener('click', () => { const item = wordSheetItem; if (!item) return; closeWordSheet(); openDetails(item); });
 $('wordKnownBtn').addEventListener('click', () => { if (wordSheetItem) setBookWordKnown(!isLearned(rec(wordSheetItem.w))); });
-$('wordUnknownBtn').addEventListener('click', () => { if (wordSheetItem) setBookWordClassified(!isClassifiedUnknown(rec(wordSheetItem.w))); });
+$('wordUnknownBtn').addEventListener('click', () => {
+  const item = wordSheetItem; if (!item) return;
+  const p = rec(item.w);
+  if (isAttempted(p)) setBookWordUnknownMarked(!p.u); // in learning: additive mark
+  else setBookWordClassified(!isClassifiedUnknown(p));
+});
 // Highlighting is a pure reader mark: it never touches learning progress.
 $('wordHighlightBtn').addEventListener('click', () => {
   if (!wordSheetSpan || typeof VocabReader === 'undefined') return;

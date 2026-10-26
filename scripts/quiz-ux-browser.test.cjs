@@ -222,6 +222,49 @@ async function simpleWordCardAndLongWords() {
   console.log('PASS main example first, collapsed reference material, card focus, desktop/390px/320px long-word containment');
 }
 
+// iPhone speaker fix (user report, 26.10): iOS WebKit drops an utterance
+// spoken synchronously after cancel(), leaving every tap silent. The app must
+// cancel first, speak on a short delay, and resume the queue; rapid taps
+// debounce to the latest word.
+async function speakerPlaysWord() {
+  const { page, context } = await newPage();
+  try {
+    await seedQuestion(page, 'choice');
+    await page.evaluate(() => {
+      const calls = [];
+      window.__speechCalls = calls;
+      class FakeUtterance { constructor(text) { this.text = text; } }
+      Object.defineProperty(window, 'SpeechSynthesisUtterance', { configurable: true, value: FakeUtterance });
+      Object.defineProperty(window, 'speechSynthesis', {
+        configurable: true,
+        value: {
+          speaking: true, pending: false,
+          getVoices: () => [{ lang: 'en-US', name: 'Samantha' }],
+          cancel: () => calls.push(['cancel', performance.now()]),
+          speak: u => calls.push(['speak', performance.now(), u.text, u.lang, u.rate, u.voice && u.voice.name]),
+          resume: () => calls.push(['resume', performance.now()]),
+        },
+      });
+    });
+    await page.locator('#speakBtn').click();
+    await page.waitForTimeout(200);
+    let calls = await page.evaluate(() => window.__speechCalls);
+    assert.deepEqual(calls.map(c => c[0]), ['cancel', 'speak', 'resume'], 'cancel, then speak, then resume');
+    assert.ok(calls[1][1] - calls[0][1] >= 50, 'speak is delayed after cancel (iOS WebKit wedging)');
+    assert.equal(calls[1][2], 'right', 'the shown word is spoken');
+    assert.equal(calls[1][3], 'en-US');
+    assert.equal(calls[1][5], 'Samantha', 'an English voice is selected');
+
+    // Rapid double-tap: only the latest speak survives the debounce.
+    await page.locator('#speakBtn').click();
+    await page.locator('#speakBtn').click();
+    await page.waitForTimeout(200);
+    calls = await page.evaluate(() => window.__speechCalls);
+    assert.equal(calls.filter(c => c[0] === 'speak').length, 2, 'rapid taps debounce to one extra speak');
+  } finally { await context.close(); }
+  console.log('PASS speaker: cancel-delay-speak-resume order, word/voice, rapid-tap debounce');
+}
+
 async function preservedLearningRules() {
   const { page, context } = await newPage();
   try {
@@ -270,6 +313,7 @@ async function preservedLearningRules() {
   await unambiguousChoicesAndContext();
   await feedbackAndContinuation();
   await simpleWordCardAndLongWords();
+  await speakerPlaysWord();
   await preservedLearningRules();
 })().catch(error => {
   console.error(error);

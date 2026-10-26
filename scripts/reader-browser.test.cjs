@@ -348,7 +348,9 @@ async function wordTapFlow() {
     await page.locator('#bookFile').setInputFiles(epubPath);
     await page.waitForFunction(() => document.getElementById('bookTitle').textContent === 'Fixture Book');
 
-    // Every word is wrapped as a tappable span; text stays intact.
+    // Every word is wrapped as a tappable span; text stays intact. The title
+    // lands before the wrapping pass, so wait for the spans explicitly.
+    await page.waitForFunction(() => document.querySelectorAll('#bookContent .bw').length > 10);
     assert.ok(await page.locator('#bookContent .bw').count() > 10, 'book words are wrapped as tappable spans');
     const text = await page.locator('#bookContent').innerText();
     assert.match(text, /A small chapter with a link and a possessive like harry’s\./, 'wrapping keeps the text identical');
@@ -375,14 +377,50 @@ async function wordTapFlow() {
     let bands = await page.evaluate(() => JSON.parse(localStorage.getItem('fw.bands.v1')));
     assert.deepEqual(bands.recent || [], [], 'book marks do not move band advancement');
 
-    // Mark unknown again: back into learning, due now, like the quiz's "לא יודע".
+    // Unmark a learned word ("סימון כלא ידועה" on the known toggle): additive,
+    // never a quiz mistake - the u flag suppresses the learned status and the
+    // word is due now, while counts and the streak stay exactly as they were.
     await page.locator('#wordKnownBtn').click();
-    assert.match(await page.locator('#wordSheetState').textContent(), /בתהליך למידה/);
+    assert.match(await page.locator('#wordSheetState').textContent(), /בתהליך למידה · מסומנת כלא ידועה/);
     stored = await page.evaluate(() => JSON.parse(localStorage.getItem('fw.progress.v2')).chapter);
-    assert.equal(stored.s, 0);
-    assert.equal(stored.w, 1);
-    assert.ok(stored.next <= Date.now(), 'unknown word is due immediately');
-    assert.ok(await page.locator('#wordUnknownBtn').isHidden(), 'an in-learning word is already in the pool - no classify button');
+    assert.deepEqual({ r: stored.r, w: stored.w, s: stored.s, u: stored.u }, { r: 1, w: 0, s: 1, u: 1 }, 'unmarking known records no miss and keeps the streak');
+    assert.ok(stored.next <= Date.now(), 'unmarked word is due immediately');
+    assert.equal(await page.locator('#wordUnknownBtn').textContent(), 'ביטול סימון כלא ידועה');
+    stats = await page.evaluate(() => JSON.parse(localStorage.getItem('fw.stats.v2')));
+    assert.equal(stats.attempts, 0, 'unmarking known is not a quiz answer');
+    bands = await page.evaluate(() => JSON.parse(localStorage.getItem('fw.bands.v1')));
+    assert.deepEqual(bands.recent || [], [], 'unmarking known does not move band advancement');
+
+    // Removing the mark restores the learned status exactly (streak intact).
+    await page.locator('#wordUnknownBtn').click();
+    stored = await page.evaluate(() => JSON.parse(localStorage.getItem('fw.progress.v2')).chapter);
+    assert.deepEqual({ r: stored.r, w: stored.w, s: stored.s, u: stored.u }, { r: 1, w: 0, s: 1, u: undefined }, 'removing the mark deletes only the flag');
+    assert.match(await page.locator('#wordSheetState').textContent(), /מסומנת כידועה/);
+    await page.locator('#wordSheetClose').click();
+
+    // A genuine in-learning word (a real miss in practice) offers the same
+    // additive mark: flag + due now, history untouched, and removable.
+    await page.evaluate(() => { markWord('chapter', false); persist(); });
+    stored = await page.evaluate(() => JSON.parse(localStorage.getItem('fw.progress.v2')).chapter);
+    assert.deepEqual({ r: stored.r, w: stored.w, s: stored.s }, { r: 1, w: 1, s: 0 });
+    await page.locator('#bookContent .bw', { hasText: 'chapter' }).first().click();
+    await page.locator('#wordSheet:not(.hidden)').waitFor();
+    assert.equal(await page.locator('#wordSheetState').textContent(), 'בתהליך למידה');
+    assert.equal(await page.locator('#wordUnknownBtn').textContent(), 'סימון כלא ידועה');
+    await page.locator('#wordUnknownBtn').click();
+    stored = await page.evaluate(() => JSON.parse(localStorage.getItem('fw.progress.v2')).chapter);
+    assert.deepEqual({ r: stored.r, w: stored.w, s: stored.s, u: stored.u }, { r: 1, w: 1, s: 0, u: 1 }, 'additive mark: history preserved, no extra miss');
+    assert.ok(stored.next <= Date.now(), 'marked word is due immediately');
+    assert.match(await page.locator('#wordSheetState').textContent(), /בתהליך למידה · מסומנת כלא ידועה/);
+    assert.match(await page.locator('#toast').textContent(), /סומנה כלא ידועה/);
+    stats = await page.evaluate(() => JSON.parse(localStorage.getItem('fw.stats.v2')));
+    assert.equal(stats.attempts, 0, 'marking unknown is not a quiz answer');
+    bands = await page.evaluate(() => JSON.parse(localStorage.getItem('fw.bands.v1')));
+    assert.deepEqual(bands.recent || [], [], 'marking unknown does not move band advancement');
+    await page.locator('#wordUnknownBtn').click();
+    stored = await page.evaluate(() => JSON.parse(localStorage.getItem('fw.progress.v2')).chapter);
+    assert.deepEqual({ r: stored.r, w: stored.w, s: stored.s, u: stored.u }, { r: 1, w: 1, s: 0, u: undefined }, 'unmarking deletes only the flag; the due-now nudge is not reverted');
+    assert.equal(await page.locator('#wordSheetState').textContent(), 'בתהליך למידה');
     await page.locator('#wordSheetClose').click();
 
     // Mark unknown on a fresh word (user request, 26.10): a classification
