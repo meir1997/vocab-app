@@ -93,7 +93,7 @@ function onVocabReady() {
   bookSerial = new Map(vocab.filter(isBookWord).sort((a, b) => a.r - b.r).map((v, i) => [v.r, i + 1]));
   if (bands.current > maxBand()) setBand(maxBand()); // clamp bands saved when book words counted as levels
   $('vocabCount').textContent = vocab.length.toLocaleString('he-IL');
-  renderBandSelect();
+  renderBandSelect(); renderLibCatSelect();
   refreshHome(); renderLibrary();
   loadDetails().catch(() => {}); // Warm local/offline examples and synonym exclusions.
   loadBookFrequency().catch(() => {}); // Warm per-word book occurrence counts.
@@ -687,6 +687,24 @@ function renderBandSelect() {
   }
   sel.value = String(bands.current);
 }
+// Library category picker (user request, 26.10): choose all words, the book,
+// or one hundred-word band; the list below scrolls through the category.
+function renderLibCatSelect() {
+  const sel = $('libCatSelect'); if (!sel) return;
+  sel.replaceChildren();
+  const all = document.createElement('option');
+  all.value = 'all'; all.textContent = 'כל המילים';
+  const book = document.createElement('option');
+  book.value = 'book'; book.textContent = 'הספר';
+  sel.append(all, book);
+  for (let b = 1; b <= maxBand(); b++) {
+    const opt = document.createElement('option');
+    opt.value = String(b);
+    opt.textContent = `רמה ${b} — מילים ${bandLo(b).toLocaleString('he-IL')}–${bandHi(b).toLocaleString('he-IL')}`;
+    sel.append(opt);
+  }
+  sel.value = libCategory;
+}
 let toastTimer = null;
 function showToast(text) {
   const el = $('toast'); if (!el) return;
@@ -696,17 +714,25 @@ function showToast(text) {
 }
 
 /* ---------- Library ---------- */
-let libFilter = '', libShown = 0;
+let libFilter = '', libShown = 0, libCategory = 'all';
 const LIB_PAGE = 60;
+function categoryItems() {
+  if (libCategory === 'book') return vocab.filter(isBookWord);
+  if (libCategory === 'all') return vocab;
+  const b = Number(libCategory);
+  return vocab.filter(v => !isBookWord(v) && v.r >= bandLo(b) && v.r <= b * BAND_SIZE);
+}
 function filteredVocab() {
-  if (!libFilter) return vocab;
+  const items = categoryItems();
+  if (!libFilter) return items;
   const q = libFilter.toLowerCase();
-  return vocab.filter(v => v.w.toLowerCase().includes(q) || v.t.includes(libFilter));
+  return items.filter(v => v.w.toLowerCase().includes(q) || v.t.includes(libFilter));
 }
 function renderLibrary(reset = true) {
   if (reset) { libShown = 0; $('libraryList').replaceChildren(); }
   const items = filteredVocab();
-  $('libraryCount').textContent = `${items.length.toLocaleString('he-IL')} מילים${libFilter ? ` עבור "${libFilter}"` : ''}`;
+  const catLabel = libCategory === 'all' ? '' : libCategory === 'book' ? ' · הספר' : ` · רמה ${libCategory}`;
+  $('libraryCount').textContent = `${items.length.toLocaleString('he-IL')} מילים${catLabel}${libFilter ? ` עבור "${libFilter}"` : ''}`;
   const page = items.slice(libShown, libShown + LIB_PAGE);
   libShown += page.length;
   const list = $('libraryList');
@@ -1138,6 +1164,7 @@ $('sessionBtn').addEventListener('click', () => switchTab('settings'));
 $('modeBtn').addEventListener('click', () => switchTab('settings'));
 function switchTab(name) { document.querySelector(`.tab-btn[data-tab="${name}"]`).click(); }
 $('searchInput').addEventListener('input', e => { libFilter = e.target.value.trim(); renderLibrary(); });
+$('libCatSelect').addEventListener('change', e => { libCategory = e.target.value; renderLibrary(); });
 $('moreBtn').addEventListener('click', () => renderLibrary(false));
 $('goalSelect').addEventListener('change', e => { settings.goal = Number(e.target.value); persist(); refreshHome(); });
 $('lengthSelect').addEventListener('change', e => { settings.length = e.target.value === 'all' ? 'all' : Number(e.target.value); persist(); refreshHome(); });
