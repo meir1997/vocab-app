@@ -374,7 +374,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v36');
+    const cache = await caches.open('four-words-offline-v37');
     const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
@@ -722,19 +722,27 @@ async function lookupBookWord(raw) {
   return BookLookup.lookupBookWord(raw, wordByLower, wordPos);
 }
 function renderWordSheetState() {
-  const state = $('wordSheetState'), knownBtn = $('wordKnownBtn'), hlBtn = $('wordHighlightBtn');
+  const state = $('wordSheetState'), knownBtn = $('wordKnownBtn'), unknownBtn = $('wordUnknownBtn'), hlBtn = $('wordHighlightBtn');
   const hl = wordSheetSpan && wordSheetSpan.classList.contains('hl');
   hlBtn.textContent = hl ? 'הסרת הדגשה' : 'הדגשת המילה';
   hlBtn.classList.toggle('hidden', !wordSheetSpan);
   if (!wordSheetItem) {
     state.textContent = 'המילה הזו לא נמצאת ברשימת המילים של האפליקציה.';
+    unknownBtn.classList.add('hidden');
     return;
   }
   const known = isLearned(rec(wordSheetItem.w));
+  const classified = isClassifiedUnknown(rec(wordSheetItem.w));
   state.textContent = known ? 'מסומנת כידועה' : isAttempted(rec(wordSheetItem.w)) ? 'בתהליך למידה'
-    : isClassifiedUnknown(rec(wordSheetItem.w)) ? 'מסומנת ללמידה · תיכנס לתרגול כשיתפנה מקום במאגר' : 'עוד לא נלמדה';
+    : classified ? 'מסומנת ללמידה · תיכנס לתרגול כשיתפנה מקום במאגר' : 'עוד לא נלמדה';
   knownBtn.textContent = known ? 'סימון כלא ידועה' : 'סימון כידועה';
   knownBtn.setAttribute('aria-pressed', known ? 'true' : 'false');
+  // "Mark unknown" (user request, 26.10): only unattempted words classify -
+  // an in-learning word is already in the pool, a learned word uses the
+  // known toggle instead.
+  unknownBtn.textContent = classified ? 'ביטול סימון כלא ידועה' : 'סימון כלא ידועה';
+  unknownBtn.setAttribute('aria-pressed', classified ? 'true' : 'false');
+  unknownBtn.classList.toggle('hidden', known || isAttempted(rec(wordSheetItem.w)));
 }
 async function openWordSheet(surface, span) {
   const item = await lookupBookWord(surface);
@@ -742,11 +750,15 @@ async function openWordSheet(surface, span) {
   wordSheetOpen = true; wordSheetItem = item; wordSheetSpan = span || null;
   $('wordSheetWord').textContent = item ? item.w : surface;
   $('wordSheetSerial').textContent = item ? serialLabel(item) : '';
+  // Show the word's translation right in the popup (user request, 26.10).
+  $('wordSheetGloss').textContent = item ? item.t : '';
+  $('wordSheetGloss').classList.toggle('hidden', !item);
   const inflected = item && normalizeBookWord(surface) !== item.w.toLowerCase();
   $('wordSheetFormRow').classList.toggle('hidden', !inflected);
   if (inflected) $('wordSheetForm').textContent = surface;
   $('wordCardBtn').classList.toggle('hidden', !item);
   $('wordKnownBtn').classList.toggle('hidden', !item);
+  $('wordUnknownBtn').classList.toggle('hidden', !item);
   renderWordSheetState();
   $('wordSheet').classList.remove('hidden');
   $('wordSheetClose').focus({ preventScroll: true });
@@ -761,6 +773,18 @@ function closeWordSheet() {
 // Known mirrors the quiz's learned rule (clean word: streak 1; after a miss:
 // 2 in a row) and schedules the review at the longest interval. Unknown puts
 // the word back into learning, due now, like the quiz's "לא יודע" button.
+// Reader "mark unknown" (user request, 26.10) mirrors the sort-mode left
+// swipe: a classification record ({u:1}), not a miss. No quiz stats, no band
+// answer; the word enters practice when the capped pool has room. Tapping
+// again removes only the classification - learning history is never touched.
+function setBookWordClassified(unknown) {
+  const item = wordSheetItem; if (!item) return;
+  if (isAttempted(rec(item.w)) || isLearned(rec(item.w))) return;
+  if (unknown) progress[item.w] = { r: 0, w: 0, s: 0, u: 1, last: Date.now() };
+  else delete progress[item.w];
+  persist(); refreshHome();
+  renderWordSheetState();
+}
 function setBookWordKnown(known) {
   const item = wordSheetItem; if (!item) return;
   const p = rec(item.w); const now = Date.now();
@@ -1014,6 +1038,7 @@ $('wordSheetClose').addEventListener('click', closeWordSheet);
 $('wordSheet').addEventListener('click', e => { if (e.target === $('wordSheet')) closeWordSheet(); });
 $('wordCardBtn').addEventListener('click', () => { const item = wordSheetItem; if (!item) return; closeWordSheet(); openDetails(item); });
 $('wordKnownBtn').addEventListener('click', () => { if (wordSheetItem) setBookWordKnown(!isLearned(rec(wordSheetItem.w))); });
+$('wordUnknownBtn').addEventListener('click', () => { if (wordSheetItem) setBookWordClassified(!isClassifiedUnknown(rec(wordSheetItem.w))); });
 // Highlighting is a pure reader mark: it never touches learning progress.
 $('wordHighlightBtn').addEventListener('click', () => {
   if (!wordSheetSpan || typeof VocabReader === 'undefined') return;
