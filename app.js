@@ -375,7 +375,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v38');
+    const cache = await caches.open('four-words-offline-v39');
     const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
@@ -422,6 +422,11 @@ function fitFcWord() {
   const el = $('fcWord'); if (!el) return;
   el.style.fontSize = '';
   let size = parseFloat(getComputedStyle(el).fontSize) || 32;
+  // Measure unwrapped, like fitWord: with overflow-wrap anywhere the card word
+  // breaks mid-word (gamekeepe/r on iPhone) before scrollWidth ever overflows,
+  // so the shrink loop never ran. nowrap makes overflow measurable and keeps
+  // the fitted line intact (fractional glyph widths round differently).
+  el.style.whiteSpace = 'nowrap';
   while (size > 16 && el.scrollWidth > el.clientWidth) { size -= 2; el.style.fontSize = size + 'px'; }
 }
 let cardFlipped = false, cardDrag = null;
