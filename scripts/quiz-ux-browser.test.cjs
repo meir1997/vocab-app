@@ -230,19 +230,49 @@ async function flashcardWordStaysOneLine() {
   for (const viewport of [{ width: 390, height: 844 }, { width: 320, height: 568 }]) {
     const { page, context } = await newPage(viewport);
     try {
-      await seedQuestion(page, 'cards', ['incomprehensible', 'run', 'light']);
-      await page.waitForFunction(() => document.getElementById('fcWord').textContent === 'incomprehensible');
-      const fitted = await page.locator('#fcWord').evaluate(el => {
-        const range = document.createRange();
-        range.selectNodeContents(el);
-        return { whiteSpace: getComputedStyle(el).whiteSpace, lines: range.getClientRects().length, overflow: el.scrollWidth - el.clientWidth };
-      });
-      assert.equal(fitted.whiteSpace, 'nowrap', 'card word is measured without wrapping');
-      assert.equal(fitted.lines, 1, 'long card word stays on one line');
-      assert.ok(fitted.overflow <= 1, 'long card word fits its line box');
+      for (const word of ['incomprehensible', 'gamekeeper']) {
+        // gamekeeper is a book word (user's exact report case), so clone a
+        // regular entry and relabel it; the card path only needs w/r/t.
+        await page.evaluate(word => {
+          const item = { ...vocab.find(entry => entry.w === 'right'), w: word };
+          settings.mode = 'cards';
+          session = { queue: [item], index: 0, correct: 0, wrong: 0, active: true };
+          locked = false;
+          document.getElementById('practiceHome').classList.add('hidden');
+          document.getElementById('summary').classList.add('hidden');
+          document.getElementById('quizCard').classList.remove('hidden');
+          showQuestion();
+        }, word);
+        await page.waitForFunction(w => document.getElementById('fcWord').textContent === w, word);
+        const fitted = await page.locator('#fcWord').evaluate(el => {
+          const cs = getComputedStyle(el);
+          const face = el.parentElement;
+          const fcs = getComputedStyle(face);
+          const card = document.getElementById('flashcard');
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          const rect = range.getBoundingClientRect();
+          const cardRect = card.getBoundingClientRect();
+          return {
+            whiteSpace: cs.whiteSpace,
+            fontSize: parseFloat(cs.fontSize),
+            lines: range.getClientRects().length,
+            textWidth: rect.width,
+            textLeft: rect.left, textRight: rect.right,
+            cardLeft: cardRect.left, cardRight: cardRect.right,
+            pad: parseFloat(cs.paddingLeft),
+            faceContent: face.clientWidth - parseFloat(fcs.paddingLeft) - parseFloat(fcs.paddingRight)
+          };
+        });
+        assert.equal(fitted.whiteSpace, 'nowrap', word + ': card word is measured without wrapping');
+        assert.equal(fitted.lines, 1, word + ': card word stays on one line');
+        assert.ok(fitted.textWidth + 2 * fitted.pad <= fitted.faceContent + 1, word + ': glyphs plus padding fit the card face content box (text ' + fitted.textWidth.toFixed(1) + 'px, pad ' + fitted.pad + 'px, box ' + fitted.faceContent.toFixed(1) + 'px)');
+        assert.ok(fitted.textLeft >= fitted.cardLeft && fitted.textRight <= fitted.cardRight, word + ': glyphs stay inside the visible card');
+        assert.ok(fitted.fontSize >= 16, word + ': fitted size stays at or above the 16px floor');
+      }
     } finally { await context.close(); }
   }
-  console.log('PASS flashcard long words stay on one fitted line at 390px and 320px');
+  console.log('PASS flashcard words fit one line inside the content box at 390px and 320px (incl. gamekeeper report case)');
 }
 
 // iPhone speaker fix (user report, 26.10): iOS WebKit drops an utterance
