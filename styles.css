@@ -489,6 +489,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 /* Highlighted words: a warm marker that survives reloads; pure reader mark. */
 .book-content .bw.hl { background: #ffe08a; box-shadow: 0 0 0 1.5px #f0c94e; }
 .book-content .bw.hl:active { background: #ffd54f; }
+.word-gloss { margin: 2px 0 0; font-size: 17px; font-weight: 600; }
 .word-surface { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
 .word-state { margin: 10px 0 14px; font-weight: 600; }
 .word-actions { display: flex; gap: 10px; flex-wrap: wrap; }
