@@ -1,6 +1,6 @@
-const CACHE = 'four-words-offline-v33';
+const CACHE = 'four-words-offline-v34';
 const SDK = ['firebase-app-compat.js', 'firebase-auth-compat.js', 'firebase-firestore-compat.js'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/' + name);
-const ASSETS = ['./', 'index.html', 'styles.css', 'app.js', 'quiz-content.js', 'firebase-config.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'book-lookup.js', 'details.json', 'book-frequency.json', 'reader.js', 'manifest.webmanifest', 'icon.svg', ...SDK];
+const ASSETS = ['./', 'index.html', 'styles.css', 'app.js', 'quiz-content.js', 'firebase-config.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'book-lookup.js', 'details.json', 'book-details.json', 'book-reviewed.js', 'book-frequency.json', 'reader.js', 'manifest.webmanifest', 'icon.svg', ...SDK];
 self.addEventListener('install', event => event.waitUntil(
   caches.open(CACHE).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting())
 ));
