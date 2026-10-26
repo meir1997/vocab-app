@@ -349,7 +349,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v33');
+    const cache = await caches.open('four-words-offline-v34');
     const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
@@ -468,8 +468,8 @@ function showQuestion() {
   $('nextBtn').classList.add('hidden'); $('dontKnowBtn').classList.remove('hidden');
   $('typingCheck').disabled = false; $('typingInput').disabled = false;
   const mode = settings.mode;
-  const content = VocabQuiz.getWordContent(item, wordDetails[item.r]);
-  const context = VocabQuiz.getPromptContext(item, mode, wordDetails[item.r]);
+  const content = wordContent(item, wordDetails[item.r]);
+  const context = promptContext(item, mode, wordDetails[item.r]);
   $('questionContext').textContent = context;
   // Keep the context slot even when a later question needs no example.
   $('questionContext').classList.remove('hidden');
@@ -560,7 +560,7 @@ function completeAnswer(ok, item) {
 function renderAnswerFeedback(item) {
   // The answer may have advanced the current band since the prompt rendered.
   renderReviewBadge(item);
-  const content = VocabQuiz.getWordContent(item, wordDetails[item.r]);
+  const content = wordContent(item, wordDetails[item.r]);
   const box = $('answerFeedback'); box.replaceChildren(); box.classList.remove('hidden');
   const label = document.createElement('p'); label.className = 'feedback-label'; label.textContent = 'המשמעות הנלמדת';
   const meaning = document.createElement('p'); meaning.className = 'feedback-meaning'; meaning.textContent = content.meaning;
@@ -734,8 +734,18 @@ function setBookWordKnown(known) {
 /* ---------- Word details card (synonyms, meanings, example) ---------- */
 let detailsPromise = null, wordDetails = {}, sheetOpen = false, pendingAdvance = null, sheetTrigger = null;
 const POS_HE = { n: 'שם עצם', v: 'פועל', a: 'תואר', r: 'תואר הפועל', int: 'קריאה', p: 'מילת יחס' };
+// Book-coverage batch (ranks 10001+) ships its reviewed examples and details in
+// book-reviewed.js / book-details.json so quiz-content.js and details.json stay
+// untouched. BookContent applies the same sense gate as VocabQuiz.
+const wordContent = (item, detail) =>
+  (item && item.r >= 10001 && window.BookContent) ? BookContent.getWordContent(item, detail) : VocabQuiz.getWordContent(item, detail);
+const promptContext = (item, mode, detail) =>
+  (item && item.r >= 10001 && window.BookContent) ? BookContent.getWordContent(item, detail).context : VocabQuiz.getPromptContext(item, mode, detail);
 function loadDetails() {
-  if (!detailsPromise) detailsPromise = fetch('details.json').then(r => { if (!r.ok) throw new Error('details'); return r.json(); }).then(data => { wordDetails = data; return data; }).catch(err => { detailsPromise = null; throw err; });
+  if (!detailsPromise) detailsPromise = Promise.all([
+    fetch('details.json').then(r => { if (!r.ok) throw new Error('details'); return r.json(); }),
+    fetch('book-details.json').then(r => (r.ok ? r.json() : {})).catch(() => ({}))
+  ]).then(([main, book]) => { wordDetails = Object.assign({}, main, book); return wordDetails; }).catch(err => { detailsPromise = null; throw err; });
   return detailsPromise;
 }
 let freqPromise = null, bookFrequency = null;
@@ -753,7 +763,7 @@ async function openDetails(item) {
   const body = $('detailBody');
   if (!sheetOpen) sheetTrigger = document.activeElement;
   $('detailWord').textContent = item.w; $('detailSerial').textContent = `#${item.r.toLocaleString('he-IL')}`;
-  $('detailTranslation').textContent = VocabQuiz.getWordContent(item).meaning;
+  $('detailTranslation').textContent = wordContent(item).meaning;
   $('detailSpeak').onclick = () => speak(item.w);
   body.replaceChildren(); const loading = document.createElement('p'); loading.className = 'detail-empty'; loading.textContent = 'טוען…'; body.append(loading);
   $('detailSheet').classList.remove('hidden'); sheetOpen = true;
@@ -766,7 +776,7 @@ async function openDetails(item) {
   }
   if (!sheetOpen || $('detailWord').textContent !== item.w) return;
   body.replaceChildren();
-  const content = VocabQuiz.getWordContent(item, data);
+  const content = wordContent(item, data);
   if (content.example) {
     const row = document.createElement('div'); row.className = 'example-row';
     const q = document.createElement('p'); q.className = 'example-text'; q.lang = 'en'; q.dir = 'ltr'; q.textContent = content.example;
