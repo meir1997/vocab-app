@@ -360,6 +360,7 @@ async function wordTapFlow() {
     await page.locator('#wordSheet:not(.hidden)').waitFor();
     assert.equal(await page.locator('#wordSheetWord').textContent(), 'chapter');
     assert.match(await page.locator('#wordSheetSerial').textContent(), new RegExp(`#${rank.toLocaleString('he-IL')}`), 'app word number shown');
+    assert.equal(await page.locator('#wordSheetGloss').textContent(), vocabData.find(v => v.w === 'chapter').t, 'translation shown in the popup');
     assert.match(await page.locator('#wordSheetState').textContent(), /עוד לא נלמדה/);
 
     // Mark known: mirrors the quiz clean-answer rule (r=1, s=1), due far out.
@@ -381,6 +382,34 @@ async function wordTapFlow() {
     assert.equal(stored.s, 0);
     assert.equal(stored.w, 1);
     assert.ok(stored.next <= Date.now(), 'unknown word is due immediately');
+    assert.ok(await page.locator('#wordUnknownBtn').isHidden(), 'an in-learning word is already in the pool - no classify button');
+    await page.locator('#wordSheetClose').click();
+
+    // Mark unknown on a fresh word (user request, 26.10): a classification
+    // record like the sort-mode left swipe, never a miss, and removable.
+    await page.locator('#bookContent .bw', { hasText: 'small' }).first().click();
+    await page.locator('#wordSheet:not(.hidden)').waitFor();
+    assert.equal(await page.locator('#wordSheetWord').textContent(), 'small');
+    assert.match(await page.locator('#wordSheetState').textContent(), /עוד לא נלמדה/);
+    assert.equal(await page.locator('#wordUnknownBtn').textContent(), 'סימון כלא ידועה');
+    await page.locator('#wordUnknownBtn').click();
+    assert.match(await page.locator('#wordSheetState').textContent(), /מסומנת ללמידה/);
+    assert.equal(await page.locator('#wordUnknownBtn').textContent(), 'ביטול סימון כלא ידועה');
+    stored = await page.evaluate(() => JSON.parse(localStorage.getItem('fw.progress.v2')).small);
+    assert.deepEqual({ r: stored.r, w: stored.w, s: stored.s, u: stored.u }, { r: 0, w: 0, s: 0, u: 1 }, 'classification record, not a miss');
+    stats = await page.evaluate(() => JSON.parse(localStorage.getItem('fw.stats.v2')));
+    assert.equal(stats.attempts, 0, 'classifying is not a quiz answer');
+    bands = await page.evaluate(() => JSON.parse(localStorage.getItem('fw.bands.v1')));
+    assert.deepEqual(bands.recent || [], [], 'classifying does not move band advancement');
+    await page.locator('#wordUnknownBtn').click();
+    assert.match(await page.locator('#wordSheetState').textContent(), /עוד לא נלמדה/);
+    stored = await page.evaluate(() => JSON.parse(localStorage.getItem('fw.progress.v2')).small);
+    assert.equal(stored, undefined, 'removing the mark removes only the classification');
+    await page.locator('#wordSheetClose').click();
+
+    // The chapter sheet still offers its card after the detour.
+    await page.locator('#bookContent .bw', { hasText: 'chapter' }).first().click();
+    await page.locator('#wordSheet:not(.hidden)').waitFor();
 
     // Open its card from the sheet.
     await page.locator('#wordCardBtn').click();
@@ -396,6 +425,8 @@ async function wordTapFlow() {
     assert.match(await page.locator('#wordSheetState').textContent(), /לא נמצאת ברשימת המילים/);
     assert.ok(await page.locator('#wordCardBtn').isHidden(), 'no card for a word the app does not teach');
     assert.ok(await page.locator('#wordKnownBtn').isHidden(), 'no known toggle for a word the app does not teach');
+    assert.ok(await page.locator('#wordUnknownBtn').isHidden(), 'no classify button for a word the app does not teach');
+    assert.ok(await page.locator('#wordSheetGloss').isHidden(), 'no translation for a word the app does not teach');
     await page.keyboard.press('Escape');
     await page.waitForFunction(() => document.getElementById('wordSheet').classList.contains('hidden'));
 
