@@ -387,12 +387,31 @@ async function libraryCategoryPicker() {
     await page.waitForFunction(() => document.querySelector('#libraryCount').textContent.includes('"the"'));
     const hits = await page.evaluate(() => [...document.querySelectorAll('#libraryList .word-item .w')].map(el => el.textContent));
     assert.ok(hits.length > 0 && hits.every(w => w.toLowerCase().includes('the')), 'search stays inside the chosen band');
+    // Selected-category words are reachable by scrolling alone, no
+    // "show more" tap: approaching the list bottom loads the next page
+    // automatically until the whole category (book included) is rendered.
+    await page.selectOption('#libCatSelect', 'book');
+    await page.waitForFunction(() => document.querySelector('#libraryCount').textContent.includes('הספר'));
+    const reached = await page.evaluate(async () => {
+      const target = filteredVocab().length;
+      for (let i = 0; i < 100 && document.querySelectorAll('#libraryList .word-item').length < target; i++) {
+        window.scrollTo(0, document.body.scrollHeight);
+        await new Promise(r => setTimeout(r, 150));
+      }
+      return {
+        rendered: document.querySelectorAll('#libraryList .word-item').length,
+        target,
+        moreHidden: document.getElementById('moreBtn').classList.contains('hidden')
+      };
+    });
+    assert.equal(reached.rendered, reached.target, 'scrolling alone renders every book word');
+    assert.ok(reached.moreHidden, 'no show-more tap needed to finish the category');
     // Back to all words.
     await page.selectOption('#libCatSelect', 'all');
     await page.fill('#searchInput', '');
     await page.waitForFunction(() => !document.querySelector('#libraryCount').textContent.includes('רמה') && !document.querySelector('#libraryCount').textContent.includes('הספר'));
   } finally { await context.close(); }
-  console.log('PASS library category picker: band/book categories scroll their words, search composes');
+  console.log('PASS library category picker: band/book categories scroll their words (auto-load, no show-more tap), search composes');
 }
 
 (async () => {
