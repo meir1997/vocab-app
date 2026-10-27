@@ -54,6 +54,7 @@
             <div><strong id="vocabCount">0</strong><span>במאגר</span></div>
           </div>
           <button class="primary-btn" id="startBtn">מתחילים תרגול</button>
+          <button class="ghost-btn sort-list-launch" id="sortListBtn">מיון ברשימה - יודע / לא יודע</button>
           <p class="settings-hint" id="offlineStatus" role="status">מכינים שימוש אופליין… יש לפתוח פעם אחת עם אינטרנט</p>
           <div class="quick-settings">
             <button class="chip" id="sessionBtn" aria-label="אורך התרגול">20 מילים</button>
@@ -64,6 +65,18 @@
           <p class="band-note learning-note" id="learningNote" aria-live="polite"></p>
           <p class="source-note" id="sourceNote">המילים נטענות מגיליון אוצר המילים שלך</p>
         </div>
+
+        <section id="sortListPanel" class="hidden" aria-label="מיון מילים ברשימה">
+          <div class="sort-list-head"><h2>מיון ברשימה</h2><button class="ghost-btn" id="sortListClose">סגירה</button></div>
+          <label for="sortListScope">מה ממיינים</label>
+          <select id="sortListScope"><option value="all">כל המילים שטרם מוינו</option><option value="book">מילים מהספר - לפי שכיחות</option></select>
+          <p class="settings-hint">כל מילה לצד התרגום שלה. מילים שסומנו יוצאות מהרשימה. לא יודע הוא סימון בלבד, לא טעות בתרגול.</p>
+          <p id="sortListCount" class="library-count"></p>
+          <p id="sortListStatus" class="sr-only" role="status" aria-live="polite"></p>
+          <div id="sortListRows"></div>
+          <p id="sortListEmpty" class="hidden">כל המילים ברשימה הזו מוינו.</p>
+          <button id="sortListMore" class="ghost-btn hidden">הצג עוד</button>
+        </section>
 
         <div id="quizCard" class="hidden">
           <div class="quiz-head">

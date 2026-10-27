@@ -174,16 +174,28 @@ const learningCount = () => Object.values(progress).filter(isLearning).length;
 // word stays out of the capped learning pool until capped practice admits it.
 const isClassifiedUnknown = p => !!p && p.u > 0 && (p.r + p.w) === 0;
 const isCardMode = () => settings.mode === 'cards' || settings.mode === 'sort';
+// Shared eligibility/order for card sorting and list sorting. Existing records,
+// including pending unknown classifications, are already sorted.
+function buildSortQueue(scope = 'all') {
+  const unsorted = vocab.filter(v => !progress[v.w]);
+  if (scope === 'book' && bookSortAvailable()) {
+    return unsorted.filter(v => bookCountFor(v.r) > 0).sort((a, b) => (bookCountFor(b.r) - bookCountFor(a.r)) || a.r - b.r);
+  }
+  return unsorted.sort((a, b) => (isBookWord(a) ? 0 : 1) - (isBookWord(b) ? 0 : 1) || a.r - b.r);
+}
+function classifySortWord(item, ok) {
+  if (progress[item.w]) return false; // also prevents rapid double classification
+  if (ok) markWord(item.w, true);
+  else progress[item.w] = { r: 0, w: 0, s: 0, u: 1, last: Date.now() };
+  markAnswer(ok);
+  return true;
+}
 function buildQueue() {
   // Sort mode (user request, 26.10): every word never graded yet, no band
   // gate, no length cap, no admission check - sorting skips nothing. Book
   // scope orders by occurrences in the loaded book; 'all' follows rank order.
   if (settings.mode === 'sort') {
-    const unsorted = vocab.filter(v => !progress[v.w]);
-    if (settings.sortScope === 'book' && bookSortAvailable()) {
-      return unsorted.filter(v => bookCountFor(v.r) > 0).sort((a, b) => (bookCountFor(b.r) - bookCountFor(a.r)) || (a.r - b.r));
-    }
-    return unsorted.sort((a, b) => (isBookWord(a) ? 0 : 1) - (isBookWord(b) ? 0 : 1) || a.r - b.r);
+    return buildSortQueue(settings.sortScope);
   }
   // Learned words are never queued again; their records stay, they simply
   // leave the rotation. Before the learning pool fills, sessions introduce
@@ -379,7 +391,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v42');
+    const cache = await caches.open('four-words-offline-v43');
     const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
@@ -468,9 +480,8 @@ function gradeCard(ok) {
   const item = session.queue[session.index];
   // Sort-left is a classification, not a miss: it is not a band answer and
   // the word waits outside the capped pool until practice admits it.
-  if (settings.mode === 'sort' && !ok) progress[item.w] = { r: 0, w: 0, s: 0, u: 1, last: Date.now() };
-  else markWord(item.w, ok);
-  markAnswer(ok);
+  if (settings.mode === 'sort') classifySortWord(item, ok);
+  else { markWord(item.w, ok); markAnswer(ok); }
   if (ok) session.correct++; else session.wrong++;
   $('pillKnow').textContent = session.correct;
   $('pillDont').textContent = session.wrong;
@@ -712,6 +723,74 @@ function showToast(text) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.add('hidden'), 4000);
 }
+
+/* ---------- Sorting list (additional interface, not a practice replacement) ---------- */
+let sortListQueue = [], sortListShown = 0;
+function updateSortListCount() {
+  $('sortListCount').textContent = `${sortListQueue.length.toLocaleString('he-IL')} מילים נותרו למיון`;
+  $('sortListEmpty').classList.toggle('hidden', sortListQueue.length > 0);
+}
+function renderSortList(reset = true) {
+  if (reset) {
+    sortListQueue = buildSortQueue($('sortListScope').value);
+    sortListShown = 0;
+    $('sortListRows').replaceChildren();
+  }
+  const batch = sortListQueue.slice(sortListShown, sortListShown + 60);
+  sortListShown += batch.length;
+  batch.forEach(item => {
+    const row = document.createElement('div'); row.className = 'sort-list-row';
+    const word = document.createElement('span'); word.className = 'sort-list-word';
+    word.lang = 'en'; word.dir = 'ltr'; word.textContent = item.w;
+    const meaning = document.createElement('span'); meaning.className = 'sort-list-meaning';
+    meaning.dir = 'rtl'; meaning.textContent = item.t;
+    const actions = document.createElement('div'); actions.className = 'sort-list-actions';
+    [true, false].forEach(ok => {
+      const button = document.createElement('button');
+      button.type = 'button'; button.textContent = ok ? 'יודע' : 'לא יודע';
+      button.className = ok ? 'sort-know' : 'sort-unknown';
+      button.setAttribute('aria-label', `${ok ? 'יודע' : 'לא יודע'}: ${item.w}`);
+      button.addEventListener('click', () => {
+        if (!classifySortWord(item, ok)) return;
+        const nextFocus = row.nextElementSibling?.querySelector('button');
+        sortListQueue = sortListQueue.filter(v => v.w !== item.w);
+        sortListShown--; row.remove(); updateSortListCount();
+        persist(); refreshHome();
+        if ($('sortListRows').children.length < 30) renderSortList(false);
+        if (nextFocus) nextFocus.focus({ preventScroll: true });
+        $('sortListStatus').textContent = `${item.w}: ${ok ? 'סומנה כידועה' : 'סומנה כלא ידועה'}`;
+      });
+      actions.append(button);
+    });
+    row.append(word, meaning, actions); $('sortListRows').append(row);
+  });
+  updateSortListCount();
+  $('sortListMore').classList.toggle('hidden', sortListShown >= sortListQueue.length);
+}
+async function openSortList() {
+  if (!vocab.length) return;
+  try { await loadBookFrequency(); } catch {}
+  $('sortListScope').querySelector('option[value="book"]').disabled = !bookSortAvailable();
+  $('sortListPanel').classList.remove('hidden');
+  $('practiceHome').classList.add('hidden');
+  $('summary').classList.add('hidden');
+  $('sortListStatus').textContent = '';
+  renderSortList(); window.scrollTo(0, 0);
+}
+$('sortListBtn').addEventListener('click', openSortList);
+$('sortListClose').addEventListener('click', () => {
+  $('sortListPanel').classList.add('hidden'); $('practiceHome').classList.remove('hidden');
+});
+$('sortListScope').addEventListener('change', () => renderSortList());
+$('sortListMore').addEventListener('click', () => renderSortList(false));
+let sortListScrollQueued = false;
+window.addEventListener('scroll', () => {
+  if (sortListScrollQueued || $('tab-practice').classList.contains('hidden') || $('sortListPanel').classList.contains('hidden')) return;
+  const more = $('sortListMore');
+  if (more.classList.contains('hidden') || more.getBoundingClientRect().top > innerHeight + 600) return;
+  sortListScrollQueued = true;
+  requestAnimationFrame(() => { sortListScrollQueued = false; renderSortList(false); });
+}, { passive: true });
 
 /* ---------- Library ---------- */
 let libFilter = '', libShown = 0, libCategory = 'all';
