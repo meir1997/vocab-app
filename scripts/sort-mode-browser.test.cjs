@@ -325,8 +325,8 @@ async function sortingListView() {
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'no horizontal overflow');
       const box = await rows.first().boundingBox();
       assert.ok(box.x >= 0 && box.x + box.width <= width);
-      fs.mkdirSync('/downloads/sorting-list', { recursive: true });
-      await page.screenshot({ path: `/downloads/sorting-list/phone-${width}.png` });
+      fs.mkdirSync(path.join(root, 'test-results/sorting-list'), { recursive: true });
+      await page.screenshot({ path: path.join(root, `test-results/sorting-list/phone-${width}.png`) });
     }
     assert.equal(await page.evaluate(() => JSON.stringify(progress)), progressBeforeScroll);
     assert.equal(JSON.parse(await page.evaluate(() => localStorage.getItem('fw.progress.v2')))[unknown].u, 1, 'classification saved');
