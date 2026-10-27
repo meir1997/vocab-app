@@ -529,3 +529,20 @@ body.reading .book-viewport {
   padding: 4px 22px; font-size: 18px;
 }
 body.reading .book-content { font-family: Georgia, 'Times New Roman', serif; color: #211e18; }
+
+/* Sorting list: English and Hebrew remain on opposite sides, actions below. */
+.sort-list-launch { width: 100%; margin-top: 10px; }
+.sort-list-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+#sortListScope { width: 100%; padding: 12px; border: 1px solid #dfe4f2; border-radius: 12px; background: white; font-size: 15px; }
+.sort-list-row { display: grid; direction: ltr; grid-template-columns: minmax(0,1fr) minmax(0,1fr) 48px 54px; gap: 8px; background: white; padding: 10px 8px; border-bottom: 1px solid #dfe4f2; min-height: 66px; }
+.sort-list-word { font-weight: 800; text-align: left; overflow-wrap: anywhere; align-self: center; }
+.sort-list-meaning { text-align: right; overflow-wrap: anywhere; align-self: center; }
+.sort-list-actions { display: contents; }
+.sort-list-actions button { min-height: 44px; padding: 5px 2px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
+.sort-know { background: #eaf7ef; color: #106d40; border: 1px solid #a5d3b7; }
+.sort-unknown { background: #fff0f1; color: #a52e3a; border: 1px solid #ebbac0; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+#sortListRows { border: 1px solid #dfe4f2; border-radius: 12px; overflow: hidden; }
+.sort-list-word, .sort-list-meaning { font-size: 14px; }
+.sort-list-head h2 { font-size: 22px; }
