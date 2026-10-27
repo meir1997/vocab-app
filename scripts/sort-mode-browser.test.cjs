@@ -276,11 +276,70 @@ async function defaultScopeIsAllRankOrder() {
   console.log('PASS default scope: book series first, then all words by rank; book scope optional');
 }
 
+async function sortingListView() {
+  const seeded = {};
+  seeded[byAnyRank(10001).w] = learnedRec();
+  seeded[byAnyRank(10002).w] = { r: 0, w: 0, s: 0, u: 1, last: past };
+  seeded[byRank(1).w] = learningRec(past);
+  const { context, page } = await isolatedPage(seeded, { mode: 'choice' });
+  try {
+    await page.locator('#sortListBtn').click();
+    await page.locator('#sortListPanel').waitFor({ state: 'visible' });
+    let expected = expectedAllQueue(seeded);
+    let rows = page.locator('#sortListRows .sort-list-row');
+    assert.equal(await rows.count(), 60);
+    assert.equal(await rows.first().locator('.sort-list-word').textContent(), expected[0]);
+    assert.equal(await rows.first().locator('.sort-list-meaning').textContent(), allWords.find(v => v.w === expected[0]).t);
+    const before = await page.evaluate(() => ({ count: learningCount(), band: bands.current, settings: JSON.stringify(settings) }));
+    const unknown = expected[0], known = expected[1];
+    await rows.nth(0).locator('.sort-unknown').click();
+    await rows.nth(0).locator('.sort-know').click();
+    const result = await page.evaluate(({ unknown, known }) => ({
+      unknown: progress[unknown], known: progress[known], count: learningCount(),
+      band: bands.current, settings: JSON.stringify(settings), stats,
+      queue: buildSortQueue().map(v => v.w)
+    }), { unknown, known });
+    assert.equal(result.unknown.u, 1); assert.equal(result.unknown.w, 0);
+    assert.equal(result.unknown.r, 0); assert.equal(result.count, before.count);
+    assert.equal(result.known.r, 1); assert.equal(result.known.w, 0);
+    assert.equal(result.band, before.band, 'book sorting does not advance levels');
+    assert.equal(result.settings, before.settings, 'list does not replace practice mode');
+    assert.equal(result.stats.attempts, 2); assert.equal(result.stats.correct, 1);
+    assert.ok(!result.queue.includes(unknown) && !result.queue.includes(known));
+    // Pending unknowns, learned words and learning records all stay out.
+    assert.ok(Object.keys(seeded).every(w => !result.queue.includes(w)));
+    await page.locator('#sortListClose').click();
+    await page.locator('#sortListBtn').click();
+    assert.equal(await rows.first().locator('.sort-list-word').textContent(), expected[2], 'reopening resumes with eligible words');
+    await page.selectOption('#sortListScope', 'book');
+    const bookOrder = expectedBookQueue(Object.assign({}, seeded, { [unknown]: result.unknown, [known]: result.known }));
+    assert.deepEqual(await rows.locator('.sort-list-word').allTextContents(), bookOrder.slice(0, 60));
+    // Scroll loads later eligible words without changing progress.
+    await rows.last().scrollIntoViewIfNeeded();
+    await page.waitForFunction(() => document.querySelectorAll('#sortListRows .sort-list-row').length > 60);
+    const progressBeforeScroll = await page.evaluate(() => JSON.stringify(progress));
+    await page.evaluate(() => window.scrollTo(0,0));
+    for (const width of [390, 320]) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.evaluate(() => window.scrollTo(0,0));
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'no horizontal overflow');
+      const box = await rows.first().boundingBox();
+      assert.ok(box.x >= 0 && box.x + box.width <= width);
+      fs.mkdirSync('/downloads/sorting-list', { recursive: true });
+      await page.screenshot({ path: `/downloads/sorting-list/phone-${width}.png` });
+    }
+    assert.equal(await page.evaluate(() => JSON.stringify(progress)), progressBeforeScroll);
+    assert.equal(JSON.parse(await page.evaluate(() => localStorage.getItem('fw.progress.v2')))[unknown].u, 1, 'classification saved');
+    console.log('PASS sorting list: shared eligibility/order, known/unknown semantics, resume, scope, scroll, 390/320 layout');
+  } finally { await context.close(); }
+}
+
 async function main() {
   browser = await chromium.launch();
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   base = `http://127.0.0.1:${server.address().port}/`;
   try {
+    await sortingListView();
     await bookScopeOrder();
     await allScopeRankOrder();
     await gradeRightScoresKnown();
