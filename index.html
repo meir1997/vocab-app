@@ -53,6 +53,20 @@
             <div><strong id="accuracyStat">—</strong><span>דיוק</span></div>
             <div><strong id="vocabCount">0</strong><span>במאגר</span></div>
           </div>
+          <section class="home-modes" aria-labelledby="homeModeTitle">
+            <h2 id="homeModeTitle">איך מתרגלים היום?</h2>
+            <div class="home-mode-grid" role="group" aria-label="בחירת סוג תרגול">
+              <button type="button" data-home-mode="cards"><strong>כרטיסיות</strong><span>הופכים כרטיס וגוררים</span></button>
+              <button type="button" data-home-mode="sort"><strong>מיון</strong><span>יודע / לא יודע בכרטיסיות</span></button>
+              <button type="button" data-home-mode="choice"><strong>משחק</strong><span>בחירת תרגום מתוך 4 תשובות</span></button>
+              <button type="button" data-home-mode="reverse"><strong>משחק הפוך</strong><span>מעברית לאנגלית</span></button>
+              <button type="button" data-home-mode="typing"><strong>הקלדה</strong><span>כותבים את המילה באנגלית</span></button>
+            </div>
+            <div id="homeSortScopeGroup" class="hidden">
+              <label for="homeSortScope">מה ממיינים בכרטיסיות?</label>
+              <select id="homeSortScope"><option value="all">כל המילים שטרם מוינו</option><option value="book">מילים מהספר - לפי שכיחות</option></select>
+            </div>
+          </section>
           <button class="primary-btn" id="startBtn">מתחילים תרגול</button>
           <button class="ghost-btn sort-list-launch" id="sortListBtn">מיון ברשימה - יודע / לא יודע</button>
           <p class="settings-hint" id="offlineStatus" role="status">מכינים שימוש אופליין… יש לפתוח פעם אחת עם אינטרנט</p>
