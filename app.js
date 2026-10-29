@@ -391,7 +391,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v43');
+    const cache = await caches.open('four-words-offline-v44');
     const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
@@ -656,7 +656,30 @@ function finishSession(early) {
   else $('summaryText').textContent = `ענית נכון על ${session.correct} מתוך ${total} מילים — ${pct(session.correct, total)} הצלחה.`;
   refreshHome();
 }
+function refreshHomeModes() {
+  document.querySelectorAll('[data-home-mode]').forEach(button => {
+    const selected = button.dataset.homeMode === settings.mode;
+    button.setAttribute('aria-pressed', String(selected));
+  });
+  $('homeSortScopeGroup').classList.toggle('hidden', settings.mode !== 'sort');
+  $('homeSortScope').value = settings.sortScope;
+  $('homeSortScope').querySelector('option[value="book"]').disabled = !bookSortAvailable();
+}
+function chooseHomeMode(mode) {
+  if (session.active || startingSession || !Object.hasOwn(MODE_LABELS, mode)) return;
+  settings.mode = mode;
+  applySettingsToUI(); persist(); refreshHome();
+}
+document.querySelectorAll('[data-home-mode]').forEach(button => {
+  button.addEventListener('click', () => chooseHomeMode(button.dataset.homeMode));
+});
+$('homeSortScope').addEventListener('change', e => {
+  settings.sortScope = e.target.value;
+  $('sortScopeSelect').value = settings.sortScope;
+  persist(); refreshHome();
+});
 function refreshHome() {
+  refreshHomeModes();
   const today = stats.days[todayKey()] || { a: 0, c: 0 };
   $('todayCount').textContent = today.a;
   $('goalTarget').textContent = settings.goal;
@@ -1240,7 +1263,11 @@ $('fcInfo').addEventListener('click', e => { e.stopPropagation(); const item = s
 $('cardClose').addEventListener('click', () => { if (session.active) finishSession(true); });
 $('cardGear').addEventListener('click', () => switchTab('settings'));
 $('sessionBtn').addEventListener('click', () => switchTab('settings'));
-$('modeBtn').addEventListener('click', () => switchTab('settings'));
+$('modeBtn').addEventListener('click', () => {
+  switchTab('practice');
+  $('homeModeTitle').scrollIntoView({ block: 'center', behavior: 'smooth' });
+  document.querySelector(`[data-home-mode="${settings.mode}"]`)?.focus({ preventScroll: true });
+});
 function switchTab(name) { document.querySelector(`.tab-btn[data-tab="${name}"]`).click(); }
 $('searchInput').addEventListener('input', e => { libFilter = e.target.value.trim(); renderLibrary(); });
 $('libCatSelect').addEventListener('change', e => { libCategory = e.target.value; renderLibrary(); });
