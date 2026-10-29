@@ -414,6 +414,42 @@ async function libraryCategoryPicker() {
   console.log('PASS library category picker: band/book categories scroll their words (auto-load, no show-more tap), search composes');
 }
 
+async function homeModeChoices() {
+  const { page, context } = await newPage();
+  try {
+    const before = await page.evaluate(() => ({p:JSON.stringify(progress),s:JSON.stringify(stats),b:JSON.stringify(bands)}));
+    for (const mode of ['cards','sort','choice','reverse','typing']) {
+      await page.locator(`[data-home-mode="${mode}"]`).click();
+      assert.equal(await page.locator(`[data-home-mode="${mode}"]`).getAttribute('aria-pressed'), 'true');
+      assert.equal(await page.evaluate(() => settings.mode), mode);
+      assert.equal(await page.locator('#modeSelect').inputValue(), mode);
+      await page.locator('#startBtn').click();
+      await page.waitForFunction(() => session.active);
+      if (['cards','sort'].includes(mode)) assert.ok(await page.locator('#flashcardBox').isVisible());
+      if (['choice','reverse'].includes(mode)) assert.equal(await page.locator('#answers button').count(), 4);
+      if (mode === 'typing') assert.ok(await page.locator('#typingInput').isVisible());
+      await page.evaluate(() => finishSession(true));
+      await page.locator('#homeBtn').click();
+    }
+    assert.deepEqual(await page.evaluate(() => ({p:JSON.stringify(progress),s:JSON.stringify(stats),b:JSON.stringify(bands)})), before, 'choosing/viewing modes does not change learning data');
+    await page.locator('[data-home-mode="sort"]').click();
+    await page.selectOption('#homeSortScope','book');
+    assert.equal(await page.locator('#sortScopeSelect').inputValue(),'book');
+    await page.locator('[data-home-mode="choice"]').click();
+    fs.mkdirSync(path.join(root,'test-results/home-modes'),{recursive:true});
+    for (const width of [390,320]) {
+      await page.setViewportSize({width,height:844});
+      await page.evaluate(() => window.scrollTo(0,0));
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+      await page.screenshot({path:path.join(root,`test-results/home-modes/phone-${width}.png`)});
+    }
+    await page.locator('#sortListBtn').click();
+    await page.locator('#sortListPanel').waitFor({state:'visible'});
+    console.log('PASS home mode picker: existing five modes, four-answer game, sort scope, list entry and unchanged learning data');
+  } finally { await context.close(); }
+}
+
+
 (async () => {
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   base = `http://127.0.0.1:${server.address().port}/vocab-app/`;
@@ -421,6 +457,7 @@ async function libraryCategoryPicker() {
     args: ['--no-sandbox'],
     ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH } : {})
   });
+  await homeModeChoices();
   await stalledDetailsDoNotBlockPractice();
   await unambiguousChoicesAndContext();
   await feedbackAndContinuation();
