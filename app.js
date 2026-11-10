@@ -318,8 +318,9 @@ function initFirebase() {
     });
   } catch { fb.initialized = false; setSync('מצב מקומי · סנכרון כשהחיבור יחזור'); }
 }
-function setSync(text) { $('syncStatus').textContent = text; }
+function setSync(text) { $('syncStatus').textContent = text; const mirror = $('settingsSync'); if (mirror) mirror.textContent = text; }
 function setAuthUI(user) {
+  if (user && $('onboarding') && !$('onboarding').classList.contains('hidden')) finishOnboarding(false);
   const btn = $('authBtn');
   if (user) { btn.textContent = user.displayName ? `מחובר: ${user.displayName}` : 'מחובר'; btn.classList.add('signed'); }
   else { btn.textContent = 'כניסה עם Google'; btn.classList.remove('signed'); }
@@ -391,9 +392,10 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v44');
+    const cache = await caches.open('four-words-offline-v47');
     const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
+    label.classList.toggle('offline-ready', !!prepared);
     if (prepared) label.textContent = 'מוכן לתרגול אופליין במכשיר זה · לפתיחה השתמשו באותה כתובת';
     else label.textContent = 'מכינים שימוש אופליין… השאירו פתוח עם אינטרנט עד שמופיע אישור';
   } catch { label.textContent = 'שמירה אופליין לא זמינה בדפדפן זה'; }
@@ -483,6 +485,8 @@ function gradeCard(ok) {
   if (settings.mode === 'sort') classifySortWord(item, ok);
   else { markWord(item.w, ok); markAnswer(ok); }
   if (ok) session.correct++; else session.wrong++;
+  // Sorting is classification, so it neither builds a review list nor counts toward the goal.
+  if (settings.mode !== 'sort') noteAnswer(ok, item);
   $('pillKnow').textContent = session.correct;
   $('pillDont').textContent = session.wrong;
   persist(); refreshHome();
@@ -585,17 +589,61 @@ function showQuestion() {
     $('fcExample').textContent = content.example || '';
   }
   fitWord();
+  // Only when the English word is the prompt; reverse and typing would give the answer away.
+  if (autoSpeak && (mode === 'choice' || cards)) speak(item.w);
 }
 let locked = false;
+/* Feedback sounds: tiny synthesized tones, a per-device preference. */
+let soundOn = (() => { try { return localStorage.getItem('fw.sound') !== '0'; } catch { return true; } })();
+let audioCtx = null;
+// Optional: say each English word aloud as its question appears (off by default).
+let autoSpeak = (() => { try { return localStorage.getItem('fw.autoSpeak') === '1'; } catch { return false; } })();
+function playSound(kind) {
+  if (!soundOn) return;
+  try {
+    audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
+    const t = audioCtx.currentTime;
+    const notes = kind === 'good' ? [[660, 0], [880, .09]] : kind === 'done' ? [[523, 0], [659, .1], [784, .2], [1047, .3]] : [[220, 0], [196, .12]];
+    notes.forEach(([freq, at]) => {
+      const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+      osc.type = kind === 'bad' ? 'triangle' : 'sine'; osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0001, t + at);
+      gain.gain.exponentialRampToValueAtTime(kind === 'bad' ? 0.08 : 0.12, t + at + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + at + 0.22);
+      osc.connect(gain).connect(audioCtx.destination); osc.start(t + at); osc.stop(t + at + 0.25);
+    });
+  } catch {}
+}
+const CHEERS = ['מעולה!', 'בול!', 'יפה מאוד!', 'אלופים!', 'מדויק!', 'נכון!'];
+// Three or more correct answers in a row turn the cheer into a combo.
+function cheer() {
+  session.combo = (session.combo || 0) + 1;
+  const lead = session.combo >= 3 ? `🔥 ${session.combo} ברצף!` : CHEERS[Math.floor(Math.random() * CHEERS.length)];
+  return `${lead} \u2066+10 XP\u2069`;
+}
+// Session bookkeeping shared by every mode: combo reset, the review list for
+// the summary, a light haptic tick and the daily-goal moment.
+function noteAnswer(ok, item, countsForGoal = true) {
+  if (!ok) {
+    session.combo = 0;
+    session.missed ||= [];
+    if (!session.missed.includes(item)) session.missed.push(item);
+  }
+  try { navigator.vibrate?.(ok ? 12 : [24, 40, 24]); } catch {}
+  if (countsForGoal && (stats.days[todayKey()] || {}).a === settings.goal) showToast('🎯 היעד היומי הושלם! כל מילה מעכשיו היא בונוס');
+}
+// What the learner chose on a miss: the wrong option's text or typed word (null = "לא יודע").
+let lastMiss = null;
 function answerChoice(ok, btn) {
   if (locked) return; locked = true;
+  lastMiss = !ok && btn ? { kind: 'choice', text: btn.textContent } : null;
   const item = session.queue[session.index];
   markWord(item.w, ok); markAnswer(ok);
   document.querySelectorAll('.answer').forEach(b => {
     b.disabled = true;
     if (b.dataset.correct === 'true') b.classList.add(ok ? 'correct' : 'reveal');
   });
-  if (ok) { session.correct++; btn.classList.add('correct'); $('hint').textContent = 'מעולה — תשובה נכונה!'; $('hint').classList.add('good'); }
+  if (ok) { session.correct++; btn.classList.add('correct'); $('hint').textContent = cheer(); $('hint').classList.add('good'); }
   else { session.wrong++; if (btn) btn.classList.add('wrong'); $('hint').textContent = btn ? 'נלמד את המילה ונמשיך' : 'זו הזדמנות להכיר את המילה'; }
   persist(); refreshHome();
   completeAnswer(ok, item);
@@ -609,8 +657,10 @@ function checkTyping() {
   const lev = (a, b) => { const m = a.length, n = b.length, d = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]); for (let j = 1; j <= n; j++) d[0][j] = j; for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); return d[m][n]; };
   const ok = guess === target || (target.length >= 5 && lev(guess, target) <= 1);
   locked = true;
+  const typed = $('typingInput').value.trim();
+  lastMiss = !ok && typed ? { kind: 'typing', text: typed } : null;
   markWord(item.w, ok); markAnswer(ok); persist(); refreshHome();
-  if (ok) { session.correct++; $('hint').textContent = 'מעולה — נכון!'; $('hint').classList.add('good'); }
+  if (ok) { session.correct++; $('hint').textContent = cheer(); $('hint').classList.add('good'); }
   else { session.wrong++; $('hint').textContent = 'נלמד את המילה ונמשיך'; }
   completeAnswer(ok, item);
 }
@@ -619,6 +669,8 @@ function nextQuestion() {
   locked = false; session.index++; showQuestion();
 }
 function completeAnswer(ok, item) {
+  playSound(ok ? 'good' : 'bad');
+  noteAnswer(ok, item);
   $('typingCheck').disabled = true; $('typingInput').disabled = true;
   if (ok) {
     $('quizCard').classList.add('answering-correct');
@@ -638,7 +690,17 @@ function renderAnswerFeedback(item) {
   renderReviewBadge(item);
   const content = wordContent(item, wordDetails[item.r]);
   const box = $('answerFeedback'); box.replaceChildren(); box.classList.remove('hidden');
-  const label = document.createElement('p'); label.className = 'feedback-label'; label.textContent = 'המשמעות הנלמדת';
+  box.classList.toggle('is-wrong', !!lastMiss);
+  if (lastMiss) {
+    // Name the miss once, then the correct meaning below it.
+    const verdict = document.createElement('p'); verdict.className = 'feedback-verdict';
+    const mark = document.createElement('span'); mark.setAttribute('aria-hidden', 'true'); mark.textContent = '✕';
+    const pick = document.createElement('bdi'); pick.className = 'feedback-pick'; pick.textContent = lastMiss.text;
+    if (lastMiss.kind === 'typing') { pick.lang = 'en'; pick.dir = 'ltr'; }
+    verdict.append(mark, ` לא נכון · ${lastMiss.kind === 'typing' ? 'כתבת' : 'בחרת'}: `, pick);
+    box.append(verdict);
+  }
+  const label = document.createElement('p'); label.className = 'feedback-label'; label.textContent = lastMiss ? 'התשובה הנכונה' : 'המשמעות הנלמדת';
   const meaning = document.createElement('p'); meaning.className = 'feedback-meaning'; meaning.textContent = content.meaning;
   const word = document.createElement('bdi'); word.lang = 'en'; word.dir = 'ltr'; word.textContent = item.w;
   const example = document.createElement('p'); example.className = 'example-text'; example.lang = 'en'; example.dir = 'ltr';
@@ -650,11 +712,75 @@ function finishSession(early) {
   session.active = false;
   $('quizCard').classList.add('hidden'); $('summary').classList.remove('hidden');
   const total = session.correct + session.wrong;
+  renderSummaryScore(early, total);
   if (early && total === 0) $('summaryText').textContent = 'התרגול הופסק — לא סומנו מילים הפעם.';
   else if (settings.mode === 'sort' && total === 0) $('summaryText').textContent = 'כל המילים מוינו — אין כרגע מילים חדשות למיון.';
   else if (settings.mode === 'sort') $('summaryText').textContent = `מיינת ${total} מילים: ${session.correct} ידועות, ${session.wrong} מסומנות ללמידה וייכנסו לתרגול כשיתפנה מקום.`;
   else $('summaryText').textContent = `ענית נכון על ${session.correct} מתוך ${total} מילים — ${pct(session.correct, total)} הצלחה.`;
   refreshHome();
+}
+function celebrate() {
+  const canvas = $('confetti');
+  if (!canvas || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const box = canvas.parentElement.getBoundingClientRect();
+  const dpr = devicePixelRatio || 1;
+  canvas.width = box.width * dpr; canvas.height = box.height * dpr;
+  const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
+  const colors = ['#7c5cff', '#ffc53d', '#ff6b81', '#22c79a', '#38bdf8'];
+  const parts = Array.from({ length: 90 }, () => ({
+    x: box.width / 2, y: box.height * 0.28, vx: (Math.random() - 0.5) * 9, vy: -Math.random() * 9 - 3,
+    r: Math.random() * 5 + 3, c: colors[Math.floor(Math.random() * colors.length)], a: Math.random() * Math.PI, va: (Math.random() - 0.5) * 0.3
+  }));
+  const start = performance.now();
+  (function frame(now) {
+    ctx.clearRect(0, 0, box.width, box.height);
+    parts.forEach(p => { p.vy += 0.25; p.x += p.vx; p.y += p.vy; p.a += p.va; ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a); ctx.fillStyle = p.c; ctx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r); ctx.restore(); });
+    if (now - start < 1800 && !$('summary').classList.contains('hidden')) requestAnimationFrame(frame);
+    else ctx.clearRect(0, 0, box.width, box.height);
+  })(start);
+}
+function renderSummaryMissed(items) {
+  const list = $('summaryMissedList'); list.replaceChildren();
+  $('summaryMissed').classList.toggle('hidden', !items.length);
+  items.forEach(item => {
+    const row = document.createElement('li');
+    const open = document.createElement('button'); open.type = 'button'; open.className = 'missed-word';
+    const word = document.createElement('bdi'); word.lang = 'en'; word.dir = 'ltr'; word.textContent = item.w;
+    const meaning = document.createElement('span'); meaning.textContent = wordContent(item, wordDetails[item.r]).meaning;
+    open.append(word, meaning);
+    open.addEventListener('click', () => openDetails(item));
+    const say = document.createElement('button'); say.type = 'button'; say.className = 'missed-speak';
+    say.setAttribute('aria-label', `השמעת ${item.w}`); say.innerHTML = iconMarkup('volume');
+    say.addEventListener('click', () => speak(item.w));
+    row.append(open, say); list.append(row);
+  });
+}
+function renderSummaryScore(early, total) {
+  const sort = settings.mode === 'sort';
+  const share = total ? Math.round(session.correct / total * 100) : 0;
+  let title = 'כל הכבוד!';
+  if (total === 0) title = early ? 'התרגול הופסק' : 'אין מה למיין כרגע';
+  else if (sort) title = 'המיון נשמר';
+  else if (share >= 90) title = 'מצוין!';
+  else if (share >= 70) title = 'כל הכבוד!';
+  else if (share >= 40) title = 'התקדמות יפה';
+  else title = 'כל טעות היא מילה חדשה';
+  $('summaryTitle').textContent = title;
+  $('summaryCorrect').textContent = session.correct;
+  $('summaryWrong').textContent = session.wrong;
+  $('summaryXp').textContent = `+${sort ? 0 : xpOf(session.correct, total)}`;
+  $('summaryStats').classList.toggle('hidden', total === 0);
+  renderSummaryMissed(sort ? [] : (session.missed || []));
+  const ring = $('summaryScore');
+  ring.classList.toggle('hidden', total === 0 || sort);
+  ring.style.setProperty('--score', `${share}%`);
+  $('summaryScoreText').textContent = `${share}%`;
+  const today = stats.days[todayKey()] || { a: 0 };
+  $('summaryGoalFill').style.width = `${Math.min(100, Math.round(today.a / settings.goal * 100))}%`;
+  if (total > 0 && (share >= 70 || today.a >= settings.goal)) { playSound('done'); celebrate(); }
+  $('summaryGoal').textContent = today.a >= settings.goal
+    ? `🎯 השלמת את היעד היומי — ${today.a} מילים היום`
+    : `היום: ${today.a} מתוך ${settings.goal} מילים ביעד היומי`;
 }
 function refreshHomeModes() {
   document.querySelectorAll('[data-home-mode]').forEach(button => {
@@ -685,14 +811,17 @@ function refreshHome() {
   $('goalTarget').textContent = settings.goal;
   const p = Math.min(100, Math.round(today.a / settings.goal * 100));
   $('goalRingText').textContent = `${p}%`;
-  $('goalRing').style.background = `conic-gradient(var(--accent) ${p}%, var(--accent-soft) ${p}%)`;
+  $('goalRing').style.setProperty('--p', `${p}%`);
+  $('goalRing').classList.toggle('done', p >= 100);
   $('dayStreak').textContent = dayStreak();
-  $('dueCount').textContent = dueCount().toLocaleString('he-IL');
+  $('xpTotal').textContent = xpOf(stats.correct, stats.attempts).toLocaleString('he-IL');
+  $('heroMessage').textContent = heroMessage(today.a);
+  $('startLabel').textContent = today.a >= settings.goal ? 'עוד שיעור בונוס' : today.a > 0 ? 'ממשיכים בשיעור' : 'מתחילים שיעור';
   renderLearningNote();
-  $('learnedStat').textContent = learnedCount().toLocaleString('he-IL');
-  $('accuracyStat').textContent = pct(stats.correct, stats.attempts);
+  renderSessionPreview();
+  renderLevelPath();
+  renderStats();
   $('sessionBtn').textContent = settings.length === 'all' ? 'כל הדחופות' : `${settings.length} מילים`;
-  $('modeBtn').textContent = settings.mode === 'sort' && settings.sortScope === 'book' && bookSortAvailable() ? 'מיון · מילים מהספר' : MODE_LABELS[settings.mode];
   const bookScopeOption = $('sortScopeSelect').querySelector('option[value="book"]');
   if (bookScopeOption) bookScopeOption.disabled = !bookSortAvailable();
   if (vocab.length) {
@@ -700,6 +829,41 @@ function refreshHome() {
     $('bandNote').textContent = bandAccuracyNote();
     if ($('bandSelect').options.length) $('bandSelect').value = String(bands.current);
   }
+}
+// XP is derived from the existing answer counters, so it syncs for free and
+// never needs its own storage: a correct answer is worth 10, an attempt 2.
+const xpOf = (correct, attempts) => correct * 10 + Math.max(0, attempts - correct) * 2;
+function heroMessage(done) {
+  const left = settings.goal - done;
+  if (done === 0) return dayStreak() > 0 ? `רצף של ${dayStreak()} ימים — לא שוברים אותו היום!` : 'כמה דקות ביום, ואנגלית שנשארת איתך.';
+  if (left > 0) return `עוד ${left} מילים ליעד היומי. כמעט שם!`;
+  return 'היעד היומי הושלם 🎉 כל מילה נוספת היא בונוס.';
+}
+function renderSessionPreview() {
+  const el = $('sessionPreview'); if (!el) return;
+  if (!vocab.length) { el.textContent = 'טוענים את המילים…'; return; }
+  const words = settings.length === 'all' ? 'כל הדחופות' : `${settings.length} מילים`;
+  el.textContent = `${MODE_SHORT[settings.mode] || ''} · ${words} · רמה ${bands.current}`;
+}
+const MODE_SHORT = { choice: '🎯 משחק', reverse: '🔄 משחק הפוך', typing: '⌨️ הקלדה', cards: '🃏 כרטיסיות', sort: '🗂️ מיון' };
+function renderLevelPath() {
+  const path = $('levelPath'); if (!path || !vocab.length) return;
+  const cur = bands.current, last = maxBand();
+  const first = Math.max(1, Math.min(cur - 1, last - 4));
+  path.replaceChildren();
+  for (let b = first; b <= Math.min(last, first + 4); b++) {
+    const li = document.createElement('li');
+    li.className = b < cur ? 'done' : b === cur ? 'current' : 'locked';
+    li.textContent = b;
+    li.setAttribute('aria-label', `רמה ${b}${b === cur ? ' — הרמה הנוכחית' : b < cur ? ' — הושלמה' : ''}`);
+    if (b === cur) li.setAttribute('aria-current', 'step');
+    path.append(li);
+  }
+  // Share of the current hundred already learned.
+  const lo = bandLo(cur), hi = cur * BAND_SIZE;
+  const inBand = vocab.filter(v => v.r >= lo && v.r <= hi);
+  const learned = inBand.filter(v => isLearned(progress[v.w])).length;
+  $('levelProgress').style.width = `${inBand.length ? Math.round(learned / inBand.length * 100) : 0}%`;
 }
 function renderLearningNote() {
   const el = $('learningNote'); if (!el) return;
@@ -1105,22 +1269,22 @@ function speak(text) {
 
 /* ---------- Stats view ---------- */
 function renderStats() {
-  $('totalAttempts').textContent = stats.attempts.toLocaleString('he-IL');
   $('totalAccuracy').textContent = pct(stats.correct, stats.attempts);
   $('statsLearned').textContent = learnedCount().toLocaleString('he-IL');
   $('statsLearning').textContent = learningCount().toLocaleString('he-IL');
-  $('statsDue').textContent = dueCount().toLocaleString('he-IL');
   const bars = $('weekBars'); bars.replaceChildren();
   const names = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
   const days = [];
   for (let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); days.push(d); }
   const max = Math.max(1, ...days.map(d => { const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; return (stats.days[k] || {}).a || 0; }));
-  days.forEach(d => {
+  days.forEach((d, i) => {
     const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     const a = (stats.days[k] || {}).a || 0;
     const bar = document.createElement('div');
     bar.className = 'bar';
-    bar.innerHTML = `<i style="height:${Math.round(a / max * 100)}%" title="${a} מילים"></i><span>${names[d.getDay()]}</span>`;
+    const isToday = i === days.length - 1;
+    bar.classList.toggle('today', isToday);
+    bar.innerHTML = `<b>${a || ''}</b><i style="height:${Math.round(a / max * 100)}%" title="${a} מילים"></i><span>${names[d.getDay()]}</span>`;
     bars.append(bar);
   });
 }
@@ -1180,7 +1344,8 @@ document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
   $(`tab-${btn.dataset.tab}`).classList.remove('hidden');
-  if (btn.dataset.tab === 'stats') renderStats();
+  if (btn.dataset.tab === 'practice') renderStats();
+  window.scrollTo(0, 0);
   if (btn.dataset.tab === 'library') renderLibrary();
   if (btn.dataset.tab === 'book' && window.VocabReader) VocabReader.showBookTab();
   else document.body.classList.remove('reading');
@@ -1208,7 +1373,7 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'ArrowLeft') gradeCard(false);
 });
 function checkTypingDontKnow() {
-  locked = true;
+  locked = true; lastMiss = null;
   const item = session.queue[session.index];
   markWord(item.w, false); markAnswer(false); session.wrong++; persist(); refreshHome();
   $('hint').textContent = 'זו הזדמנות להכיר את המילה';
@@ -1261,14 +1426,38 @@ $('fcSpeak').addEventListener('click', e => { e.stopPropagation(); const item = 
 $('fcInfo').addEventListener('pointerdown', e => e.stopPropagation());
 $('fcInfo').addEventListener('click', e => { e.stopPropagation(); const item = session.queue[session.index]; if (item) openDetails(item); });
 $('cardClose').addEventListener('click', () => { if (session.active) finishSession(true); });
-$('cardGear').addEventListener('click', () => switchTab('settings'));
-$('sessionBtn').addEventListener('click', () => switchTab('settings'));
-$('modeBtn').addEventListener('click', () => {
-  switchTab('practice');
-  $('homeModeTitle').scrollIntoView({ block: 'center', behavior: 'smooth' });
-  document.querySelector(`[data-home-mode="${settings.mode}"]`)?.focus({ preventScroll: true });
-});
-function switchTab(name) { document.querySelector(`.tab-btn[data-tab="${name}"]`).click(); }
+$('cardGear').addEventListener('click', openSettings);
+$('sessionBtn').addEventListener('click', openSettings);
+function switchTab(name) {
+  if (name === 'settings') return openSettings();
+  if (name === 'stats') {
+    document.querySelector('.tab-btn[data-tab="practice"]').click();
+    renderStats();
+    $('statsSection').scrollIntoView({ block: 'start' });
+    return;
+  }
+  document.querySelector(`.tab-btn[data-tab="${name}"]`).click();
+}
+/* ---------- Settings sheet ---------- */
+let settingsOpen = false, settingsTrigger = null;
+function openSettings() {
+  if (settingsOpen) return;
+  settingsTrigger = document.activeElement;
+  applySettingsToUI();
+  $('settingsSheet').classList.remove('hidden'); settingsOpen = true;
+  document.body.classList.add('sheet-locked');
+  $('settingsClose').focus({ preventScroll: true });
+}
+function closeSettings() {
+  if (!settingsOpen) return;
+  $('settingsSheet').classList.add('hidden'); settingsOpen = false;
+  document.body.classList.remove('sheet-locked');
+  if (settingsTrigger?.isConnected) settingsTrigger.focus({ preventScroll: true });
+}
+$('settingsBtn').addEventListener('click', openSettings);
+$('settingsClose').addEventListener('click', closeSettings);
+$('settingsSheet').addEventListener('click', e => { if (e.target === $('settingsSheet')) closeSettings(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && settingsOpen) closeSettings(); });
 $('searchInput').addEventListener('input', e => { libFilter = e.target.value.trim(); renderLibrary(); });
 $('libCatSelect').addEventListener('change', e => { libCategory = e.target.value; renderLibrary(); });
 // Category words must be reachable by scrolling alone (user request, 26.10):
@@ -1296,9 +1485,10 @@ $('moreBtn').addEventListener('click', () => renderLibrary(false));
 $('goalSelect').addEventListener('change', e => { settings.goal = Number(e.target.value); persist(); refreshHome(); });
 $('lengthSelect').addEventListener('change', e => { settings.length = e.target.value === 'all' ? 'all' : Number(e.target.value); persist(); refreshHome(); });
 $('modeSelect').addEventListener('change', e => { settings.mode = e.target.value; $('sortScopeGroup').classList.toggle('hidden', settings.mode !== 'sort'); persist(); refreshHome(); });
+$('soundToggle').addEventListener('change', e => { soundOn = e.target.checked; try { localStorage.setItem('fw.sound', soundOn ? '1' : '0'); } catch {} if (soundOn) playSound('good'); });
 $('sortScopeSelect').addEventListener('change', e => { settings.sortScope = e.target.value; persist(); refreshHome(); });
 $('bandSelect').addEventListener('change', e => { setBand(Number(e.target.value)); showToast(`הרמה שונתה — ${bandLabel()}`); });
-$('bandBtn').addEventListener('click', () => switchTab('settings'));
+$('bandBtn').addEventListener('click', openSettings);
 $('exportBtn').addEventListener('click', exportData);
 $('importBtn').addEventListener('click', () => $('importFile').click());
 $('importFile').addEventListener('change', e => { if (e.target.files[0]) importData(e.target.files[0]); });
@@ -1333,7 +1523,75 @@ if ('serviceWorker' in navigator) window.addEventListener('load', async () => {
   } catch { $('offlineStatus').textContent = 'לא הושלמה הכנה לאופליין. פתחו שוב עם אינטרנט ונסו לרענן.'; }
 });
 
+/* ---------- First-run onboarding ---------- */
+const OB_KEY = 'fw.onboarded';
+const OB_LEVELS = [
+  { band: 1, emoji: '🐣', name: 'מתחילים', note: 'המילים הכי נפוצות' },
+  { band: 11, emoji: '🙂', name: 'בסיסי', note: 'מכירים את המילים היומיומיות' },
+  { band: 31, emoji: '😎', name: 'בינוני', note: 'קוראים טקסטים פשוטים' },
+  { band: 61, emoji: '🧠', name: 'מתקדם', note: 'מחפשים מילים נדירות' }
+];
+let obStep = 0, obGoal = settings.goal, obBand = bands.current;
+function needsOnboarding() {
+  try { if (localStorage.getItem(OB_KEY)) return false; } catch { return false; }
+  return !stats.attempts && !Object.keys(progress).length;
+}
+function showObStep(n) {
+  obStep = n;
+  document.querySelectorAll('.ob-step').forEach(step => step.classList.toggle('hidden', Number(step.dataset.step) !== n));
+  document.querySelectorAll('.ob-dots i').forEach((dot, i) => dot.classList.toggle('on', i <= n));
+  const heading = document.querySelector(`.ob-step[data-step="${n}"] h1`);
+  heading?.setAttribute('tabindex', '-1'); heading?.focus({ preventScroll: true });
+}
+function markObChoice(selector, attr, value) {
+  document.querySelectorAll(selector).forEach(b => b.setAttribute('aria-checked', String(b.dataset[attr] === String(value))));
+}
+function renderObLevels() {
+  const box = $('obLevels'); box.replaceChildren();
+  OB_LEVELS.filter(l => l.band <= maxBand()).forEach(level => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.obBand = String(level.band);
+    const sample = vocab.filter(v => !isBookWord(v) && v.r >= bandLo(level.band) && v.r <= level.band * BAND_SIZE).slice(10, 13).map(v => v.w).join(' · ');
+    b.innerHTML = `<span class="ob-emoji" aria-hidden="true"></span><strong></strong><span></span><em dir="ltr" lang="en"></em>`;
+    b.children[0].textContent = level.emoji; b.children[1].textContent = level.name;
+    b.children[2].textContent = level.note; b.children[3].textContent = sample;
+    b.addEventListener('click', () => { obBand = level.band; markObChoice('[data-ob-band]', 'obBand', obBand); });
+    box.append(b);
+  });
+  markObChoice('[data-ob-band]', 'obBand', obBand);
+}
+function startOnboarding() {
+  $('onboarding').classList.remove('hidden');
+  document.body.classList.add('sheet-locked');
+  markObChoice('[data-ob-goal]', 'obGoal', obGoal);
+  showObStep(0);
+}
+function finishOnboarding(apply) {
+  try { localStorage.setItem(OB_KEY, '1'); } catch {}
+  $('onboarding').classList.add('hidden');
+  document.body.classList.remove('sheet-locked');
+  if (!apply) return;
+  settings.goal = obGoal;
+  applySettingsToUI();
+  if (vocab.length && obBand !== bands.current) { setBand(obBand); renderBandSelect(); }
+  else { persist(); refreshHome(); }
+  startSession();
+}
+document.querySelectorAll('[data-ob-next]').forEach(b => b.addEventListener('click', () => {
+  if (obStep === 1) renderObLevels();
+  showObStep(obStep + 1);
+}));
+document.querySelectorAll('[data-ob-goal]').forEach(b => b.addEventListener('click', () => {
+  obGoal = Number(b.dataset.obGoal); markObChoice('[data-ob-goal]', 'obGoal', obGoal);
+}));
+$('obFinish').addEventListener('click', () => finishOnboarding(true));
+$('obSignIn').addEventListener('click', () => { finishOnboarding(false); $('authBtn').click(); });
+
+$('soundToggle').checked = soundOn;
+$('autoSpeakToggle').checked = autoSpeak;
+$('autoSpeakToggle').addEventListener('change', e => { autoSpeak = e.target.checked; try { localStorage.setItem('fw.autoSpeak', autoSpeak ? '1' : '0'); } catch {} });
 applySettingsToUI();
+if (needsOnboarding()) startOnboarding();
 loadVocab();
 refreshHome();
 initFirebase();

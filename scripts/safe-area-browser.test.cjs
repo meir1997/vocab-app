@@ -35,6 +35,7 @@ async function geometry(page) {
 }
 async function checkDevice(name, width, height, userAgent, mobile) {
   const context = await browser.newContext({ viewport: { width, height }, userAgent, isMobile: mobile, hasTouch: mobile, serviceWorkers: 'block', reducedMotion: 'reduce' });
+  await context.addInitScript(() => { try { localStorage.setItem('fw.onboarded', '1'); } catch {} }); // returning user: skip first-run onboarding
   try {
     await context.route('**/*', route => {
       const url = new URL(route.request().url());

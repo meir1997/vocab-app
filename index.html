@@ -3,7 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#0f1730">
+  <meta name="theme-color" content="#f6f3ff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#141130" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="ארבע מילים">
@@ -11,6 +13,9 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="styles.css">
   <title>ארבע מילים</title>
 </head>
@@ -33,50 +38,66 @@
       <div class="top-actions">
         <span id="syncStatus" class="sync-status" role="status">מצב מקומי</span>
         <button class="auth-btn" id="authBtn">כניסה עם Google</button>
+        <button class="round-btn settings-btn" id="settingsBtn" aria-label="הגדרות" aria-haspopup="dialog"><svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#icon-settings"/></svg></button>
       </div>
     </header>
 
     <main id="main">
-      <!-- ===== Practice tab ===== -->
+      <!-- ===== Home / practice tab ===== -->
       <section id="tab-practice" class="tab-panel" aria-label="תרגול">
         <div id="practiceHome">
-          <div class="goal-card">
-            <div class="goal-ring" id="goalRing" role="img" aria-label="התקדמות יומית"><span id="goalRingText">0%</span></div>
-            <div class="goal-info">
-              <strong id="todayCount">0</strong><span>מתוך <b id="goalTarget">20</b> מילים היום</span>
-              <span class="streak-line">🔥 <b id="dayStreak">0</b> ימים ברצף</span>
+          <section class="hero" aria-labelledby="heroTitle">
+            <div class="hero-pills">
+              <span class="pill pill-streak" title="ימים ברצף"><span aria-hidden="true">🔥</span> <b id="dayStreak">0</b> <span>ימים ברצף</span></span>
+              <span class="pill pill-xp" title="נקודות ניסיון"><span aria-hidden="true">⚡</span> <b id="xpTotal">0</b> <span>XP</span></span>
             </div>
-          </div>
-          <div class="mini-stats">
-            <div><strong id="dueCount">0</strong><span>דחופות לחזרה</span></div>
-            <div><strong id="learnedStat">0</strong><span>נלמדו</span></div>
-            <div><strong id="accuracyStat">—</strong><span>דיוק</span></div>
-            <div><strong id="vocabCount">0</strong><span>במאגר</span></div>
-          </div>
+            <div class="hero-main">
+              <div class="goal-ring" id="goalRing" role="img" aria-label="התקדמות יומית"><span id="goalRingText">0%</span></div>
+              <div class="goal-info">
+                <h1 id="heroTitle">השיעור של היום</h1>
+                <p class="goal-count"><b id="todayCount">0</b> מתוך <b id="goalTarget">20</b> מילים</p>
+                <p class="hero-message" id="heroMessage">כמה דקות ביום, ואנגלית שנשארת איתך.</p>
+              </div>
+            </div>
+            <button class="primary-btn start-btn" id="startBtn"><span aria-hidden="true" class="start-icon">▶</span> <span id="startLabel">מתחילים שיעור</span></button>
+            <p class="session-preview" id="sessionPreview" aria-live="polite"></p>
+          </section>
+
           <section class="home-modes" aria-labelledby="homeModeTitle">
-            <h2 id="homeModeTitle">איך מתרגלים היום?</h2>
+            <div class="section-head"><h2 id="homeModeTitle">סגנון התרגול</h2><button class="chip" id="sessionBtn" aria-label="אורך השיעור">20 מילים</button></div>
             <div class="home-mode-grid" role="group" aria-label="בחירת סוג תרגול">
-              <button type="button" data-home-mode="cards"><strong>כרטיסיות</strong><span>הופכים כרטיס וגוררים</span></button>
-              <button type="button" data-home-mode="sort"><strong>מיון</strong><span>יודע / לא יודע בכרטיסיות</span></button>
-              <button type="button" data-home-mode="choice"><strong>משחק</strong><span>בחירת תרגום מתוך 4 תשובות</span></button>
-              <button type="button" data-home-mode="reverse"><strong>משחק הפוך</strong><span>מעברית לאנגלית</span></button>
-              <button type="button" data-home-mode="typing"><strong>הקלדה</strong><span>כותבים את המילה באנגלית</span></button>
+              <button type="button" data-home-mode="choice" style="--tile:var(--c-violet)"><span class="mode-emoji" aria-hidden="true">🎯</span><strong>משחק</strong><span>4 תשובות, בוחרים תרגום</span></button>
+              <button type="button" data-home-mode="reverse" style="--tile:var(--c-sky)"><span class="mode-emoji" aria-hidden="true">🔄</span><strong>משחק הפוך</strong><span>מעברית לאנגלית</span></button>
+              <button type="button" data-home-mode="typing" style="--tile:var(--c-coral)"><span class="mode-emoji" aria-hidden="true">⌨️</span><strong>הקלדה</strong><span>כותבים באנגלית</span></button>
+              <button type="button" data-home-mode="cards" style="--tile:var(--c-mint)"><span class="mode-emoji" aria-hidden="true">🃏</span><strong>כרטיסיות</strong><span>הופכים וגוררים</span></button>
+              <button type="button" data-home-mode="sort" style="--tile:var(--c-sun)"><span class="mode-emoji" aria-hidden="true">🗂️</span><strong>מיון</strong><span>יודע / לא יודע</span></button>
             </div>
             <div id="homeSortScopeGroup" class="hidden">
               <label for="homeSortScope">מה ממיינים בכרטיסיות?</label>
               <select id="homeSortScope"><option value="all">כל המילים שטרם מוינו</option><option value="book">מילים מהספר - לפי שכיחות</option></select>
             </div>
+            <button class="link-btn sort-list-launch" id="sortListBtn">מיון מהיר ברשימה ←</button>
           </section>
-          <button class="primary-btn" id="startBtn">מתחילים תרגול</button>
-          <button class="ghost-btn sort-list-launch" id="sortListBtn">מיון ברשימה - יודע / לא יודע</button>
+
+          <section class="level-card" aria-labelledby="levelTitle">
+            <div class="section-head"><h2 id="levelTitle">המסלול שלך</h2><button class="chip" id="bandBtn" aria-label="רמת תרגול נוכחית">רמה 1</button></div>
+            <ol class="level-path" id="levelPath" aria-label="רמות"></ol>
+            <div class="level-progress"><div class="level-progress-fill" id="levelProgress"></div></div>
+            <p class="band-note" id="bandNote" aria-live="polite"></p>
+            <p class="band-note learning-note" id="learningNote" aria-live="polite"></p>
+          </section>
+
+          <section class="stats-card" id="statsSection" aria-labelledby="statsTitle">
+            <h2 id="statsTitle">השבוע שלך</h2>
+            <div class="week-bars" id="weekBars"></div>
+            <div class="mini-stats">
+              <div style="--tile:var(--c-mint)"><strong id="statsLearned">0</strong><span>נלמדו</span></div>
+              <div style="--tile:var(--c-sun)"><strong id="statsLearning">0</strong><span>בלמידה</span></div>
+              <div style="--tile:var(--c-sky)"><strong id="totalAccuracy">—</strong><span>דיוק</span></div>
+              <div style="--tile:var(--c-violet)"><strong id="vocabCount">0</strong><span>במאגר</span></div>
+            </div>
+          </section>
           <p class="settings-hint" id="offlineStatus" role="status">מכינים שימוש אופליין… יש לפתוח פעם אחת עם אינטרנט</p>
-          <div class="quick-settings">
-            <button class="chip" id="sessionBtn" aria-label="אורך התרגול">20 מילים</button>
-            <button class="chip" id="modeBtn" aria-label="סוג התרגול">בחירה אנגלית ← עברית</button>
-            <button class="chip" id="bandBtn" aria-label="רמת תרגול נוכחית">רמה 1</button>
-          </div>
-          <p class="band-note" id="bandNote" aria-live="polite"></p>
-          <p class="band-note learning-note" id="learningNote" aria-live="polite"></p>
           <p class="source-note" id="sourceNote">המילים נטענות מגיליון אוצר המילים שלך</p>
         </div>
 
@@ -143,10 +164,23 @@
         </div>
 
         <div id="summary" class="hidden">
-          <h2>כל הכבוד!</h2>
+          <canvas id="confetti" class="confetti" aria-hidden="true"></canvas>
+          <div class="summary-score" id="summaryScore" aria-hidden="true"><span id="summaryScoreText">0%</span></div>
+          <h2 id="summaryTitle">כל הכבוד!</h2>
           <p id="summaryText"></p>
-          <button class="primary-btn" id="againBtn">עוד סבב</button>
-          <button class="ghost-btn" id="homeBtn">חזרה למסך הראשי</button>
+          <div class="summary-stats" id="summaryStats">
+            <div class="s-good"><strong id="summaryCorrect">0</strong><span>נכונות</span></div>
+            <div class="s-bad"><strong id="summaryWrong">0</strong><span>ללמידה</span></div>
+            <div class="s-xp"><strong id="summaryXp">+0</strong><span>XP</span></div>
+          </div>
+          <div class="summary-goal-bar" aria-hidden="true"><div id="summaryGoalFill"></div></div>
+          <p class="summary-goal" id="summaryGoal"></p>
+          <section class="summary-missed hidden" id="summaryMissed" aria-labelledby="summaryMissedTitle">
+            <h3 id="summaryMissedTitle">מילים לחזרה</h3>
+            <ul id="summaryMissedList"></ul>
+          </section>
+          <button class="primary-btn" id="againBtn">עוד שיעור</button>
+          <button class="ghost-btn" id="homeBtn">חזרה למסך הבית</button>
         </div>
       </section>
 
@@ -161,7 +195,6 @@
         <button class="ghost-btn hidden" id="moreBtn">הצג עוד</button>
       </section>
 
-      <!-- ===== Stats tab ===== -->
       <section id="tab-book" class="tab-panel hidden" aria-label="קריאת ספר">
         <div id="bookEmpty" class="book-empty">
           <h2>הספר שלי</h2>
@@ -203,86 +236,12 @@
         </div>
         <input type="file" id="bookFile" accept=".epub,application/epub+zip" class="hidden" aria-label="בחירת קובץ EPUB">
       </section>
-      <section id="tab-stats" class="tab-panel hidden" aria-label="סטטיסטיקה">
-        <h2>השבוע שלך</h2>
-        <div class="week-bars" id="weekBars"></div>
-        <div class="mini-stats">
-          <div><strong id="totalAttempts">0</strong><span>תשובות סה״כ</span></div>
-          <div><strong id="totalAccuracy">—</strong><span>דיוק כללי</span></div>
-          <div><strong id="statsLearned">0</strong><span>מילים נלמדו</span></div>
-          <div><strong id="statsLearning">0</strong><span>בלמידה</span></div>
-          <div><strong id="statsDue">0</strong><span>דחופות</span></div>
-        </div>
-      </section>
-
-      <!-- ===== Settings tab ===== -->
-      <section id="tab-settings" class="tab-panel hidden" aria-label="הגדרות">
-        <h2>הגדרות</h2>
-        <div class="settings-group">
-          <label for="goalSelect">יעד יומי</label>
-          <select id="goalSelect">
-            <option value="10">10 מילים ביום</option>
-            <option value="20">20 מילים ביום</option>
-            <option value="30">30 מילים ביום</option>
-            <option value="50">50 מילים ביום</option>
-            <option value="100">100 מילים ביום</option>
-          </select>
-        </div>
-        <div class="settings-group">
-          <label for="lengthSelect">אורך תרגול</label>
-          <select id="lengthSelect">
-            <option value="10">10 מילים</option>
-            <option value="20">20 מילים</option>
-            <option value="30">30 מילים</option>
-            <option value="50">50 מילים</option>
-            <option value="100">100 מילים</option>
-            <option value="all">כל הדחופות</option>
-          </select>
-        </div>
-        <div class="settings-group">
-          <label for="modeSelect">סוג תרגול</label>
-          <select id="modeSelect">
-            <option value="choice">בחירה — אנגלית ← עברית</option>
-            <option value="reverse">בחירה הפוכה — עברית ← אנגלית</option>
-            <option value="typing">הקלדה — כתיבת המילה באנגלית</option>
-            <option value="cards">כרטיסיות — חשיפה וגרירה</option>
-            <option value="sort">מיון — סימון יודע/לא יודע לפי הסדר</option>
-          </select>
-        </div>
-        <div class="settings-group hidden" id="sortScopeGroup">
-          <label for="sortScopeSelect">מה ממיינים</label>
-          <select id="sortScopeSelect">
-            <option value="all">כל המילים — לפי הסדר</option>
-            <option value="book">מילים מהספר בלבד — לפי שכיחות בספר</option>
-          </select>
-          <span class="settings-hint">המיון מציג כל מילה שעוד לא סווגה, בלי דילוגים. גרירה ימינה מסמנת ידועה, שמאלה מסמנת ללמידה — והמילה נכנסת לתרגול כשמתפנה מקום במאגר הלמידה.</span>
-        </div>
-        <div class="settings-group">
-          <label for="bandSelect">רמת תרגול — מאה מילים לפי דירוג</label>
-          <select id="bandSelect"></select>
-          <span class="settings-hint">התרגול מתמקד במאה הנוכחית. 70 נכונות מתוך 100 התשובות הרגילות האחרונות באלף הנוכחי מדלגות אוטומטית לאלף הבא, גם בין סבבים. 7 נכונות מתוך 10 האחרונות עוברים אוטומטית למאה הבאה, בלי לסמן מילים שלא הופיעו כידועות.</span>
-        </div>
-        <div class="settings-group">
-          <span class="label">גיבוי</span>
-          <div class="row">
-            <button class="ghost-btn" id="exportBtn">ייצוא התקדמות</button>
-            <button class="ghost-btn" id="importBtn">שחזור מקובץ</button>
-            <input type="file" id="importFile" accept="application/json" class="hidden" aria-label="בחירת קובץ גיבוי">
-          </div>
-        </div>
-        <div class="settings-group danger">
-          <button class="ghost-btn danger" id="resetBtn">איפוס כל ההתקדמות</button>
-        </div>
-        <p class="source-note">גרסה 2.0 — סנכרון ענן, חזרות מרווחות ו־9,998 מילים</p>
-      </section>
     </main>
 
     <nav class="tabbar" aria-label="ניווט ראשי">
-      <button class="tab-btn active" data-tab="practice" aria-label="תרגול"><svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#icon-home"/></svg><span>תרגול</span></button>
+      <button class="tab-btn active" data-tab="practice" aria-label="בית"><svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#icon-home"/></svg><span>בית</span></button>
       <button class="tab-btn" data-tab="library" aria-label="ספריית מילים"><svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#icon-book"/></svg><span>ספריה</span></button>
       <button class="tab-btn" data-tab="book" aria-label="ספר"><svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#icon-reader"/></svg><span>ספר</span></button>
-      <button class="tab-btn" data-tab="stats" aria-label="סטטיסטיקה"><svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#icon-chart"/></svg><span>נתונים</span></button>
-      <button class="tab-btn" data-tab="settings" aria-label="הגדרות"><svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#icon-settings"/></svg><span>הגדרות</span></button>
     </nav>
   </div>
 
@@ -317,6 +276,113 @@
       </div>
     </div>
   </div>
+  <div id="settingsSheet" class="sheet-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="sheet settings-sheet">
+      <div class="sheet-head settings-head">
+        <h2 id="settingsTitle">הגדרות</h2>
+        <button class="sheet-close" id="settingsClose" aria-label="סגירה"><svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#icon-close"/></svg></button>
+      </div>
+      <div class="settings-group account-group">
+        <span class="label">חשבון וסנכרון</span>
+        <p class="settings-hint" id="settingsSync">מצב מקומי</p>
+      </div>
+      <div class="settings-group">
+        <label for="goalSelect">יעד יומי</label>
+        <select id="goalSelect">
+          <option value="10">10 מילים ביום · קליל</option>
+          <option value="20">20 מילים ביום · רגיל</option>
+          <option value="30">30 מילים ביום · רציני</option>
+          <option value="50">50 מילים ביום · אינטנסיבי</option>
+          <option value="100">100 מילים ביום · מרתון</option>
+        </select>
+      </div>
+      <div class="settings-group">
+        <label for="lengthSelect">אורך שיעור</label>
+        <select id="lengthSelect">
+          <option value="10">10 מילים</option>
+          <option value="20">20 מילים</option>
+          <option value="30">30 מילים</option>
+          <option value="50">50 מילים</option>
+          <option value="100">100 מילים</option>
+          <option value="all">כל הדחופות</option>
+        </select>
+      </div>
+      <div class="settings-group">
+        <label for="modeSelect">סוג תרגול</label>
+        <select id="modeSelect">
+          <option value="choice">בחירה — אנגלית ← עברית</option>
+          <option value="reverse">בחירה הפוכה — עברית ← אנגלית</option>
+          <option value="typing">הקלדה — כתיבת המילה באנגלית</option>
+          <option value="cards">כרטיסיות — חשיפה וגרירה</option>
+          <option value="sort">מיון — סימון יודע/לא יודע לפי הסדר</option>
+        </select>
+      </div>
+      <div class="settings-group hidden" id="sortScopeGroup">
+        <label for="sortScopeSelect">מה ממיינים</label>
+        <select id="sortScopeSelect">
+          <option value="all">כל המילים — לפי הסדר</option>
+          <option value="book">מילים מהספר בלבד — לפי שכיחות בספר</option>
+        </select>
+        <span class="settings-hint">המיון מציג כל מילה שעוד לא סווגה, בלי דילוגים. גרירה ימינה מסמנת ידועה, שמאלה מסמנת ללמידה — והמילה נכנסת לתרגול כשמתפנה מקום במאגר הלמידה.</span>
+      </div>
+      <div class="settings-group">
+        <label for="bandSelect">רמת תרגול — מאה מילים לפי דירוג</label>
+        <select id="bandSelect"></select>
+        <span class="settings-hint">התרגול מתמקד במאה הנוכחית. 70 נכונות מתוך 100 התשובות הרגילות האחרונות באלף הנוכחי מדלגות אוטומטית לאלף הבא, גם בין סבבים. 7 נכונות מתוך 10 האחרונות עוברים אוטומטית למאה הבאה, בלי לסמן מילים שלא הופיעו כידועות.</span>
+      </div>
+      <div class="settings-group toggle-row">
+        <label for="soundToggle">צלילי משוב</label>
+        <input type="checkbox" id="soundToggle" class="switch" role="switch" checked>
+      </div>
+      <div class="settings-group toggle-row">
+        <label for="autoSpeakToggle">השמעת המילה אוטומטית</label>
+        <input type="checkbox" id="autoSpeakToggle" class="switch" role="switch">
+      </div>
+      <div class="settings-group">
+        <span class="label">גיבוי</span>
+        <div class="row">
+          <button class="ghost-btn" id="exportBtn">ייצוא התקדמות</button>
+          <button class="ghost-btn" id="importBtn">שחזור מקובץ</button>
+          <input type="file" id="importFile" accept="application/json" class="hidden" aria-label="בחירת קובץ גיבוי">
+        </div>
+      </div>
+      <div class="settings-group danger">
+        <button class="ghost-btn danger" id="resetBtn">איפוס כל ההתקדמות</button>
+      </div>
+      <p class="source-note">גרסה 3.0 — סנכרון ענן, חזרות מרווחות ו־9,998 מילים</p>
+    </div>
+  </div>
+
+  <div id="onboarding" class="onboarding hidden" role="dialog" aria-modal="true" aria-labelledby="obTitle">
+    <div class="ob-inner">
+      <div class="ob-dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+      <section class="ob-step" data-step="0">
+        <div class="ob-hero" aria-hidden="true"><span class="ob-badge">4</span><span class="ob-float f1">cat</span><span class="ob-float f2">חתול</span><span class="ob-float f3">sun</span><span class="ob-float f4">שמש</span></div>
+        <h1 id="obTitle">ברוכים הבאים לארבע מילים</h1>
+        <p>אוצר מילים באנגלית, כמה דקות ביום. משחקים קצרים, חזרות חכמות, והתקדמות שרואים.</p>
+        <button class="primary-btn" data-ob-next>יאללה, מתחילים</button>
+        <button class="link-btn" id="obSignIn">כבר יש לי חשבון — כניסה עם Google</button>
+      </section>
+      <section class="ob-step hidden" data-step="1">
+        <h1>כמה זמן ביום?</h1>
+        <p>אפשר לשנות בכל רגע בהגדרות.</p>
+        <div class="ob-options" role="radiogroup" aria-label="יעד יומי">
+          <button type="button" role="radio" data-ob-goal="10"><span class="ob-emoji" aria-hidden="true">🌱</span><strong>קליל</strong><span>10 מילים · כ־3 דקות</span></button>
+          <button type="button" role="radio" data-ob-goal="20"><span class="ob-emoji" aria-hidden="true">🚶</span><strong>רגיל</strong><span>20 מילים · כ־5 דקות</span></button>
+          <button type="button" role="radio" data-ob-goal="30"><span class="ob-emoji" aria-hidden="true">🏃</span><strong>רציני</strong><span>30 מילים · כ־8 דקות</span></button>
+          <button type="button" role="radio" data-ob-goal="50"><span class="ob-emoji" aria-hidden="true">🚀</span><strong>אינטנסיבי</strong><span>50 מילים · כ־12 דקות</span></button>
+        </div>
+        <button class="primary-btn" data-ob-next>המשך</button>
+      </section>
+      <section class="ob-step hidden" data-step="2">
+        <h1>מאיפה מתחילים?</h1>
+        <p>בחרו את הרמה שבה רוב המילים עוד לא מוכרות לכם.</p>
+        <div class="ob-options" role="radiogroup" aria-label="רמת פתיחה" id="obLevels"></div>
+        <button class="primary-btn" id="obFinish">לשיעור הראשון</button>
+      </section>
+    </div>
+  </div>
+
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js" defer></script>

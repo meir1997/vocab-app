@@ -124,6 +124,7 @@ async function stability(page, viewport) {
   await Promise.all([[320,568],[375,553],[390,664],[390,750],[390,844],[1440,900]].map(async ([width,height]) => {
     const viewport = {width,height};
     const context = await browser.newContext({viewport, serviceWorkers:'block', isMobile:width<500, hasTouch:width<500, reducedMotion:'reduce'});
+    await context.addInitScript(() => { try { localStorage.setItem('fw.onboarded', '1'); } catch {} }); // returning user: skip first-run onboarding
     await context.route('**/*', route => {
       const url = new URL(route.request().url());
       return url.origin !== new URL(base).origin || url.pathname.endsWith('/firebase-config.js') ? route.fulfill({body:'',contentType:'application/javascript'}) : route.continue();

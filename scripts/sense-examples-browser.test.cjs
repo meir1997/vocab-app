@@ -38,6 +38,7 @@ async function newPage({ details = 'loaded', viewport = { width: 390, height: 84
     viewport, serviceWorkers: 'block', deviceScaleFactor: 1,
     isMobile: viewport.width === 390, hasTouch: viewport.width === 390
   });
+  await context.addInitScript(() => { try { localStorage.setItem('fw.onboarded', '1'); } catch {} }); // returning user: skip first-run onboarding
   const fixtures = structuredClone(sourceDetails);
   if (corruptExamples) {
     for (const item of vocabulary) {

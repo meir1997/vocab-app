@@ -29,6 +29,7 @@ const labels = ['כניסה עם Google', 'מחובר', 'מחובר: מאיר כ
   browser = await chromium.launch({ args: ['--no-sandbox'], ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH } : {}) });
   for (const [width, height] of [[320, 568], [375, 667], [390, 664], [390, 844], [430, 932]]) {
     const context = await browser.newContext({ viewport: { width, height }, serviceWorkers: 'block', isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
+    await context.addInitScript(() => { try { localStorage.setItem('fw.onboarded', '1'); } catch {} }); // returning user: skip first-run onboarding
     await context.route('**/*', route => {
       const url = new URL(route.request().url());
       return url.origin !== new URL(base).origin || url.pathname.endsWith('/firebase-config.js') ? route.fulfill({ body: '', contentType: 'application/javascript' }) : route.continue();

@@ -30,6 +30,7 @@ let browser;
 let base;
 async function isolatedPage(progress, mode) {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block', hasTouch: true });
+  await context.addInitScript(() => { try { localStorage.setItem('fw.onboarded', '1'); } catch {} }); // returning user: skip first-run onboarding
   await context.route('https://**/*', route => route.fulfill({ body: '', contentType: 'application/javascript' }));
   await context.route('**/firebase-config.js', route => route.fulfill({ body: '', contentType: 'application/javascript' }));
   const seeded = {

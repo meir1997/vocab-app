@@ -184,6 +184,7 @@ async function reviewBadges(page, device) {
   browser = await chromium.launch({ args: ['--no-sandbox'], ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH } : {}) });
   for (const [device, viewport] of [['phone-320', { width: 320, height: 568 }], ['phone-390', { width: 390, height: 844 }], ['desktop-1440', { width: 1440, height: 1000 }]]) {
     const context = await browser.newContext({ viewport, serviceWorkers: 'block', isMobile: viewport.width < 500, hasTouch: viewport.width < 500, reducedMotion: 'reduce', locale: 'he-IL' });
+    await context.addInitScript(() => { try { localStorage.setItem('fw.onboarded', '1'); } catch {} }); // returning user: skip first-run onboarding
     await context.route('**/*', route => {
       const url = new URL(route.request().url());
       if (url.origin !== new URL(base).origin || url.pathname.endsWith('/firebase-config.js')) return route.fulfill({ body: '', contentType: 'application/javascript' });

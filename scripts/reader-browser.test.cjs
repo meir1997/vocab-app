@@ -40,6 +40,7 @@ let epubPath;
 
 async function newPage() {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block' });
+  await context.addInitScript(() => { try { localStorage.setItem('fw.onboarded', '1'); } catch {} }); // returning user: skip first-run onboarding
   await context.route('**/firebase-config.js', route => route.fulfill({ body: '', contentType: 'application/javascript' }));
   await context.route('https://www.gstatic.com/**', route => route.fulfill({ body: '', contentType: 'application/javascript' }));
   const page = await context.newPage();

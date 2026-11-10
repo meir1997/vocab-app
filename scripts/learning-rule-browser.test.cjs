@@ -28,6 +28,7 @@ let browser;
 let base;
 async function isolatedPage(progress) {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block' });
+  await context.addInitScript(() => { try { localStorage.setItem('fw.onboarded', '1'); } catch {} }); // returning user: skip first-run onboarding
   // Never use an existing profile, account, or production endpoint.
   await context.route('https://**/*', route => route.fulfill({ body: '', contentType: 'application/javascript' }));
   await context.route('**/firebase-config.js', route => route.fulfill({ body: '', contentType: 'application/javascript' }));
@@ -61,7 +62,7 @@ async function countsAndReadOnlyDerivation() {
         old: { learned: records.filter(p => p.s >= 2).length, learning: records.filter(p => (p.r + p.w) > 0 && p.s < 2).length },
         current: { learned: learnedCount(), learning: learningCount() },
         attempted: records.filter(isAttempted).length,
-        home: document.getElementById('learnedStat').textContent,
+        home: document.getElementById('statsLearned').textContent,
         stats: document.getElementById('statsLearned').textContent,
         learningNote: document.getElementById('learningNote').textContent,
         queueLength: queue.length,

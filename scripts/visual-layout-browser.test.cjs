@@ -49,6 +49,7 @@ async function newPage(viewport) {
     isMobile: viewport.width < 500, hasTouch: viewport.width < 500,
     reducedMotion: 'reduce', locale: 'he-IL'
   });
+  await context.addInitScript(() => { try { localStorage.setItem('fw.onboarded', '1'); } catch {} }); // returning user: skip first-run onboarding
   await context.route('**/*', route => {
     const url = new URL(route.request().url());
     if (url.pathname.endsWith('/firebase-config.js') || url.origin !== new URL(base).origin) {
@@ -64,7 +65,7 @@ async function newPage(viewport) {
   assert.equal(await page.evaluate(() => !!fb.initialized), false, 'Firebase stays disconnected');
   assert.equal(await page.evaluate(() => localStorage.getItem(K.progress)), null, 'context starts without real progress');
   if (!baseline) {
-    assert.equal(await page.locator('.tabbar .tab-btn').count(), 5);
+    assert.equal(await page.locator('.tabbar .tab-btn').count(), 3); // home, library, book; stats live on home, settings in a sheet
     await assertIcons(page, '.tabbar .tab-btn, #speakBtn, #detailBtn, .word-item:first-child .speak');
   }
   return { page, context, pageErrors };
@@ -167,6 +168,8 @@ async function geometry(page, meaning) {
 
 function assertLayout(layout, surface, label) {
   if (baseline) return;
+  // Practice is full-screen: the tab bar steps aside during a session, so the viewport bottom is the limit.
+  const floor = layout.nav ? layout.nav.top : layout.viewport.height;
   assert.ok(layout.documentWidth <= layout.viewport.width, `${label}: zero document horizontal overflow`);
   assert.equal(layout.scrollX, 0, `${label}: no horizontal scrolling`);
   if (surface === 'word-card') {
@@ -180,14 +183,14 @@ function assertLayout(layout, surface, label) {
   }
   if (surface === 'prompt' && layout.viewport.width === 320) {
     assert.equal(layout.scrollY, 0, `${label}: prompt does not scroll`);
-    for (const answer of layout.answers) assert.ok(answer.top >= 0 && answer.bottom <= layout.nav.top, `${label}: every option fits above navigation`);
-    assert.ok(layout.dontKnow.top >= 0 && layout.dontKnow.bottom <= layout.nav.top, `${label}: I do not know fits above navigation`);
+    for (const answer of layout.answers) assert.ok(answer.top >= 0 && answer.bottom <= floor, `${label}: every option fits above navigation`);
+    assert.ok(layout.dontKnow.top >= 0 && layout.dontKnow.bottom <= floor, `${label}: I do not know fits above navigation`);
   }
   if (surface.endsWith('correction')) {
     assert.equal(layout.meaningOccurrences.length, 1, `${label}: correct Hebrew answer is visible exactly once`);
     assert.equal(layout.scrollY, 0, `${label}: correction requires no page scrolling`);
-    assert.ok(layout.feedback.top >= 0 && layout.feedback.bottom <= layout.nav.top, `${label}: feedback fits above navigation`);
-    assert.ok(layout.next.top >= 0 && layout.next.bottom <= layout.nav.top, `${label}: Continue fits above navigation`);
+    assert.ok(layout.feedback.top >= 0 && layout.feedback.bottom <= floor, `${label}: feedback fits above navigation`);
+    assert.ok(layout.next.top >= 0 && layout.next.bottom <= floor, `${label}: Continue fits above navigation`);
   }
 }
 
