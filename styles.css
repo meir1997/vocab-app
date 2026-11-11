@@ -763,6 +763,7 @@ body:has(#quizCard.cards-mode:not(.hidden)) .shell { max-width: none; padding: 0
 }
 .cards-mode.answer-ready #dontKnowBtn { justify-self: start; color: #b96f18; border: 1px solid #efd2a5; background: #fff8ec; box-shadow: none; }
 .cards-mode.answer-ready #knowBtn { justify-self: end; background: #20a978; box-shadow: none; }
+.cards-mode.flashcards-mode.answer-ready #dontKnowBtn, .cards-mode.flashcards-mode.answer-ready #knowBtn { display: none; }
 .cards-mode #nextBtn { display: none; }
 @media (min-width: 960px) {
   #quizCard.cards-mode { max-width: 760px; margin-inline: auto; }
