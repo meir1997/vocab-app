@@ -30,6 +30,9 @@
       <symbol id="icon-volume" viewBox="0 0 24 24"><path d="m11 5-6 4H2v6h3l6 4ZM15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></symbol>
       <symbol id="icon-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.01"/></symbol>
       <symbol id="icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+      <symbol id="icon-star" viewBox="0 0 24 24"><path d="m12 3.4 2.65 5.36 5.92.86-4.28 4.18 1.01 5.9L12 17l-5.3 2.7 1.01-5.9-4.28-4.18 5.92-.86Z"/></symbol>
+      <symbol id="icon-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h8a7 7 0 1 1 0 14h-3"/></symbol>
+      <symbol id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7Z"/></symbol>
     </defs>
   </svg>
   <div class="shell">
@@ -137,8 +140,7 @@
             <span class="side-pill pill-dont" id="pillDont" aria-hidden="true">0</span>
             <div class="flashcard" id="flashcard" role="button" tabindex="0" aria-label="כרטיסיה, הקישו לחשיפת התרגום">
               <div class="fc-face fc-front">
-                <button class="fc-corner fc-corner-l" id="fcSpeak" aria-label="השמעת המילה"><svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#icon-volume"/></svg></button>
-                <button class="fc-corner fc-corner-r" id="fcInfo" aria-label="פרטים על המילה"><svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#icon-info"/></svg></button>
+                <button class="fc-corner fc-star" id="fcInfo" aria-label="פרטים על המילה"><svg class="icon" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#icon-star"/></svg></button>
                 <span class="fc-word" id="fcWord" lang="en" dir="ltr"></span>
                 <span class="fc-serial" id="fcSerial"></span>
                 <span class="fc-hint">הקישו לחשיפת התרגום</span>
@@ -156,10 +158,12 @@
           </div>
           <section id="answerFeedback" class="answer-feedback hidden" role="status" aria-live="polite" aria-atomic="true"></section>
           <div class="quiz-footer">
+            <button class="card-side-btn" id="cardResetBtn" type="button" aria-label="החזרת הכרטיס לצד הראשון" disabled><svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#icon-undo"/></svg></button>
+            <p class="hint" id="hint" aria-live="polite" aria-atomic="true"></p>
+            <button class="card-side-btn" id="fcSpeak" type="button" aria-label="השמעת המילה"><svg class="icon" width="23" height="23" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#icon-play"/></svg></button>
             <button class="ghost-btn" id="dontKnowBtn">לא יודע</button>
             <button class="primary-btn hidden" id="knowBtn">יודע</button>
             <button class="primary-btn hidden" id="nextBtn">המשך</button>
-            <p class="hint" id="hint" aria-live="polite" aria-atomic="true"></p>
           </div>
         </div>
 
