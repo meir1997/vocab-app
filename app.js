@@ -392,7 +392,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v49');
+    const cache = await caches.open('four-words-offline-v50');
     const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     label.classList.toggle('offline-ready', !!prepared);
