@@ -392,7 +392,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v48');
+    const cache = await caches.open('four-words-offline-v49');
     const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     label.classList.toggle('offline-ready', !!prepared);
@@ -578,6 +578,7 @@ function showQuestion() {
   // right = know (a correct answer), left = don't know (same as "לא יודע").
   const cards = mode === 'cards' || mode === 'sort';
   $('quizCard').classList.toggle('cards-mode', cards);
+  $('quizCard').classList.toggle('flashcards-mode', mode === 'cards');
   $('flashcardBox').classList.toggle('hidden', !cards);
   $('knowBtn').classList.toggle('hidden', !cards);
   if (cards) {
