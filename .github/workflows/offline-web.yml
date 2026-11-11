@@ -7,7 +7,7 @@ on:
     paths: ['app.js', 'quiz-content.js', 'styles.css', 'index.html', 'sw.js', 'scripts/**', '.github/workflows/offline-web.yml']
 jobs:
   offline:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
