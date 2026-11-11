@@ -109,12 +109,18 @@ async function allScopeRankOrder() {
   console.log('PASS sort all scope: book priority then rank order, no band gate, graded/classified excluded');
 }
 
+async function revealCard(page) {
+  await page.locator('#flashcard').click();
+  await page.waitForFunction(() => document.getElementById('flashcard').classList.contains('flipped'));
+}
+
 async function gradeRightScoresKnown() {
   const { context, page } = await isolatedPage({}, { mode: 'sort', sortScope: 'all' });
   try {
     await page.locator('#startBtn').click();
     await page.waitForFunction(() => session.active);
     const word = await page.evaluate(() => session.queue[session.index].w);
+    await revealCard(page);
     await page.locator('#knowBtn').click();
     await page.waitForFunction(() => session.index === 1);
     const result = await page.evaluate(w => ({ rec: progress[w], attempts: stats.attempts, correct: stats.correct, recent: bands.recent, rank: session.queue[0].r }), word);
@@ -134,6 +140,7 @@ async function gradeLeftClassifies() {
     await page.waitForFunction(() => session.active);
     const word = await page.evaluate(() => session.queue[session.index].w);
     const learningBefore = await page.evaluate(() => learningCount());
+    await revealCard(page);
     await page.locator('#dontKnowBtn').click();
     await page.waitForFunction(() => session.index === 1);
     const result = await page.evaluate(w => ({ rec: progress[w], learning: learningCount(), recent: bands.recent.length, attempts: stats.attempts }), word);
@@ -168,6 +175,7 @@ async function noSkipWithFullPool() {
     assert.equal(result.learning, 200, 'pool is full');
     assert.equal(result.length, expected.length, 'a full pool never truncates the sort queue');
     assert.equal(result.first, expected[0], 'the first unsorted word is shown despite the full pool');
+    await revealCard(page);
     await page.locator('#knowBtn').click();
     await page.waitForFunction(() => session.index === 1);
   } finally { await context.close(); }
@@ -181,8 +189,10 @@ async function resumeAcrossSessions() {
   try {
     await firstRun.page.locator('#startBtn').click();
     await firstRun.page.waitForFunction(() => session.active);
+    await firstRun.page.locator('#flashcard').click();
     await firstRun.page.locator('#knowBtn').click();
     await firstRun.page.waitForFunction(() => session.index === 1);
+    await firstRun.page.locator('#flashcard').click();
     await firstRun.page.locator('#dontKnowBtn').click();
     await firstRun.page.waitForFunction(() => session.index === 2);
   } finally { await firstRun.context.close(); }

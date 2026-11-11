@@ -1,6 +1,6 @@
-// Flashcards mode (user request, 25.10): Quizlet-style cards - tap flips to
-// the Hebrew meaning, swipe right (or יודע) grades known like a correct
-// answer, swipe left (or לא יודע) grades unknown like "לא יודע". The mode
+// Flashcards mode (user request, 25.10; Quizlet-style refresh 11.11): tap
+// flips to the Hebrew meaning, then swipe right (or יודע) grades known like a
+// correct answer, swipe left (or לא יודע) grades unknown like "לא יודע". The mode
 // shares buildQueue, so the learning-pool cycle rules hold unchanged.
 // Isolated synthetic state, no Firebase.
 'use strict';
@@ -60,8 +60,11 @@ async function cardFlowBasics() {
     assert.equal(await page.locator('#flashcardBox').isVisible(), true, 'card box visible in cards mode');
     assert.equal(await page.locator('#answers').evaluate(el => el.children.length), 0, 'no choice buttons in cards mode');
     assert.equal(await page.locator('#typingBox').isVisible(), false, 'typing hidden in cards mode');
-    assert.equal(await page.locator('#knowBtn').isVisible(), true, 'know button visible');
-    assert.equal(await page.locator('#dontKnowBtn').isVisible(), true, 'dont-know button visible');
+    assert.equal(await page.locator('#knowBtn').isVisible(), false, 'know button waits for the answer side');
+    assert.equal(await page.locator('#dontKnowBtn').isVisible(), false, 'dont-know button waits for the answer side');
+    assert.equal(await page.locator('#fcSpeak').isVisible(), true, 'play control visible before flipping');
+    assert.equal(await page.locator('#cardResetBtn').isDisabled(), true, 'reset control disabled on the front');
+    assert.equal(await page.locator('#hint').textContent(), 'הקישו על הכרטיס כדי להפוך אותו');
     const word = await page.evaluate(() => session.queue[session.index].w);
     const prompt = await page.locator('#word').textContent();
     assert.equal(prompt, word, 'prompt shows the English word');
@@ -69,6 +72,10 @@ async function cardFlowBasics() {
     // Tap flips and reveals the meaning matching the displayed word.
     await page.locator('#flashcard').click();
     await page.waitForFunction(() => document.getElementById('flashcard').classList.contains('flipped'));
+    assert.equal(await page.locator('#knowBtn').isVisible(), true, 'know button appears after flipping');
+    assert.equal(await page.locator('#dontKnowBtn').isVisible(), true, 'dont-know button appears after flipping');
+    assert.equal(await page.locator('#cardResetBtn').isDisabled(), false, 'reset control enabled on the back');
+    assert.equal(await page.locator('#fcSpeak').isVisible(), false, 'play control leaves while grading');
     const meaning = await page.locator('#fcMeaning').textContent();
     const expected = await page.evaluate(w => VocabQuiz.getWordContent(session.queue[session.index], wordDetails[session.queue[session.index].r]).meaning, word);
     assert.equal(meaning, expected, 'flip reveals the displayed word meaning');
@@ -82,6 +89,7 @@ async function gradeRightLikeCorrect() {
   try {
     await startCardsSession(page);
     const word = await page.evaluate(() => session.queue[session.index].w);
+    await page.locator('#flashcard').click();
     await page.locator('#knowBtn').click();
     await page.waitForFunction(() => session.index === 1);
     const result = await page.evaluate(w => ({ rec: progress[w], attempts: stats.attempts, correct: stats.correct, sessionCorrect: session.correct }), word);
@@ -97,6 +105,7 @@ async function gradeLeftLikeDontKnow() {
   try {
     await startCardsSession(page);
     const word = await page.evaluate(() => session.queue[session.index].w);
+    await page.locator('#flashcard').click();
     await page.locator('#dontKnowBtn').click();
     await page.waitForFunction(() => session.index === 1);
     const result = await page.evaluate(w => ({ rec: progress[w], attempts: stats.attempts, correct: stats.correct, wrong: session.wrong }), word);
@@ -168,6 +177,7 @@ async function poolSemanticsShared() {
     assert.ok(result.queue.every(w => progress[w].s < 2), 'no learned word enters the cards queue');
     // A known swipe moves the word to the back of the cycle.
     const first = result.queue[0];
+    await page.locator('#flashcard').click();
     await page.locator('#knowBtn').click();
     await page.waitForFunction(() => session.index === 1);
     const order = await page.evaluate(() => vocab.filter(v => isLearning(progress[v.w]))
@@ -189,12 +199,30 @@ async function cardChrome() {
     assert.equal(await page.locator('#progressText').textContent(), '1 / 20', 'compact counter');
     assert.equal(await page.locator('#pillKnow').textContent(), '0');
     assert.equal(await page.locator('#pillDont').textContent(), '0');
-    assert.equal(await page.locator('#fcSpeak').isVisible(), true, 'speaker on the card');
-    assert.equal(await page.locator('#fcInfo').isVisible(), true, 'details on the card');
+    assert.equal(await page.locator('#fcSpeak').isVisible(), true, 'play control below the card');
+    assert.equal(await page.locator('#fcInfo').isVisible(), true, 'star details action on the card');
+    assert.equal(await page.locator('#fcInfo use').getAttribute('href'), '#icon-star', 'Quizlet-style star icon');
+    const layout = await page.evaluate(() => Object.fromEntries(['cardClose', 'progressText', 'cardGear', 'pillDont', 'pillKnow', 'flashcard'].map(id => {
+      const r = document.getElementById(id).getBoundingClientRect();
+      return [id, { x: r.x, y: r.y, width: r.width, height: r.height }];
+    })));
+    assert.ok(layout.cardClose.x < layout.progressText.x && layout.progressText.x < layout.cardGear.x, 'X / counter / gear match the Quizlet header order');
+    assert.ok(layout.pillDont.x < layout.pillKnow.x, 'unknown counter on the left, known on the right');
+    assert.ok(Math.abs(layout.flashcard.width - 328) <= 2, '390px card matches the reference width');
+    assert.equal(layout.flashcard.height, 570, '390px card matches the reference height');
+    assert.equal(await page.evaluate(() => getComputedStyle(document.body).backgroundColor), 'rgb(255, 255, 255)');
+    await page.locator('#flashcard').click();
+    const beforeReset = await page.evaluate(() => ({ progress: JSON.stringify(progress), stats: JSON.stringify(stats) }));
+    await page.locator('#cardResetBtn').click();
+    await page.waitForFunction(() => !document.getElementById('flashcard').classList.contains('flipped'));
+    assert.equal(await page.locator('#knowBtn').isVisible(), false, 'reset returns to the ungraded Quizlet front');
+    assert.deepEqual(await page.evaluate(() => ({ progress: JSON.stringify(progress), stats: JSON.stringify(stats) })), beforeReset, 'reset is presentation-only');
+    await page.locator('#flashcard').click();
     await page.locator('#knowBtn').click();
     await page.waitForFunction(() => session.index === 1);
     assert.equal(await page.locator('#pillKnow').textContent(), '1', 'right pill counts known');
     assert.equal(await page.locator('#progressText').textContent(), '2 / 20', 'counter advances');
+    await page.locator('#flashcard').click();
     await page.locator('#dontKnowBtn').click();
     await page.waitForFunction(() => session.index === 2);
     assert.equal(await page.locator('#pillDont').textContent(), '1', 'left pill counts unknown');
@@ -209,7 +237,7 @@ async function cardChrome() {
     await page.waitForFunction(() => !session.active);
     assert.equal(await page.locator('#summary').isVisible(), true, 'X closes to the summary');
   } finally { await context.close(); }
-  console.log('PASS card chrome: word on card, counter, pills, corner actions, X ends session');
+  console.log('PASS card chrome: Quizlet layout, counter, pills, star/play actions, X ends session');
 }
 
 async function main() {

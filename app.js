@@ -392,7 +392,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v47');
+    const cache = await caches.open('four-words-offline-v48');
     const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     label.classList.toggle('offline-ready', !!prepared);
@@ -468,6 +468,8 @@ function resetFlashcard() {
   card.classList.add('no-anim');
   card.classList.remove('flipped', 'dragging', 'fly-out');
   card.style.transform = '';
+  $('quizCard').classList.remove('answer-ready');
+  $('cardResetBtn').disabled = true;
   void card.offsetHeight;
   card.classList.remove('no-anim');
 }
@@ -475,6 +477,8 @@ function flipFlashcard() {
   if (!session.active || !isCardMode() || locked) return;
   cardFlipped = !cardFlipped;
   $('flashcard').classList.toggle('flipped', cardFlipped);
+  $('quizCard').classList.toggle('answer-ready', cardFlipped);
+  $('cardResetBtn').disabled = !cardFlipped;
 }
 function gradeCard(ok) {
   if (locked || !session.active || !isCardMode()) return;
@@ -579,6 +583,7 @@ function showQuestion() {
   if (cards) {
     $('questionContext').textContent = ''; $('questionContext').classList.add('empty');
     resetFlashcard();
+    $('hint').textContent = 'הקישו על הכרטיס כדי להפוך אותו';
     // Reference design (user request, 26.10): the word lives on the card
     // front; the top counter is the compact "current / total" form.
     $('progressText').textContent = `${session.index + 1} / ${session.queue.length}`;
@@ -1421,8 +1426,8 @@ document.addEventListener('keydown', e => {
 $('speakBtn').addEventListener('click', () => { const item = session.queue[session.index]; if (item) speak(item.w); });
 // Card-mode chrome (redesign 26.10): corner actions must not start a drag or
 // flip the card; X ends the session, the gear opens the settings tab.
-$('fcSpeak').addEventListener('pointerdown', e => e.stopPropagation());
 $('fcSpeak').addEventListener('click', e => { e.stopPropagation(); const item = session.queue[session.index]; if (item) speak(item.w); });
+$('cardResetBtn').addEventListener('click', () => { if (cardFlipped) flipFlashcard(); });
 $('fcInfo').addEventListener('pointerdown', e => e.stopPropagation());
 $('fcInfo').addEventListener('click', e => { e.stopPropagation(); const item = session.queue[session.index]; if (item) openDetails(item); });
 $('cardClose').addEventListener('click', () => { if (session.active) finishSession(true); });
