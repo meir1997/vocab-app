@@ -851,7 +851,7 @@ function renderSessionPreview() {
   const words = settings.length === 'all' ? 'כל הדחופות' : `${settings.length} מילים`;
   el.textContent = `${MODE_SHORT[settings.mode] || ''} · ${words} · רמה ${bands.current}`;
 }
-const MODE_SHORT = { choice: '🎯 משחק', reverse: '🔄 משחק הפוך', typing: '⌨️ הקלדה', cards: '🃏 כרטיסיות', sort: '🗂️ מיון' };
+const MODE_SHORT = { choice: 'משחק', reverse: 'משחק הפוך', typing: 'הקלדה', cards: 'כרטיסיות', sort: 'מיון' };
 function renderLevelPath() {
   const path = $('levelPath'); if (!path || !vocab.length) return;
   const cur = bands.current, last = maxBand();
@@ -1532,10 +1532,10 @@ if ('serviceWorker' in navigator) window.addEventListener('load', async () => {
 /* ---------- First-run onboarding ---------- */
 const OB_KEY = 'fw.onboarded';
 const OB_LEVELS = [
-  { band: 1, emoji: '🐣', name: 'מתחילים', note: 'המילים הכי נפוצות' },
-  { band: 11, emoji: '🙂', name: 'בסיסי', note: 'מכירים את המילים היומיומיות' },
-  { band: 31, emoji: '😎', name: 'בינוני', note: 'קוראים טקסטים פשוטים' },
-  { band: 61, emoji: '🧠', name: 'מתקדם', note: 'מחפשים מילים נדירות' }
+  { band: 1, name: 'מתחילים', note: 'המילים הכי נפוצות' },
+  { band: 11, name: 'בסיסי', note: 'מכירים את המילים היומיומיות' },
+  { band: 31, name: 'בינוני', note: 'קוראים טקסטים פשוטים' },
+  { band: 61, name: 'מתקדם', note: 'מחפשים מילים נדירות' }
 ];
 let obStep = 0, obGoal = settings.goal, obBand = bands.current;
 function needsOnboarding() {
@@ -1558,8 +1558,9 @@ function renderObLevels() {
     const b = document.createElement('button');
     b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.obBand = String(level.band);
     const sample = vocab.filter(v => !isBookWord(v) && v.r >= bandLo(level.band) && v.r <= level.band * BAND_SIZE).slice(10, 13).map(v => v.w).join(' · ');
-    b.innerHTML = `<span class="ob-emoji" aria-hidden="true"></span><strong></strong><span></span><em dir="ltr" lang="en"></em>`;
-    b.children[0].textContent = level.emoji; b.children[1].textContent = level.name;
+    b.innerHTML = `<span class="ob-ico" aria-hidden="true"><svg viewBox="0 0 36 36" focusable="false">${[0, 1, 2, 3].map(i => `<rect class="${i <= OB_LEVELS.indexOf(level) ? 'on' : 'trk-fill'}" x="${3 + i * 8}" y="${23 - i * 6}" width="6" height="${9 + i * 6}" rx="2.5"/>`).join('')}</svg></span><strong></strong><span></span><em dir="ltr" lang="en"></em>`;
+    b.style.setProperty('--tile', `var(${['--c-mint', '--c-sky', '--c-violet', '--c-coral'][OB_LEVELS.indexOf(level)]})`);
+    b.children[1].textContent = level.name;
     b.children[2].textContent = level.note; b.children[3].textContent = sample;
     b.addEventListener('click', () => { obBand = level.band; markObChoice('[data-ob-band]', 'obBand', obBand); });
     box.append(b);
