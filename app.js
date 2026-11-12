@@ -392,7 +392,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v50');
+    const cache = await caches.open('four-words-offline-v51');
     const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     label.classList.toggle('offline-ready', !!prepared);
@@ -988,6 +988,7 @@ window.addEventListener('scroll', () => {
 /* ---------- Library ---------- */
 let libFilter = '', libShown = 0, libCategory = 'all';
 const LIB_PAGE = 60;
+const libraryLevel = p => isClassifiedUnknown(p) ? '⏳' : (p.r + p.w) === 0 ? '☆' : p.s >= 4 ? '★★★' : p.s >= 2 ? '★★' : p.s >= 1 ? '★' : '☆';
 function categoryItems() {
   if (libCategory === 'book') return vocab.filter(isBookWord);
   if (libCategory === 'all') return vocab;
@@ -1009,13 +1010,25 @@ function renderLibrary(reset = true) {
   libShown += page.length;
   const list = $('libraryList');
   page.forEach(v => {
-    const p = rec(v.w);
     const row = document.createElement('div');
     row.className = 'word-item';
-    const level = isClassifiedUnknown(p) ? '⏳' : (p.r + p.w) === 0 ? '☆' : p.s >= 4 ? '★★★' : p.s >= 2 ? '★★' : p.s >= 1 ? '★' : '☆';
-    row.innerHTML = `<span class="rank">${serialLabel(v)}</span><span class="w"></span><span class="t"></span><span class="level" aria-label="רמת שליטה">${level}</span><button class="speak" aria-label="השמעה">${iconMarkup('volume')}</button>`;
+    row.innerHTML = `<span class="rank">${serialLabel(v)}</span><span class="w"></span><span class="t"></span><button type="button" class="level known-toggle" aria-pressed="false"></button><button class="speak" aria-label="השמעה">${iconMarkup('volume')}</button>`;
     row.querySelector('.w').textContent = v.w;
     row.querySelector('.t').textContent = v.t;
+    const levelButton = row.querySelector('.level');
+    const updateLevel = () => {
+      const p = rec(v.w), learned = isLearned(p);
+      levelButton.textContent = libraryLevel(p);
+      levelButton.setAttribute('aria-pressed', learned ? 'true' : 'false');
+      levelButton.setAttribute('aria-label', learned ? `${v.w} מסומנת כידועה` : `סימון ${v.w} כידועה`);
+      levelButton.title = learned ? 'המילה מסומנת כידועה' : 'סימון כידוע';
+    };
+    levelButton.addEventListener('click', () => {
+      if (isLearned(rec(v.w))) return;
+      setWordKnown(v, true);
+      updateLevel();
+    });
+    updateLevel();
     row.querySelector('.speak').addEventListener('click', () => speak(v.w));
     row.querySelector('.w').addEventListener('click', () => openDetails(v));
     row.querySelector('.t').addEventListener('click', () => openDetails(v));
@@ -1126,8 +1139,7 @@ function setBookWordUnknownMarked(unknown) {
   renderWordSheetState();
   if (unknown) showToast('סומנה כלא ידועה · נתרגל אותה שוב בקרוב');
 }
-function setBookWordKnown(known) {
-  const item = wordSheetItem; if (!item) return;
+function setWordKnown(item, known) {
   const p = rec(item.w); const now = Date.now();
   if (known) {
     const need = p.w === 0 ? 1 : 2;
@@ -1143,6 +1155,10 @@ function setBookWordKnown(known) {
   p.last = now; // sync tiebreaker: most recently touched record wins
   progress[item.w] = p;
   persist(); refreshHome();
+}
+function setBookWordKnown(known) {
+  const item = wordSheetItem; if (!item) return;
+  setWordKnown(item, known);
   renderWordSheetState();
 }
 

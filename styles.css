@@ -497,7 +497,8 @@ body:has(#quizCard:not(.hidden)) .tabbar { transform: translateY(calc(100% + 24p
 .word-item .rank { color: var(--muted); font-size: 11px; min-width: 38px; font-weight: 600; }
 .word-item .w { font-weight: 800; direction: ltr; cursor: pointer; }
 .word-item .t { color: var(--muted); font-size: 14px; flex: 1; cursor: pointer; }
-.word-item .level { font-size: 12px; color: var(--c-sun); }
+.word-item .level { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; margin: -8px 0; padding: 0; border: 0; background: none; color: var(--c-sun); font-size: 12px; cursor: pointer; }
+.word-item .level[aria-pressed="true"] { cursor: default; }
 .word-item .speak { display: inline-flex; align-items: center; justify-content: center; border: 0; background: var(--accent-soft); color: var(--accent); border-radius: 12px; cursor: pointer; min-width: 44px; min-height: 44px; }
 .word-item .example { flex-basis: 100%; color: var(--muted); font-size: 12.5px; direction: ltr; text-align: left; }
 
@@ -801,4 +802,4 @@ body:has(#quizCard.cards-mode:not(.hidden)) .shell { max-width: none; padding: 0
   #quizCard.cards-mode { grid-template-rows: 52px 3px 36px minmax(240px, 1fr) 58px; }
   .cards-mode .side-pill { top: -34px; }
   .cards-mode .flashcard { height: calc(100% - 8px); margin-top: 8px; }
-}
+                        }
