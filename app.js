@@ -392,7 +392,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v51');
+    const cache = await caches.open('four-words-offline-v52');
     const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     label.classList.toggle('offline-ready', !!prepared);
@@ -986,8 +986,14 @@ window.addEventListener('scroll', () => {
 }, { passive: true });
 
 /* ---------- Library ---------- */
-let libFilter = '', libShown = 0, libCategory = 'all';
+let libFilter = '', libShown = 0, libCategory = 'all', libStatus = 'all';
 const LIB_PAGE = 60;
+const LIB_STATUS_LABELS = {
+  'not-learned': 'עוד לא נלמדו',
+  learning: 'בלמידה',
+  unknown: 'מסומנות כלא ידועות',
+  learned: 'נלמדו'
+};
 const libraryLevel = p => isClassifiedUnknown(p) ? '⏳' : (p.r + p.w) === 0 ? '☆' : p.s >= 4 ? '★★★' : p.s >= 2 ? '★★' : p.s >= 1 ? '★' : '☆';
 function categoryItems() {
   if (libCategory === 'book') return vocab.filter(isBookWord);
@@ -996,7 +1002,11 @@ function categoryItems() {
   return vocab.filter(v => !isBookWord(v) && v.r >= bandLo(b) && v.r <= b * BAND_SIZE);
 }
 function filteredVocab() {
-  const items = categoryItems();
+  let items = categoryItems();
+  if (libStatus === 'not-learned') items = items.filter(v => !isLearned(rec(v.w)));
+  else if (libStatus === 'learning') items = items.filter(v => isLearning(progress[v.w]));
+  else if (libStatus === 'unknown') items = items.filter(v => !!rec(v.w).u);
+  else if (libStatus === 'learned') items = items.filter(v => isLearned(rec(v.w)));
   if (!libFilter) return items;
   const q = libFilter.toLowerCase();
   return items.filter(v => v.w.toLowerCase().includes(q) || v.t.includes(libFilter));
@@ -1005,7 +1015,8 @@ function renderLibrary(reset = true) {
   if (reset) { libShown = 0; $('libraryList').replaceChildren(); }
   const items = filteredVocab();
   const catLabel = libCategory === 'all' ? '' : libCategory === 'book' ? ' · הספר' : ` · רמה ${libCategory}`;
-  $('libraryCount').textContent = `${items.length.toLocaleString('he-IL')} מילים${catLabel}${libFilter ? ` עבור "${libFilter}"` : ''}`;
+  const statusLabel = libStatus === 'all' ? '' : ` · ${LIB_STATUS_LABELS[libStatus]}`;
+  $('libraryCount').textContent = `${items.length.toLocaleString('he-IL')} מילים${catLabel}${statusLabel}${libFilter ? ` עבור "${libFilter}"` : ''}`;
   const page = items.slice(libShown, libShown + LIB_PAGE);
   libShown += page.length;
   const list = $('libraryList');
@@ -1026,7 +1037,10 @@ function renderLibrary(reset = true) {
     levelButton.addEventListener('click', () => {
       if (isLearned(rec(v.w))) return;
       setWordKnown(v, true);
-      updateLevel();
+      // A status filter must stay truthful after the star changes the state:
+      // known words leave "not learned"/"unknown" filtered lists immediately.
+      if (libStatus === 'all') updateLevel();
+      else renderLibrary();
     });
     updateLevel();
     row.querySelector('.speak').addEventListener('click', () => speak(v.w));
@@ -1482,6 +1496,7 @@ $('settingsSheet').addEventListener('click', e => { if (e.target === $('settings
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && settingsOpen) closeSettings(); });
 $('searchInput').addEventListener('input', e => { libFilter = e.target.value.trim(); renderLibrary(); });
 $('libCatSelect').addEventListener('change', e => { libCategory = e.target.value; renderLibrary(); });
+$('libStatusSelect').addEventListener('change', e => { libStatus = e.target.value; renderLibrary(); });
 // Category words must be reachable by scrolling alone (user request, 26.10):
 // the next page loads automatically as the list bottom approaches, chaining
 // while it stays in view; the "show more" button stays as a fallback.
