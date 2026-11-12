@@ -392,7 +392,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v53');
+    const cache = await caches.open('four-words-offline-v54');
     const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     label.classList.toggle('offline-ready', !!prepared);
@@ -1023,7 +1023,7 @@ function renderLibrary(reset = true) {
   page.forEach(v => {
     const row = document.createElement('div');
     row.className = 'word-item';
-    row.innerHTML = `<span class="rank">${serialLabel(v)}</span><span class="w"></span><span class="t"></span><button type="button" class="level known-toggle" aria-pressed="false"></button><button class="speak" aria-label="השמעה">${iconMarkup('volume')}</button>`;
+    row.innerHTML = `<span class="rank">${serialLabel(v)}</span><span class="w"></span><span class="t"></span><button type="button" class="level known-toggle" aria-pressed="false"></button><button type="button" class="unknown-toggle" aria-pressed="false"></button><button class="speak" aria-label="השמעה">${iconMarkup('volume')}</button>`;
     row.querySelector('.w').textContent = v.w;
     row.querySelector('.t').textContent = v.t;
     const levelButton = row.querySelector('.level');
@@ -1034,15 +1034,31 @@ function renderLibrary(reset = true) {
       levelButton.setAttribute('aria-label', learned ? `${v.w} מסומנת כידועה` : `סימון ${v.w} כידועה`);
       levelButton.title = learned ? 'המילה מסומנת כידועה' : 'סימון כידוע';
     };
+    const unknownButton = row.querySelector('.unknown-toggle');
+    unknownButton.innerHTML = iconMarkup('close');
+    const updateUnknown = () => {
+      const marked = !!rec(v.w).u;
+      unknownButton.setAttribute('aria-pressed', marked ? 'true' : 'false');
+      unknownButton.setAttribute('aria-label', marked ? `ביטול הסימון של ${v.w} כלא ידועה` : `סימון ${v.w} כלא ידועה`);
+      unknownButton.title = marked ? 'ביטול סימון כלא ידועה' : 'סימון כלא ידועה';
+    };
     levelButton.addEventListener('click', () => {
       if (isLearned(rec(v.w))) return;
       setWordKnown(v, true);
       // A status filter must stay truthful after the star changes the state:
       // known words leave "not learned"/"unknown" filtered lists immediately.
-      if (libStatus === 'all') updateLevel();
+      if (libStatus === 'all') { updateLevel(); updateUnknown(); }
       else renderLibrary();
     });
+    unknownButton.addEventListener('click', () => {
+      setWordUnknown(v, !rec(v.w).u);
+      // Unknown/learned filters depend on the u flag; other statuses can update
+      // this row in place without resetting the user's position in the list.
+      if (libStatus === 'unknown' || libStatus === 'learned') renderLibrary();
+      else { updateLevel(); updateUnknown(); }
+    });
     updateLevel();
+    updateUnknown();
     row.querySelector('.speak').addEventListener('click', () => speak(v.w));
     row.querySelector('.w').addEventListener('click', () => openDetails(v));
     row.querySelector('.t').addEventListener('click', () => openDetails(v));
@@ -1168,6 +1184,21 @@ function setWordKnown(item, known) {
   }
   p.last = now; // sync tiebreaker: most recently touched record wins
   progress[item.w] = p;
+  persist(); refreshHome();
+}
+// Library "mark unknown" mirrors the reader/sort classification semantics:
+// fresh words get only a {u:1} classification; attempted words keep every
+// answer count and streak and receive the additive u flag plus a due-now
+// nudge. Removing the mark deletes only that classification.
+function setWordUnknown(item, unknown) {
+  const p = rec(item.w), now = Date.now();
+  if (unknown) {
+    if (!isAttempted(p)) progress[item.w] = { r: 0, w: 0, s: 0, u: 1, last: now };
+    else { p.u = 1; p.next = now; p.last = now; progress[item.w] = p; }
+  } else {
+    if (!isAttempted(p)) delete progress[item.w];
+    else { delete p.u; p.last = now; progress[item.w] = p; }
+  }
   persist(); refreshHome();
 }
 function setBookWordKnown(known) {

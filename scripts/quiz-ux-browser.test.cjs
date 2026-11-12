@@ -536,6 +536,91 @@ async function libraryStarMarksKnown() {
   console.log('PASS library star: tap marks clean and previously-missed words known, partial recovery stays unfilled, pressed/no-op state, no stats or band movement');
 }
 
+async function libraryUnknownMarks() {
+  // Library X (user request, 12.11): marking unknown is the same additive
+  // classification as reader/sort mode, never a quiz answer or band answer.
+  // Fresh, in-learning, and learned records each keep their existing history.
+  const { page, context } = await newPage();
+  const rowFor = async word => {
+    await page.fill('#searchInput', word);
+    await page.waitForFunction(word => [...document.querySelectorAll('#libraryList .word-item .w')].some(el => el.textContent === word), word);
+    const index = await page.evaluate(word => [...document.querySelectorAll('#libraryList .word-item .w')].findIndex(el => el.textContent === word), word);
+    assert.ok(index >= 0, `library row for ${word}`);
+    return page.locator('#libraryList .word-item').nth(index);
+  };
+  try {
+    await page.locator('.tab-btn[data-tab="library"]').click();
+    await page.selectOption('#libCatSelect', '4');
+    await page.waitForFunction(() => document.querySelectorAll('#libraryList .word-item').length > 0);
+    const before = await page.evaluate(() => ({ stats: JSON.stringify(stats), bands: JSON.stringify(bands) }));
+
+    const fresh = await rowFor('girl');
+    assert.equal(await fresh.locator('.unknown-toggle').getAttribute('aria-pressed'), 'false', 'fresh word starts without an unknown mark');
+    await fresh.locator('.unknown-toggle').click();
+    await page.waitForFunction(() => progress.girl?.u === 1);
+    const classified = await page.evaluate(() => ({
+      record: progress.girl,
+      star: document.querySelector('#libraryList .known-toggle').textContent,
+      pressed: document.querySelector('#libraryList .unknown-toggle').getAttribute('aria-pressed'),
+      stats: JSON.stringify(stats),
+      bands: JSON.stringify(bands)
+    }));
+    assert.deepEqual({ r: classified.record.r, w: classified.record.w, s: classified.record.s, u: classified.record.u }, { r: 0, w: 0, s: 0, u: 1 });
+    assert.equal(classified.star, '⏳', 'fresh classified word keeps the unknown hourglass display');
+    assert.equal(classified.pressed, 'true', 'X is pressed after marking unknown');
+    assert.equal(classified.stats, before.stats, 'fresh unknown mark adds no quiz stats');
+    assert.equal(classified.bands, before.bands, 'fresh unknown mark adds no band answer');
+    await fresh.locator('.unknown-toggle').click();
+    await page.waitForFunction(() => !progress.girl);
+    assert.equal(await fresh.locator('.known-toggle').textContent(), '☆', 'removing a fresh classification returns the outline star');
+    assert.equal(await fresh.locator('.unknown-toggle').getAttribute('aria-pressed'), 'false', 'X clears with the classification');
+
+    await page.evaluate(() => {
+      progress.known = { r: 1, w: 1, s: 1, next: 1234, last: 1000 };
+    });
+    const learning = await rowFor('known');
+    await learning.locator('.unknown-toggle').click();
+    await page.waitForFunction(() => progress.known?.u === 1);
+    const learningMarked = await page.evaluate(() => ({ record: progress.known, star: document.querySelector('#libraryList .known-toggle').textContent, pressed: document.querySelector('#libraryList .unknown-toggle').getAttribute('aria-pressed') }));
+    assert.deepEqual({ r: learningMarked.record.r, w: learningMarked.record.w, s: learningMarked.record.s, u: learningMarked.record.u }, { r: 1, w: 1, s: 1, u: 1 });
+    assert.ok(learningMarked.record.next > 1234, 'in-learning unknown mark nudges the word due now');
+    assert.equal(learningMarked.star, '☆', 'in-learning unknown mark keeps the not-learned star display');
+    assert.equal(learningMarked.pressed, 'true', 'X is pressed for the additive unknown mark');
+    await learning.locator('.unknown-toggle').click();
+    await page.waitForFunction(() => progress.known && !progress.known.u);
+    assert.deepEqual(await page.evaluate(() => ({ r: progress.known.r, w: progress.known.w, s: progress.known.s, u: progress.known.u })),
+      { r: 1, w: 1, s: 1, u: undefined }, 'unmarking removes only the u flag');
+
+    await page.evaluate(() => {
+      progress.girl = { r: 1, w: 0, s: 1, next: 1234, last: 1000 };
+    });
+    const learned = await rowFor('girl');
+    assert.equal(await learned.locator('.known-toggle').textContent(), '★', 'learned word starts with a filled star');
+    await learned.locator('.unknown-toggle').click();
+    await page.waitForFunction(() => progress.girl?.u === 1);
+    const learnedMarked = await page.evaluate(() => ({ record: progress.girl, star: document.querySelector('#libraryList .known-toggle').textContent, pressed: document.querySelector('#libraryList .unknown-toggle').getAttribute('aria-pressed') }));
+    assert.deepEqual({ r: learnedMarked.record.r, w: learnedMarked.record.w, s: learnedMarked.record.s, u: learnedMarked.record.u }, { r: 1, w: 0, s: 1, u: 1 });
+    assert.equal(learnedMarked.star, '☆', 'unknown mark suppresses the learned star without changing history');
+    assert.equal(learnedMarked.pressed, 'true', 'X is pressed after unmarking a learned word as unknown');
+    await learned.locator('.unknown-toggle').click();
+    await page.waitForFunction(() => progress.girl && !progress.girl.u);
+    assert.deepEqual(await page.evaluate(() => ({ r: progress.girl.r, w: progress.girl.w, s: progress.girl.s, u: progress.girl.u })),
+      { r: 1, w: 0, s: 1, u: undefined }, 'removing the mark restores the same learned record');
+
+    await page.selectOption('#libStatusSelect', 'unknown');
+    await page.evaluate(() => { progress.known.u = 1; });
+    await page.fill('#searchInput', 'known');
+    await page.evaluate(() => renderLibrary());
+    await page.waitForFunction(() => [...document.querySelectorAll('#libraryList .word-item .w')].some(el => el.textContent === 'known'));
+    await page.locator('#libraryList .unknown-toggle').first().click();
+    await page.waitForFunction(() => ![...document.querySelectorAll('#libraryList .word-item .w')].some(el => el.textContent === 'known'));
+    const finalState = await page.evaluate(() => ({ stats: JSON.stringify(stats), bands: JSON.stringify(bands) }));
+    assert.equal(finalState.stats, before.stats, 'all library unknown toggles add no quiz stats');
+    assert.equal(finalState.bands, before.bands, 'all library unknown toggles add no band answer');
+  } finally { await context.close(); }
+  console.log('PASS library X: fresh, in-learning, and learned unknown marks preserve history, filters, stats, and bands');
+}
+
 async function homeModeChoices() {
   const { page, context } = await newPage();
   try {
@@ -590,6 +675,7 @@ async function homeModeChoices() {
   await libraryCategoryPicker();
   await libraryStatusFilters();
   await libraryStarMarksKnown();
+  await libraryUnknownMarks();
 })().catch(error => {
   console.error(error);
   process.exitCode = 1;
