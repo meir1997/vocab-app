@@ -415,6 +415,68 @@ async function libraryCategoryPicker() {
   console.log('PASS library category picker: band/book categories scroll their words (auto-load, no show-more tap), search composes');
 }
 
+async function libraryStarMarksKnown() {
+  // Library stars (user request, 12.11): tapping the pictured star applies the
+  // same direct "known" rule as the book sheet, without a quiz answer, stats,
+  // or band movement. A learned star is pressed and tapping it again is a no-op.
+  const { page, context } = await newPage();
+  const rowFor = async word => {
+    await page.fill('#searchInput', word);
+    await page.waitForFunction(word => [...document.querySelectorAll('#libraryList .word-item .w')].some(el => el.textContent === word), word);
+    const index = await page.evaluate(word => [...document.querySelectorAll('#libraryList .word-item .w')].findIndex(el => el.textContent === word), word);
+    assert.ok(index >= 0, `library row for ${word}`);
+    return page.locator('#libraryList .word-item').nth(index);
+  };
+  try {
+    await page.locator('.tab-btn[data-tab="library"]').click();
+    await page.selectOption('#libCatSelect', '4');
+    await page.waitForFunction(() => document.querySelectorAll('#libraryList .word-item').length > 0);
+    const before = await page.evaluate(() => ({ stats: JSON.stringify(stats), bands: JSON.stringify(bands) }));
+
+    const girl = await rowFor('girl');
+    assert.equal(await girl.locator('.known-toggle').getAttribute('aria-pressed'), 'false', 'fresh word star starts unpressed');
+    await girl.locator('.known-toggle').click();
+    await page.waitForFunction(() => progress.girl && isLearned(progress.girl));
+    const clean = await page.evaluate(() => ({
+      record: progress.girl,
+      learned: isLearned(progress.girl),
+      star: document.querySelector('#libraryList .known-toggle').textContent,
+      pressed: document.querySelector('#libraryList .known-toggle').getAttribute('aria-pressed'),
+      stats: JSON.stringify(stats),
+      bands: JSON.stringify(bands)
+    }));
+    assert.equal(clean.learned, true, 'clean word is known after one star tap');
+    assert.deepEqual({ r: clean.record.r, w: clean.record.w, s: clean.record.s, u: clean.record.u }, { r: 1, w: 0, s: 1, u: undefined });
+    assert.ok(clean.record.next - clean.record.last >= 29 * 86400000, 'known word is scheduled at the longest interval');
+    assert.equal(clean.star, '★', 'row star immediately shows learned');
+    assert.equal(clean.pressed, 'true', 'row star is pressed after marking known');
+    assert.equal(clean.stats, before.stats, 'star mark adds no quiz stats');
+    assert.equal(clean.bands, before.bands, 'star mark adds no band answer');
+    const firstRecord = JSON.stringify(clean.record);
+    await girl.locator('.known-toggle').click();
+    await page.waitForTimeout(100);
+    assert.equal(await page.evaluate(() => JSON.stringify(progress.girl)), firstRecord, 'tapping an already-known star is a no-op');
+
+    await page.evaluate(() => {
+      progress.known = { r: 0, w: 1, s: 0, next: 0, last: 1000 };
+    });
+    const known = await rowFor('known');
+    await known.locator('.known-toggle').click();
+    await page.waitForFunction(() => progress.known?.s === 2);
+    const afterMiss = await page.evaluate(() => ({
+      record: progress.known,
+      learned: isLearned(progress.known),
+      stats: JSON.stringify(stats),
+      bands: JSON.stringify(bands)
+    }));
+    assert.equal(afterMiss.learned, true, 'word with an earlier miss follows the two-streak learned rule');
+    assert.deepEqual({ r: afterMiss.record.r, w: afterMiss.record.w, s: afterMiss.record.s, u: afterMiss.record.u }, { r: 2, w: 1, s: 2, u: undefined });
+    assert.equal(afterMiss.stats, before.stats, 'miss-history star mark still adds no quiz stats');
+    assert.equal(afterMiss.bands, before.bands, 'miss-history star mark still adds no band answer');
+  } finally { await context.close(); }
+  console.log('PASS library star: tap marks clean and previously-missed words known, pressed/no-op state, no stats or band movement');
+}
+
 async function homeModeChoices() {
   const { page, context } = await newPage();
   try {
@@ -467,6 +529,7 @@ async function homeModeChoices() {
   await speakerPlaysWord();
   await preservedLearningRules();
   await libraryCategoryPicker();
+  await libraryStarMarksKnown();
 })().catch(error => {
   console.error(error);
   process.exitCode = 1;
