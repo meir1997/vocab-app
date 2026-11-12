@@ -441,7 +441,9 @@ async function libraryStatusFilters() {
         notLearned: ['right', 'light', 'run', 'girl'].every(word => has('not-learned', word)) && !has('not-learned', 'the'),
         learning: ['right', 'run'].every(word => has('learning', word)) && !['the', 'light', 'girl'].some(word => has('learning', word)),
         unknown: ['light', 'run'].every(word => has('unknown', word)) && !['the', 'right', 'girl'].some(word => has('unknown', word)),
-        learned: has('learned', 'the') && !['right', 'light', 'run', 'girl'].some(word => has('learned', word))
+        learned: has('learned', 'the') && !['right', 'light', 'run', 'girl'].some(word => has('learned', word)),
+        partialStar: libraryLevel(rec('run')) === '☆',
+        learnedStar: libraryLevel(rec('the')) === '★'
       };
     });
     assert.deepEqual(membership, Object.fromEntries(Object.keys(membership).map(key => [key, true])),
@@ -513,9 +515,11 @@ async function libraryStarMarksKnown() {
     assert.equal(await page.evaluate(() => JSON.stringify(progress.girl)), firstRecord, 'tapping an already-known star is a no-op');
 
     await page.evaluate(() => {
-      progress.known = { r: 0, w: 1, s: 0, next: 0, last: 1000 };
+      progress.known = { r: 1, w: 1, s: 1, next: 0, last: 1000 };
     });
     const known = await rowFor('known');
+    assert.equal(await known.locator('.known-toggle').textContent(), '☆', 'one correct answer after a miss is progress, not a filled learned star');
+    assert.equal(await known.locator('.known-toggle').getAttribute('aria-pressed'), 'false', 'partial recovery remains unpressed');
     await known.locator('.known-toggle').click();
     await page.waitForFunction(() => progress.known?.s === 2);
     const afterMiss = await page.evaluate(() => ({
@@ -529,7 +533,7 @@ async function libraryStarMarksKnown() {
     assert.equal(afterMiss.stats, before.stats, 'miss-history star mark still adds no quiz stats');
     assert.equal(afterMiss.bands, before.bands, 'miss-history star mark still adds no band answer');
   } finally { await context.close(); }
-  console.log('PASS library star: tap marks clean and previously-missed words known, pressed/no-op state, no stats or band movement');
+  console.log('PASS library star: tap marks clean and previously-missed words known, partial recovery stays unfilled, pressed/no-op state, no stats or band movement');
 }
 
 async function homeModeChoices() {
