@@ -392,7 +392,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v52');
+    const cache = await caches.open('four-words-offline-v53');
     const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     label.classList.toggle('offline-ready', !!prepared);
@@ -994,7 +994,7 @@ const LIB_STATUS_LABELS = {
   unknown: 'מסומנות כלא ידועות',
   learned: 'נלמדו'
 };
-const libraryLevel = p => isClassifiedUnknown(p) ? '⏳' : (p.r + p.w) === 0 ? '☆' : p.s >= 4 ? '★★★' : p.s >= 2 ? '★★' : p.s >= 1 ? '★' : '☆';
+const libraryLevel = p => isClassifiedUnknown(p) ? '⏳' : !isLearned(p) ? '☆' : p.s >= 4 ? '★★★' : p.s >= 2 ? '★★' : '★';
 function categoryItems() {
   if (libCategory === 'book') return vocab.filter(isBookWord);
   if (libCategory === 'all') return vocab;
