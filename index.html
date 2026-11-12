@@ -193,6 +193,13 @@
         <div class="search-row">
           <input id="searchInput" type="search" placeholder="חיפוש מילה באנגלית או בעברית…" aria-label="חיפוש מילה">
           <select id="libCatSelect" aria-label="בחירת קטגוריה"></select>
+          <select id="libStatusSelect" aria-label="סינון לפי מצב למידה">
+            <option value="all">כל מצבי הלמידה</option>
+            <option value="not-learned">עוד לא נלמדו</option>
+            <option value="learning">בלמידה</option>
+            <option value="unknown">מסומנות כלא ידועות</option>
+            <option value="learned">נלמדו</option>
+          </select>
         </div>
         <p class="library-count" id="libraryCount"></p>
         <div id="libraryList" class="library-list"></div>

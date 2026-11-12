@@ -415,6 +415,61 @@ async function libraryCategoryPicker() {
   console.log('PASS library category picker: band/book categories scroll their words (auto-load, no show-more tap), search composes');
 }
 
+async function libraryStatusFilters() {
+  // Library status filter (user request, 12.11): "not learned" means every
+  // word outside the learned state; "unknown" is the explicit additive u mark
+  // (fresh classifications and in-learning marks), never a quiz answer.
+  const { page, context } = await newPage();
+  try {
+    await page.locator('.tab-btn[data-tab="library"]').click();
+    const labels = await page.locator('#libStatusSelect option').allTextContents();
+    assert.deepEqual(labels.map(label => label.trim()), ['כל מצבי הלמידה', 'עוד לא נלמדו', 'בלמידה', 'מסומנות כלא ידועות', 'נלמדו']);
+
+    const membership = await page.evaluate(() => {
+      progress = {
+        the: { r: 1, w: 0, s: 1, next: Date.now() + 30 * DAY, last: 1000 },
+        right: { r: 0, w: 1, s: 0, next: 0, last: 1001 },
+        light: { r: 0, w: 0, s: 0, u: 1, last: 1002 },
+        run: { r: 1, w: 1, s: 1, u: 1, next: 0, last: 1003 }
+      };
+      const has = (status, word) => {
+        libStatus = status;
+        return filteredVocab().some(item => item.w === word);
+      };
+      return {
+        all: ['the', 'right', 'light', 'run', 'girl'].every(word => has('all', word)),
+        notLearned: ['right', 'light', 'run', 'girl'].every(word => has('not-learned', word)) && !has('not-learned', 'the'),
+        learning: ['right', 'run'].every(word => has('learning', word)) && !['the', 'light', 'girl'].some(word => has('learning', word)),
+        unknown: ['light', 'run'].every(word => has('unknown', word)) && !['the', 'right', 'girl'].some(word => has('unknown', word)),
+        learned: has('learned', 'the') && !['right', 'light', 'run', 'girl'].some(word => has('learned', word))
+      };
+    });
+    assert.deepEqual(membership, Object.fromEntries(Object.keys(membership).map(key => [key, true])),
+      'each learning-status option matches the existing progress semantics');
+
+    await page.selectOption('#libStatusSelect', 'not-learned');
+    await page.waitForFunction(() => document.querySelector('#libraryCount').textContent.includes('עוד לא נלמדו'));
+    await page.selectOption('#libStatusSelect', 'unknown');
+    await page.fill('#searchInput', 'light');
+    await page.waitForFunction(() => [...document.querySelectorAll('#libraryList .word-item .w')].some(el => el.textContent === 'light'));
+    const before = await page.evaluate(() => ({ stats: JSON.stringify(stats), bands: JSON.stringify(bands) }));
+    await page.locator('#libraryList .known-toggle').first().click();
+    await page.waitForFunction(() => progress.light && isLearned(progress.light));
+    await page.waitForFunction(() => ![...document.querySelectorAll('#libraryList .word-item .w')].some(el => el.textContent === 'light'));
+    const after = await page.evaluate(() => ({
+      record: progress.light,
+      count: document.querySelector('#libraryCount').textContent,
+      stats: JSON.stringify(stats),
+      bands: JSON.stringify(bands)
+    }));
+    assert.deepEqual({ r: after.record.r, w: after.record.w, s: after.record.s, u: after.record.u }, { r: 1, w: 0, s: 1, u: undefined });
+    assert.ok(after.count.startsWith('0 מילים'), 'unknown filter updates after the star clears the unknown mark');
+    assert.equal(after.stats, before.stats, 'filter/star flow adds no quiz stats');
+    assert.equal(after.bands, before.bands, 'filter/star flow adds no band answer');
+  } finally { await context.close(); }
+  console.log('PASS library status filter: not-learned/unknown semantics, accessible select, live row removal, no stats or band movement');
+}
+
 async function libraryStarMarksKnown() {
   // Library stars (user request, 12.11): tapping the pictured star applies the
   // same direct "known" rule as the book sheet, without a quiz answer, stats,
@@ -529,6 +584,7 @@ async function homeModeChoices() {
   await speakerPlaysWord();
   await preservedLearningRules();
   await libraryCategoryPicker();
+  await libraryStatusFilters();
   await libraryStarMarksKnown();
 })().catch(error => {
   console.error(error);

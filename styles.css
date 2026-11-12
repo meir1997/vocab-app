@@ -488,6 +488,10 @@ body:has(#quizCard:not(.hidden)) .tabbar { transform: translateY(calc(100% + 24p
 /* ---------- Library ---------- */
 .search-row { display: grid; gap: 8px; margin-bottom: 4px; }
 .search-row input:focus, .search-row select:focus { border-color: var(--accent); outline: none; }
+@media (min-width: 520px) {
+  .search-row { grid-template-columns: 1fr 1fr; }
+  .search-row input { grid-column: 1 / -1; }
+}
 .library-count { color: var(--muted); font-size: 12.5px; margin: 6px 2px 10px; }
 .library-list { display: flex; flex-direction: column; gap: 8px; }
 .word-item {
@@ -802,4 +806,4 @@ body:has(#quizCard.cards-mode:not(.hidden)) .shell { max-width: none; padding: 0
   #quizCard.cards-mode { grid-template-rows: 52px 3px 36px minmax(240px, 1fr) 58px; }
   .cards-mode .side-pill { top: -34px; }
   .cards-mode .flashcard { height: calc(100% - 8px); margin-top: 8px; }
-                        }
+   }
