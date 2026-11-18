@@ -299,6 +299,7 @@ async function speakerPlaysWord() {
           resume: () => calls.push(['resume', performance.now()]),
         },
       });
+      Object.defineProperty(navigator, 'audioSession', { configurable: true, value: { type: 'auto', state: 'inactive' } });
     });
 
     // Idle queue: speak synchronously inside the tap. Playwright's click has
@@ -308,7 +309,8 @@ async function speakerPlaysWord() {
     assert.deepEqual(calls.map(c => c[0]), ['speak', 'resume'], 'idle tap speaks before any timer');
     assert.equal(calls[0][2], 'right', 'the shown word is spoken');
     assert.equal(calls[0][3], 'en-US');
-    assert.equal(calls[0][5], 'Samantha', 'an English voice is selected');
+    assert.equal(calls[0][5], undefined, 'the device default voice is used instead of forcing a possibly stale iOS voice');
+    assert.equal(await page.evaluate(() => navigator.audioSession.type), 'playback', 'tap promotes the page audio session when WebKit supports it');
     await page.waitForTimeout(120);
     calls = await page.evaluate(() => window.__speechCalls);
     assert.equal(calls.filter(c => c[0] === 'speak').length, 1, 'idle tap does not schedule a duplicate');
@@ -330,6 +332,53 @@ async function speakerPlaysWord() {
     assert.equal(calls.filter(c => c[0] === 'speak').length, 3, 'rapid active taps debounce to one extra speak');
   } finally { await context.close(); }
   console.log('PASS speaker: idle tap speaks synchronously; active tap cancels, delays, resumes and debounces');
+}
+
+// Settings -> sound check is the physical-device evidence path for the
+// remaining silent-iPhone report: it exposes WebKit queue state, voice count,
+// audio-session state and utterance events without touching learning data.
+async function speechDiagnosticsPanel() {
+  const { page, context } = await newPage();
+  try {
+    await page.evaluate(() => {
+      window.__speechCalls = [];
+      class FakeUtterance { constructor(text) { this.text = text; } }
+      Object.defineProperty(window, 'SpeechSynthesisUtterance', { configurable: true, value: FakeUtterance });
+      Object.defineProperty(window, 'speechSynthesis', {
+        configurable: true,
+        value: {
+          speaking: false, pending: false, paused: false,
+          getVoices: () => [{ lang: 'en-US', name: 'Samantha' }],
+          cancel: () => {},
+          speak: u => {
+            window.__speechCalls.push([u.text, u.lang, u.rate, u.voice]);
+            setTimeout(() => u.onstart && u.onstart(), 0);
+            setTimeout(() => u.onend && u.onend(), 10);
+          },
+          resume: () => {},
+        },
+      });
+      Object.defineProperty(navigator, 'audioSession', { configurable: true, value: { type: 'auto', state: 'inactive' } });
+    });
+    await page.locator('#settingsBtn').click();
+    await page.locator('#settingsSheet').waitFor({ state: 'visible' });
+    await page.locator('#speechTestBtn').click();
+    await page.waitForTimeout(100);
+    let diagnostics = await page.locator('#speechDiagnostics').innerText();
+    assert.match(diagnostics, /speech test tap/);
+    assert.match(diagnostics, /speech speak\(\) returned/);
+    assert.match(diagnostics, /speech onstart/);
+    assert.match(diagnostics, /speech onend/);
+    assert.match(diagnostics, /mode=browser/);
+    assert.match(diagnostics, /voices=1 \[Samantha\(en-US\)\]/);
+    assert.match(diagnostics, /audioSession=playback\/inactive/);
+    assert.deepEqual(await page.evaluate(() => window.__speechCalls), [['phoenix', 'en-US', 0.92, undefined]]);
+    await page.waitForTimeout(1600);
+    diagnostics = await page.locator('#speechDiagnostics').innerText();
+    assert.match(diagnostics, /speech state after 1\.5s/);
+    assert.equal(await page.evaluate(() => stats.attempts), 0, 'diagnostic speech does not record learning data');
+  } finally { await context.close(); }
+  console.log('PASS speech diagnostics: settings test records speech state/events and leaves learning data unchanged');
 }
 
 async function preservedLearningRules() {
@@ -684,6 +733,7 @@ async function homeModeChoices() {
   await simpleWordCardAndLongWords();
   await flashcardWordStaysOneLine();
   await speakerPlaysWord();
+  await speechDiagnosticsPanel();
   await preservedLearningRules();
   await libraryCategoryPicker();
   await libraryStatusFilters();
