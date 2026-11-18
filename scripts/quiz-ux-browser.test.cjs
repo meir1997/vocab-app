@@ -276,10 +276,10 @@ async function flashcardWordStaysOneLine() {
   console.log('PASS flashcard words fit one line inside the content box at 390px and 320px (incl. gamekeeper report case)');
 }
 
-// iPhone speaker fix (user report, 26.10): iOS WebKit drops an utterance
-// spoken synchronously after cancel(), leaving every tap silent. The app must
-// cancel first, speak on a short delay, and resume the queue; rapid taps
-// debounce to the latest word.
+// iPhone speaker regression (user reports, 26.10 and 18.11): iOS WebKit
+// allows the first utterance only synchronously inside the tap. The app must
+// speak immediately when the queue is idle; only an active utterance uses the
+// cancel-delay-speak path, and rapid active taps debounce to the latest word.
 async function speakerPlaysWord() {
   const { page, context } = await newPage();
   try {
@@ -292,7 +292,7 @@ async function speakerPlaysWord() {
       Object.defineProperty(window, 'speechSynthesis', {
         configurable: true,
         value: {
-          speaking: true, pending: false,
+          speaking: false, pending: false,
           getVoices: () => [{ lang: 'en-US', name: 'Samantha' }],
           cancel: () => calls.push(['cancel', performance.now()]),
           speak: u => calls.push(['speak', performance.now(), u.text, u.lang, u.rate, u.voice && u.voice.name]),
@@ -300,23 +300,36 @@ async function speakerPlaysWord() {
         },
       });
     });
+
+    // Idle queue: speak synchronously inside the tap. Playwright's click has
+    // returned from the handler before this read; no timer wait is needed.
+    await page.locator('#speakBtn').click();
+    let calls = await page.evaluate(() => window.__speechCalls);
+    assert.deepEqual(calls.map(c => c[0]), ['speak', 'resume'], 'idle tap speaks before any timer');
+    assert.equal(calls[0][2], 'right', 'the shown word is spoken');
+    assert.equal(calls[0][3], 'en-US');
+    assert.equal(calls[0][5], 'Samantha', 'an English voice is selected');
+    await page.waitForTimeout(120);
+    calls = await page.evaluate(() => window.__speechCalls);
+    assert.equal(calls.filter(c => c[0] === 'speak').length, 1, 'idle tap does not schedule a duplicate');
+
+    // Active queue: cancel it, then delay the replacement so iOS does not
+    // wedge on speak-synchronously-after-cancel.
+    await page.evaluate(() => { speechSynthesis.speaking = true; });
     await page.locator('#speakBtn').click();
     await page.waitForTimeout(200);
-    let calls = await page.evaluate(() => window.__speechCalls);
-    assert.deepEqual(calls.map(c => c[0]), ['cancel', 'speak', 'resume'], 'cancel, then speak, then resume');
-    assert.ok(calls[1][1] - calls[0][1] >= 50, 'speak is delayed after cancel (iOS WebKit wedging)');
-    assert.equal(calls[1][2], 'right', 'the shown word is spoken');
-    assert.equal(calls[1][3], 'en-US');
-    assert.equal(calls[1][5], 'Samantha', 'an English voice is selected');
+    calls = await page.evaluate(() => window.__speechCalls);
+    assert.deepEqual(calls.map(c => c[0]), ['speak', 'resume', 'cancel', 'speak', 'resume'], 'active speech is canceled before a delayed replacement');
+    assert.ok(calls[3][1] - calls[2][1] >= 50, 'replacement speak is delayed after cancel (iOS WebKit wedging)');
 
-    // Rapid double-tap: only the latest speak survives the debounce.
+    // Rapid double-tap while active: only the latest speak survives.
     await page.locator('#speakBtn').click();
     await page.locator('#speakBtn').click();
     await page.waitForTimeout(200);
     calls = await page.evaluate(() => window.__speechCalls);
-    assert.equal(calls.filter(c => c[0] === 'speak').length, 2, 'rapid taps debounce to one extra speak');
+    assert.equal(calls.filter(c => c[0] === 'speak').length, 3, 'rapid active taps debounce to one extra speak');
   } finally { await context.close(); }
-  console.log('PASS speaker: cancel-delay-speak-resume order, word/voice, rapid-tap debounce');
+  console.log('PASS speaker: idle tap speaks synchronously; active tap cancels, delays, resumes and debounces');
 }
 
 async function preservedLearningRules() {
