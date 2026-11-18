@@ -350,6 +350,15 @@
         <input type="checkbox" id="autoSpeakToggle" class="switch" role="switch">
       </div>
       <div class="settings-group">
+        <span class="label">בדיקת שמע</span>
+        <div class="row">
+          <button class="ghost-btn" id="speechTestBtn">השמעת מילה</button>
+          <button class="ghost-btn" id="toneTestBtn">צליל בדיקה</button>
+        </div>
+        <pre id="speechDiagnostics" class="speech-diagnostics" aria-live="polite">הבדיקה תציג כאן את מצב ההשמעה.</pre>
+        <span class="settings-hint">אם הרמקול שקט, לוחצים על שתי הבדיקות ושולחים צילום מסך.</span>
+      </div>
+      <div class="settings-group">
         <span class="label">גיבוי</span>
         <div class="row">
           <button class="ghost-btn" id="exportBtn">ייצוא התקדמות</button>
