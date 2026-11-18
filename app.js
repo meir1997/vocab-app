@@ -392,7 +392,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v55');
+    const cache = await caches.open('four-words-offline-v56');
     const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     label.classList.toggle('offline-ready', !!prepared);
@@ -604,21 +604,89 @@ let soundOn = (() => { try { return localStorage.getItem('fw.sound') !== '0'; } 
 let audioCtx = null;
 // Optional: say each English word aloud as its question appears (off by default).
 let autoSpeak = (() => { try { return localStorage.getItem('fw.autoSpeak') === '1'; } catch { return false; } })();
+function promoteAudioPlayback() {
+  try {
+    if ('audioSession' in navigator) navigator.audioSession.type = 'playback';
+  } catch {}
+}
+function ensureAudioContext() {
+  try {
+    promoteAudioPlayback();
+    audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+  } catch {}
+  return audioCtx;
+}
 function playSound(kind) {
   if (!soundOn) return;
   try {
-    audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
-    const t = audioCtx.currentTime;
+    const ctx = ensureAudioContext();
+    if (!ctx) return;
+    const t = ctx.currentTime;
     const notes = kind === 'good' ? [[660, 0], [880, .09]] : kind === 'done' ? [[523, 0], [659, .1], [784, .2], [1047, .3]] : [[220, 0], [196, .12]];
     notes.forEach(([freq, at]) => {
-      const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
       osc.type = kind === 'bad' ? 'triangle' : 'sine'; osc.frequency.value = freq;
       gain.gain.setValueAtTime(0.0001, t + at);
       gain.gain.exponentialRampToValueAtTime(kind === 'bad' ? 0.08 : 0.12, t + at + 0.02);
       gain.gain.exponentialRampToValueAtTime(0.0001, t + at + 0.22);
-      osc.connect(gain).connect(audioCtx.destination); osc.start(t + at); osc.stop(t + at + 0.25);
+      osc.connect(gain).connect(ctx.destination); osc.start(t + at); osc.stop(t + at + 0.25);
     });
   } catch {}
+}
+// Speech diagnostics: visible only in Settings -> בדיקת שמע. It records the
+// physical device's queue/voice/audio state and utterance events, so a silent
+// iPhone can show whether WebKit started speech, errored, or only pretended to.
+let speechDiagLines = [];
+function updateSpeechDiagnostics(event, extra = '') {
+  const el = $('speechDiagnostics');
+  if (!el) return;
+  const synth = 'speechSynthesis' in window ? speechSynthesis : null;
+  let voices = [];
+  try { voices = synth ? synth.getVoices() : []; } catch {}
+  const english = voices.filter(v => (v.lang || '').toLowerCase().startsWith('en')).slice(0, 3)
+    .map(v => `${v.name || 'unnamed'}(${v.lang || 'unknown'})`).join(', ');
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  const session = 'audioSession' in navigator
+    ? `${navigator.audioSession.type || 'unknown'}/${navigator.audioSession.state || 'unknown'}`
+    : 'unsupported';
+  const activation = navigator.userActivation
+    ? `${navigator.userActivation.isActive ? 'active' : 'inactive'}/${navigator.userActivation.hasBeenActive ? 'seen' : 'none'}`
+    : 'unsupported';
+  const line = [
+    new Date().toLocaleTimeString('he-IL', { hour12: false }),
+    event,
+    `mode=${standalone ? 'standalone' : 'browser'}`,
+    `speech=${synth ? 'yes' : 'no'}`,
+    synth ? `queue speaking=${synth.speaking} pending=${synth.pending} paused=${synth.paused}` : '',
+    `voices=${voices.length}${english ? ` [${english}]` : ''}`,
+    `audioSession=${session}`,
+    `audioCtx=${audioCtx ? audioCtx.state : 'not-created'}`,
+    `gesture=${activation}`,
+    extra
+  ].filter(Boolean).join(' | ');
+  speechDiagLines.push(line);
+  speechDiagLines = speechDiagLines.slice(-10);
+  el.textContent = speechDiagLines.join('\n');
+}
+function playSpeechTestTone() {
+  updateSpeechDiagnostics('tone tap');
+  const ctx = ensureAudioContext();
+  if (!ctx) { updateSpeechDiagnostics('tone failed', 'AudioContext unavailable'); return; }
+  try {
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.type = 'sine'; osc.frequency.value = 660;
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.16, t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(t); osc.stop(t + 0.5);
+    updateSpeechDiagnostics('tone scheduled');
+    ctx.resume().then(() => updateSpeechDiagnostics('tone resumed')).catch(error => updateSpeechDiagnostics('tone resume error', error && error.message));
+  } catch (error) {
+    updateSpeechDiagnostics('tone failed', error && error.message);
+  }
 }
 const CHEERS = ['מעולה!', 'בול!', 'יפה מאוד!', 'אלופים!', 'מדויק!', 'נכון!'];
 // Three or more correct answers in a row turn the cheer into a combo.
@@ -1316,21 +1384,33 @@ function advanceWhenReady(fn, delay) {
 // speak the latest word on a short delay: speaking synchronously right after
 // cancel() can wedge the iOS synthesizer. resume() covers a paused queue, and
 // the utterance is kept referenced so it cannot be collected mid-speech.
+// Do not force a voice object on iOS: WebKit has shipped silent failures for
+// stale/broken voice selections, while lang=en-US lets the device choose its
+// current default English voice. Declaring playback keeps Web Audio from the
+// ambient session that the iPhone mute switch can silence.
 let speakTimer = null, speakUtterance = null;
-function speak(text) {
+try { if ('speechSynthesis' in window) speechSynthesis.getVoices(); } catch {}
+function speak(text, diagnostic = false) {
   try {
     if (!('speechSynthesis' in window)) return;
+    promoteAudioPlayback();
     clearTimeout(speakTimer);
     const say = () => {
       try {
+        promoteAudioPlayback();
         const u = new SpeechSynthesisUtterance(text);
         u.lang = 'en-US'; u.rate = 0.92;
-        const voice = speechSynthesis.getVoices().find(v => v.lang.startsWith('en'));
-        if (voice) try { u.voice = voice; } catch {}
+        if (diagnostic) {
+          u.onstart = () => updateSpeechDiagnostics('speech onstart');
+          u.onend = () => updateSpeechDiagnostics('speech onend');
+          u.onerror = event => updateSpeechDiagnostics('speech onerror', event && (event.error || event.type));
+        }
         speakUtterance = u;
         speechSynthesis.speak(u);
         speechSynthesis.resume();
-      } catch {}
+      } catch (error) {
+        if (diagnostic) updateSpeechDiagnostics('speech call error', error && error.message);
+      }
     };
     if (speechSynthesis.speaking || speechSynthesis.pending) {
       speechSynthesis.cancel();
@@ -1561,6 +1641,13 @@ $('goalSelect').addEventListener('change', e => { settings.goal = Number(e.targe
 $('lengthSelect').addEventListener('change', e => { settings.length = e.target.value === 'all' ? 'all' : Number(e.target.value); persist(); refreshHome(); });
 $('modeSelect').addEventListener('change', e => { settings.mode = e.target.value; $('sortScopeGroup').classList.toggle('hidden', settings.mode !== 'sort'); persist(); refreshHome(); });
 $('soundToggle').addEventListener('change', e => { soundOn = e.target.checked; try { localStorage.setItem('fw.sound', soundOn ? '1' : '0'); } catch {} if (soundOn) playSound('good'); });
+$('speechTestBtn').addEventListener('click', () => {
+  updateSpeechDiagnostics('speech test tap');
+  speak('phoenix', true);
+  updateSpeechDiagnostics('speech speak() returned');
+  setTimeout(() => updateSpeechDiagnostics('speech state after 1.5s'), 1500);
+});
+$('toneTestBtn').addEventListener('click', playSpeechTestTone);
 $('sortScopeSelect').addEventListener('change', e => { settings.sortScope = e.target.value; persist(); refreshHome(); });
 $('bandSelect').addEventListener('change', e => { setBand(Number(e.target.value)); showToast(`הרמה שונתה — ${bandLabel()}`); });
 $('bandBtn').addEventListener('click', openSettings);
