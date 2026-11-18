@@ -392,7 +392,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v54');
+    const cache = await caches.open('four-words-offline-v55');
     const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     label.classList.toggle('offline-ready', !!prepared);
@@ -1310,17 +1310,18 @@ function closeDetails() {
 function advanceWhenReady(fn, delay) {
   setTimeout(() => { if (sheetOpen) pendingAdvance = fn; else fn(); }, delay);
 }
-// iOS WebKit drops an utterance that is spoken synchronously right after
-// cancel() (the synthesizer wedges and every tap stays silent). Cancel first,
-// speak on a short delay, then resume(): the queue can also be left paused.
-// The utterance is kept referenced so it cannot be collected mid-speech.
+// iOS WebKit lets the first utterance start only synchronously inside the
+// tap; a timer after the tap is treated as autoplay. Speak immediately when
+// the queue is idle. When a previous utterance is active, cancel first and
+// speak the latest word on a short delay: speaking synchronously right after
+// cancel() can wedge the iOS synthesizer. resume() covers a paused queue, and
+// the utterance is kept referenced so it cannot be collected mid-speech.
 let speakTimer = null, speakUtterance = null;
 function speak(text) {
   try {
     if (!('speechSynthesis' in window)) return;
     clearTimeout(speakTimer);
-    if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
-    speakTimer = setTimeout(() => {
+    const say = () => {
       try {
         const u = new SpeechSynthesisUtterance(text);
         u.lang = 'en-US'; u.rate = 0.92;
@@ -1330,7 +1331,13 @@ function speak(text) {
         speechSynthesis.speak(u);
         speechSynthesis.resume();
       } catch {}
-    }, 60);
+    };
+    if (speechSynthesis.speaking || speechSynthesis.pending) {
+      speechSynthesis.cancel();
+      speakTimer = setTimeout(say, 60);
+    } else {
+      say();
+    }
   } catch {}
 }
 
