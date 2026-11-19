@@ -309,7 +309,7 @@ async function speakerPlaysWord() {
     assert.deepEqual(calls.map(c => c[0]), ['speak', 'resume'], 'idle tap speaks before any timer');
     assert.equal(calls[0][2], 'right', 'the shown word is spoken');
     assert.equal(calls[0][3], 'en-US');
-    assert.equal(calls[0][5], undefined, 'the device default voice is used instead of forcing a possibly stale iOS voice');
+    assert.equal(calls[0][5], 'Samantha', 'a fresh current English voice avoids both null-voice and stale-voice WebKit failures');
     assert.equal(await page.evaluate(() => navigator.audioSession.type), 'playback', 'tap promotes the page audio session when WebKit supports it');
     await page.waitForTimeout(120);
     calls = await page.evaluate(() => window.__speechCalls);
@@ -359,6 +359,14 @@ async function speechDiagnosticsPanel() {
         },
       });
       Object.defineProperty(navigator, 'audioSession', { configurable: true, value: { type: 'auto', state: 'inactive' } });
+      window.__audioResumes = 0;
+      class FakeAudioContext {
+        constructor() { this.state = 'interrupted'; this.currentTime = 0; this.destination = {}; }
+        createOscillator() { return { type: '', frequency: { value: 0 }, connect: node => node, start: () => {}, stop: () => {} }; }
+        createGain() { return { gain: { setValueAtTime: () => {}, exponentialRampToValueAtTime: () => {} }, connect: node => node }; }
+        resume() { window.__audioResumes += 1; this.state = 'running'; return Promise.resolve(); }
+      }
+      Object.defineProperty(window, 'AudioContext', { configurable: true, value: FakeAudioContext });
     });
     await page.locator('#settingsBtn').click();
     await page.locator('#settingsSheet').waitFor({ state: 'visible' });
@@ -367,12 +375,23 @@ async function speechDiagnosticsPanel() {
     let diagnostics = await page.locator('#speechDiagnostics').innerText();
     assert.match(diagnostics, /speech test tap/);
     assert.match(diagnostics, /speech speak\(\) returned/);
+    assert.match(diagnostics, /speech voice selected.*Samantha\(en-US\)/);
     assert.match(diagnostics, /speech onstart/);
     assert.match(diagnostics, /speech onend/);
     assert.match(diagnostics, /mode=browser/);
     assert.match(diagnostics, /voices=1 \[Samantha\(en-US\)\]/);
     assert.match(diagnostics, /audioSession=playback\/inactive/);
-    assert.deepEqual(await page.evaluate(() => window.__speechCalls), [['phoenix', 'en-US', 0.92, undefined]]);
+    const calls = await page.evaluate(() => window.__speechCalls);
+    assert.equal(calls.length, 1);
+    assert.deepEqual(calls[0].slice(0, 3), ['phoenix', 'en-US', 0.92]);
+    assert.equal(calls[0][3]?.name, 'Samantha');
+    await page.locator('#toneTestBtn').click();
+    await page.waitForTimeout(100);
+    diagnostics = await page.locator('#speechDiagnostics').innerText();
+    assert.match(diagnostics, /tone resume requested/);
+    assert.match(diagnostics, /tone resume settled/);
+    assert.match(diagnostics, /audioCtx=running/);
+    assert.equal(await page.evaluate(() => window.__audioResumes), 1, 'tone test resumes an interrupted AudioContext');
     await page.waitForTimeout(1600);
     diagnostics = await page.locator('#speechDiagnostics').innerText();
     assert.match(diagnostics, /speech state after 1\.5s/);
