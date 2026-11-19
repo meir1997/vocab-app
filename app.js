@@ -392,7 +392,7 @@ async function updateOfflineStatus() {
   if (!label) return;
   try {
     const registration = await navigator.serviceWorker.getRegistration();
-    const cache = await caches.open('four-words-offline-v56');
+    const cache = await caches.open('four-words-offline-v57');
     const required = ['index.html', 'app.js', 'book-lookup.js', 'quiz-content.js', 'vocab.json', 'book-vocab.json', 'word-pos.json', 'details.json', 'book-frequency.json', 'styles.css', 'firebase-config.js', ...['app','auth','firestore'].map(name => 'https://www.gstatic.com/firebasejs/10.14.1/firebase-' + name + '-compat.js')];
     const prepared = registration?.active && (await Promise.all(required.map(url => cache.match(url)))).every(Boolean);
     label.classList.toggle('offline-ready', !!prepared);
@@ -602,6 +602,7 @@ let locked = false;
 /* Feedback sounds: tiny synthesized tones, a per-device preference. */
 let soundOn = (() => { try { return localStorage.getItem('fw.sound') !== '0'; } catch { return true; } })();
 let audioCtx = null;
+let speechDiagLines = [];
 // Optional: say each English word aloud as its question appears (off by default).
 let autoSpeak = (() => { try { return localStorage.getItem('fw.autoSpeak') === '1'; } catch { return false; } })();
 function promoteAudioPlayback() {
@@ -609,14 +610,31 @@ function promoteAudioPlayback() {
     if ('audioSession' in navigator) navigator.audioSession.type = 'playback';
   } catch {}
 }
+function resumeAudioContext(ctx = audioCtx) {
+  try {
+    if (!ctx || (ctx.state !== 'suspended' && ctx.state !== 'interrupted')) return Promise.resolve(ctx && ctx.state);
+    return ctx.resume().then(() => ctx.state).catch(() => ctx.state);
+  } catch {
+    return Promise.resolve(ctx && ctx.state);
+  }
+}
 function ensureAudioContext() {
   try {
     promoteAudioPlayback();
     audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+    resumeAudioContext(audioCtx);
   } catch {}
   return audioCtx;
 }
+function recoverAudioContext(reason) {
+  if (!audioCtx || (audioCtx.state !== 'suspended' && audioCtx.state !== 'interrupted')) return;
+  resumeAudioContext(audioCtx).then(state => {
+    if (speechDiagLines.length) updateSpeechDiagnostics('audioCtx recovery', `${reason}:${state}`);
+  });
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) recoverAudioContext('visible'); });
+window.addEventListener('pageshow', () => recoverAudioContext('pageshow'));
+window.addEventListener('focus', () => recoverAudioContext('focus'));
 function playSound(kind) {
   if (!soundOn) return;
   try {
@@ -637,7 +655,6 @@ function playSound(kind) {
 // Speech diagnostics: visible only in Settings -> בדיקת שמע. It records the
 // physical device's queue/voice/audio state and utterance events, so a silent
 // iPhone can show whether WebKit started speech, errored, or only pretended to.
-let speechDiagLines = [];
 function updateSpeechDiagnostics(event, extra = '') {
   const el = $('speechDiagnostics');
   if (!el) return;
@@ -674,6 +691,10 @@ function playSpeechTestTone() {
   const ctx = ensureAudioContext();
   if (!ctx) { updateSpeechDiagnostics('tone failed', 'AudioContext unavailable'); return; }
   try {
+    const beforeResume = ctx.state;
+    const resume = resumeAudioContext(ctx);
+    updateSpeechDiagnostics('tone resume requested', `from=${beforeResume}`);
+    resume.then(state => updateSpeechDiagnostics('tone resume settled', `${beforeResume}->${state}`));
     const t = ctx.currentTime;
     const osc = ctx.createOscillator(), gain = ctx.createGain();
     osc.type = 'sine'; osc.frequency.value = 660;
@@ -683,7 +704,6 @@ function playSpeechTestTone() {
     osc.connect(gain).connect(ctx.destination);
     osc.start(t); osc.stop(t + 0.5);
     updateSpeechDiagnostics('tone scheduled');
-    ctx.resume().then(() => updateSpeechDiagnostics('tone resumed')).catch(error => updateSpeechDiagnostics('tone resume error', error && error.message));
   } catch (error) {
     updateSpeechDiagnostics('tone failed', error && error.message);
   }
@@ -1384,11 +1404,25 @@ function advanceWhenReady(fn, delay) {
 // speak the latest word on a short delay: speaking synchronously right after
 // cancel() can wedge the iOS synthesizer. resume() covers a paused queue, and
 // the utterance is kept referenced so it cannot be collected mid-speech.
-// Do not force a voice object on iOS: WebKit has shipped silent failures for
-// stale/broken voice selections, while lang=en-US lets the device choose its
-// current default English voice. Declaring playback keeps Web Audio from the
-// ambient session that the iPhone mute switch can silence.
+// Pick a fresh voice object on each tap. A null voice and a stale forced
+// voice have both shipped silent WebKit failures; using the current en-US
+// object avoids both while preserving the device's available voice list.
+// Declaring playback keeps Web Audio from the ambient session that the
+// iPhone mute switch can silence.
 let speakTimer = null, speakUtterance = null;
+function preferredEnglishVoice() {
+  try {
+    if (!('speechSynthesis' in window)) return null;
+    const voices = speechSynthesis.getVoices() || [];
+    const lang = voice => (voice.lang || '').toLowerCase();
+    return voices.find(voice => voice.default && lang(voice) === 'en-us')
+      || voices.find(voice => lang(voice) === 'en-us')
+      || voices.find(voice => lang(voice).startsWith('en'))
+      || null;
+  } catch {
+    return null;
+  }
+}
 try { if ('speechSynthesis' in window) speechSynthesis.getVoices(); } catch {}
 function speak(text, diagnostic = false) {
   try {
@@ -1400,7 +1434,10 @@ function speak(text, diagnostic = false) {
         promoteAudioPlayback();
         const u = new SpeechSynthesisUtterance(text);
         u.lang = 'en-US'; u.rate = 0.92;
+        const voice = preferredEnglishVoice();
+        if (voice) u.voice = voice;
         if (diagnostic) {
+          updateSpeechDiagnostics('speech voice selected', voice ? `${voice.name || 'unnamed'}(${voice.lang || 'unknown'})` : 'default');
           u.onstart = () => updateSpeechDiagnostics('speech onstart');
           u.onend = () => updateSpeechDiagnostics('speech onend');
           u.onerror = event => updateSpeechDiagnostics('speech onerror', event && (event.error || event.type));
