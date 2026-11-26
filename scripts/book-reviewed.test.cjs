@@ -31,3 +31,57 @@ test('normalized keys match hyphenated card words', () => {
     assert.ok(BookContent.getWordContent({ w: card.w, t: card.t }).example, `${card.w}: key lookup failed`);
   }
 });
+
+test('book examples use the card word or a known inflection', () => {
+  const irregular = {
+    threequarters: ['three-quarters'],
+    hoof: ['hooves'],
+    freeze: ['froze', 'frozen'],
+    unstick: ['unstuck'],
+    slink: ['slunk'],
+    overhear: ['overheard'],
+    weave: ['wove', 'woven'],
+    stink: ['stank', 'stunk'],
+    tapdance: ['tap-danced', 'tap-dancing'],
+    wring: ['wrung']
+  };
+  const forms = word => {
+    const out = new Set([word, ...(irregular[word] || [])]);
+    if (word.endsWith('e')) {
+      out.add(word.slice(0, -1) + 'ing');
+      out.add(word + 'd');
+    }
+    if (word.endsWith('y') && !/[aeiou]y$/.test(word)) {
+      out.add(word.slice(0, -1) + 'ies');
+      out.add(word.slice(0, -1) + 'ied');
+    }
+    if (/(s|x|z|ch|sh)$/.test(word)) out.add(word + 'es');
+    if (/[^aeiou][aeiou][bcdfgklmnprstz]$/.test(word)) {
+      out.add(word + word.at(-1) + 'ed');
+      out.add(word + word.at(-1) + 'ing');
+    }
+    out.add(word + 's');
+    out.add(word + 'ed');
+    out.add(word + 'ing');
+    return [...out];
+  };
+  for (const card of cards) {
+    const content = BookContent.getWordContent(card);
+    const text = ` ${content.example.toLowerCase().replace(/-/g, ' ').replace(/[^a-z' ]+/g, ' ')} `;
+    assert.ok(
+      forms(card.w).some(form => text.includes(` ${form.replace(/-/g, ' ')} `)),
+      `${card.w}: example does not use the card word: ${content.example}`
+    );
+  }
+});
+
+test('swish entries do not use the unrelated Hebrew slang sense', () => {
+  const swish = BookContent.getWordContent({ w: 'swish', t: 'להשמיע שריקה בתנועה' });
+  assert.equal(swish.reviewed, true);
+  assert.equal(swish.meaning, 'להשמיע שריקה בתנועה');
+  assert.equal(swish.example, 'The stick swished through the air.');
+  const swishy = BookContent.getWordContent({ w: 'swishy', t: 'מְרַשְׁרֵשׁ' });
+  assert.equal(swishy.reviewed, true);
+  assert.equal(swishy.meaning, 'מְרַשְׁרֵשׁ');
+  assert.equal(swishy.example, 'The swishy skirt moved softly.');
+});
